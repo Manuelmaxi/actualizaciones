@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 52,
-    "versionName": "6.1",
+    "versionCode": 53,
+    "versionName": "6.2",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Los reportes semanal y mensual salen en Excel con el formato de Benderrack: logo, datos de la empresa, banda azul y tablas con totales."
+    "notas": "• Nueva pestaña 📊 Reportes: semanal, mensual y anual (nuevo) en Excel con el formato de Benderrack, y en PDF.\n• Los reportes ahora están solo en esa pestaña."
   },
   "clientes": {
     "versionCode": 7,
