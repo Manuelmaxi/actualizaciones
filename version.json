@@ -1,0 +1,14 @@
+{
+  "vendedores": {
+    "versionCode": 48,
+    "versionName": "5.7",
+    "apk": "Benderrack_Vendedores.apk",
+    "notas": "• Nuevo: 🎯 pestaña Captación: operativos de visitas a clientes potenciales con ruta, registro de cada visita, levantamiento, fotos, próximas visitas, resumen y conversión en cliente.\n• Modo oscuro (5.6)."
+  },
+  "clientes": {
+    "versionCode": 6,
+    "versionName": "2.0",
+    "apk": "Benderrack_Clientes.apk",
+    "notas": "• Diseño nuevo: inicio con tu vendedor, accesos rápidos y categorías.\n• Favoritos ❤, productos vistos y búsqueda más precisa.\n• Más y menos en cada producto, carrito más claro.\n• Marca tus pedidos como pagados."
+  }
+}
