@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 53,
-    "versionName": "6.2",
+    "versionCode": 55,
+    "versionName": "6.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nueva pestaña 📊 Reportes: semanal, mensual y anual (nuevo) en Excel con el formato de Benderrack, y en PDF.\n• Los reportes ahora están solo en esa pestaña."
+    "notas": "• Importar correos desde Excel (Correos_Benderrack.xlsx) a la pestaña ✉️ Correos y a cada cliente.\n• Pestaña ✉️ Correos: los correos de la empresa llegan solos, con aviso en el teléfono (6.3)."
   },
   "clientes": {
     "versionCode": 7,
