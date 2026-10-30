@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 51,
-    "versionName": "6.0",
+    "versionCode": 52,
+    "versionName": "6.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Descuentos por línea, generales y fijos por cliente.\n• Revisiones de cotización (Rev. B, C…).\n• Escanear documentos a PDF.\n• Mapa de clientes y prospectos.\n• Copia de seguridad automática.\n• Reporte mensual en PDF."
+    "notas": "• Los reportes semanal y mensual salen en Excel con el formato de Benderrack: logo, datos de la empresa, banda azul y tablas con totales."
   },
   "clientes": {
     "versionCode": 7,
