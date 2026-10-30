@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 49,
-    "versionName": "5.8",
+    "versionCode": 50,
+    "versionName": "5.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Las actualizaciones llegan solas desde el servidor de la empresa (GitHub).\n• Pestaña 🎯 Captación (5.7) y modo oscuro (5.6)."
+    "notas": "• El menú + está organizado por secciones: Más usadas, Ventas, Contactar, Visitas y agenda, En el sitio y Crear.\n• Nuevas acciones en el menú: prospecto, operativo de captación, ruta de hoy y calculadora."
   },
   "clientes": {
     "versionCode": 7,
