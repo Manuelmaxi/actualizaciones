@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 50,
-    "versionName": "5.9",
+    "versionCode": 51,
+    "versionName": "6.0",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• El menú + está organizado por secciones: Más usadas, Ventas, Contactar, Visitas y agenda, En el sitio y Crear.\n• Nuevas acciones en el menú: prospecto, operativo de captación, ruta de hoy y calculadora."
+    "notas": "• Descuentos por línea, generales y fijos por cliente.\n• Revisiones de cotización (Rev. B, C…).\n• Escanear documentos a PDF.\n• Mapa de clientes y prospectos.\n• Copia de seguridad automática.\n• Reporte mensual en PDF."
   },
   "clientes": {
     "versionCode": 7,
