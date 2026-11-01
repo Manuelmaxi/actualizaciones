@@ -1,14 +1,14 @@
 {
   "vendedores": {
-    "versionCode": 55,
-    "versionName": "6.4",
+    "versionCode": 60,
+    "versionName": "6.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Importar correos desde Excel (Correos_Benderrack.xlsx) a la pestaña ✉️ Correos y a cada cliente.\n• Pestaña ✉️ Correos: los correos de la empresa llegan solos, con aviso en el teléfono (6.3)."
+    "notas": "• Ajustes: nueva sección \"App de clientes\" para enviar la app Benderrack (a cualquier chat o directo al WhatsApp de un cliente).\n• Productos con precio de oferta y marca de NUEVO para la app de clientes.\n• Lee los PDF de pedidos y solicitudes que mandan los clientes desde su app."
   },
   "clientes": {
-    "versionCode": 7,
-    "versionName": "2.1",
+    "versionCode": 8,
+    "versionName": "2.2",
     "apk": "Benderrack_Clientes.apk",
-    "notas": "• Las actualizaciones llegan solas.\n• Diseño nuevo, favoritos y carrito mejorado (2.0)."
+    "notas": "• Tus pedidos y solicitudes de cotización se envían en PDF con el formato de Benderrack.\n• Mis listas y \"Pedir otra vez\" con un toque.\n• Ofertas y novedades con su etiqueta."
   }
 }
