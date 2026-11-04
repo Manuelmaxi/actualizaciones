@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 60,
-    "versionName": "6.9",
+    "versionCode": 64,
+    "versionName": "7.3",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Ajustes: nueva sección \"App de clientes\" para enviar la app Benderrack (a cualquier chat o directo al WhatsApp de un cliente).\n• Productos con precio de oferta y marca de NUEVO para la app de clientes.\n• Lee los PDF de pedidos y solicitudes que mandan los clientes desde su app."
+    "notas": "• Ya existe la versión web de Benderrack Vendedores (se abre en el navegador y se instala como app).\n• Fotos de soporte guardadas en la tablet (7.2)."
   },
   "clientes": {
     "versionCode": 8,
