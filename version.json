@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 64,
-    "versionName": "7.3",
+    "versionCode": 65,
+    "versionName": "7.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Ya existe la versión web de Benderrack Vendedores (se abre en el navegador y se instala como app).\n• Fotos de soporte guardadas en la tablet (7.2)."
+    "notas": "• Dibujo del rack (vista frontal y de planta) dentro del PDF de la cotización.\n• Inspección de racks después de la venta: visita programada, informe con fotos y firma en PDF, y cotización de repuestos.\n• Escanear tarjetas de presentación y leer PDF escaneados (sin internet)."
   },
   "clientes": {
     "versionCode": 8,
