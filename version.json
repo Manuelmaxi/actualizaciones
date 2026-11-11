@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 69,
-    "versionName": "7.8",
+    "versionCode": 70,
+    "versionName": "7.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Iconos redondos en el menú + y en los submenús, con botones más redondeados y detalles a juego.\n• Submenús compactos con un icono por acción (7.7)."
+    "notas": "• Nuevo botón de notificaciones (la campana arriba): actualizaciones, mensajes de la empresa, correos de clientes, pedidos online y agenda, todo en un solo lugar.\n• Avisos en el teléfono de mensajes de la empresa y versiones nuevas aunque la app esté cerrada."
   },
   "clientes": {
     "versionCode": 8,
