@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 66,
-    "versionName": "7.5",
+    "versionCode": 67,
+    "versionName": "7.6",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Reportes: botón «Enviar o guardar» para elegir por dónde enviarlos: correo, WhatsApp, guardar en el dispositivo u otra app, en Excel o PDF.\n• Dibujo del rack, inspección de racks y escanear tarjetas (7.4)."
+    "notas": "• Nuevo botón «Reportes F.V»: el reporte semanal de visitas comerciales sale en la plantilla de la empresa, con el logo de Benderrack, y se envía por correo, WhatsApp o se guarda.\n• Clientes y prospectos: datos opcionales para el Reporte F.V (municipio, segmento, prioridad y sistema)."
   },
   "clientes": {
     "versionCode": 8,
