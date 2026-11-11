@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 67,
-    "versionName": "7.6",
+    "versionCode": 68,
+    "versionName": "7.7",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo botón «Reportes F.V»: el reporte semanal de visitas comerciales sale en la plantilla de la empresa, con el logo de Benderrack, y se envía por correo, WhatsApp o se guarda.\n• Clientes y prospectos: datos opcionales para el Reporte F.V (municipio, segmento, prioridad y sistema)."
+    "notas": "• Submenús con un estilo más moderno y compacto, con un icono que identifica cada acción (enviar, guardar, editar, escanear, eliminar…).\n• Reportes F.V con la plantilla de la empresa (7.6)."
   },
   "clientes": {
     "versionCode": 8,
