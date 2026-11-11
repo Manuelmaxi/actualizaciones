@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 71,
-    "versionName": "8.0",
+    "versionCode": 72,
+    "versionName": "8.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Conecta cualquier correo de la empresa con correo y contraseña (hosting/cPanel, Hostinger, GoDaddy, Zoho, Titan…) o Google Workspace con contraseña de aplicación: recibe, ordena por cliente y envía cotizaciones y facturas directo desde tu correo.\n• La contraseña queda cifrada en el teléfono.\n• Campana de notificaciones (7.9)."
+    "notas": "• La app en español, inglés o ruso: Ajustes → Idioma.\n• Los documentos para clientes siguen en español.\n• Correo con correo y contraseña (8.0)."
   },
   "clientes": {
     "versionCode": 8,
