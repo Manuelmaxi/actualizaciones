@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 65,
-    "versionName": "7.4",
+    "versionCode": 66,
+    "versionName": "7.5",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Dibujo del rack (vista frontal y de planta) dentro del PDF de la cotización.\n• Inspección de racks después de la venta: visita programada, informe con fotos y firma en PDF, y cotización de repuestos.\n• Escanear tarjetas de presentación y leer PDF escaneados (sin internet)."
+    "notas": "• Reportes: botón «Enviar o guardar» para elegir por dónde enviarlos: correo, WhatsApp, guardar en el dispositivo u otra app, en Excel o PDF.\n• Dibujo del rack, inspección de racks y escanear tarjetas (7.4)."
   },
   "clientes": {
     "versionCode": 8,
