@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 70,
-    "versionName": "7.9",
+    "versionCode": 71,
+    "versionName": "8.0",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo botón de notificaciones (la campana arriba): actualizaciones, mensajes de la empresa, correos de clientes, pedidos online y agenda, todo en un solo lugar.\n• Avisos en el teléfono de mensajes de la empresa y versiones nuevas aunque la app esté cerrada."
+    "notas": "• Conecta cualquier correo de la empresa con correo y contraseña (hosting/cPanel, Hostinger, GoDaddy, Zoho, Titan…) o Google Workspace con contraseña de aplicación: recibe, ordena por cliente y envía cotizaciones y facturas directo desde tu correo.\n• La contraseña queda cifrada en el teléfono.\n• Campana de notificaciones (7.9)."
   },
   "clientes": {
     "versionCode": 8,
