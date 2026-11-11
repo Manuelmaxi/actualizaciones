@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 68,
-    "versionName": "7.7",
+    "versionCode": 69,
+    "versionName": "7.8",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Submenús con un estilo más moderno y compacto, con un icono que identifica cada acción (enviar, guardar, editar, escanear, eliminar…).\n• Reportes F.V con la plantilla de la empresa (7.6)."
+    "notas": "• Iconos redondos en el menú + y en los submenús, con botones más redondeados y detalles a juego.\n• Submenús compactos con un icono por acción (7.7)."
   },
   "clientes": {
     "versionCode": 8,
