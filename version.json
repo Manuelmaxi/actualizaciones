@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 72,
-    "versionName": "8.1",
+    "versionCode": 74,
+    "versionName": "8.3",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• La app en español, inglés o ruso: Ajustes → Idioma.\n• Los documentos para clientes siguen en español.\n• Correo con correo y contraseña (8.0)."
+    "notas": "• Correo de la empresa (Microsoft 365) listo: Ajustes → Correo institucional → Conectar, con tu correo @bendertrading.com.do.\n• Desliza hacia abajo en Inicio para actualizar y confirmación al salir (8.2)."
   },
   "clientes": {
     "versionCode": 8,
