@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 74,
-    "versionName": "8.3",
+    "versionCode": 75,
+    "versionName": "8.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Correo de la empresa (Microsoft 365) listo: Ajustes → Correo institucional → Conectar, con tu correo @bendertrading.com.do.\n• Desliza hacia abajo en Inicio para actualizar y confirmación al salir (8.2)."
+    "notas": "• Calendario de Outlook: tus visitas y entregas aparecen solas en tu calendario, y en Agenda ves lo que ya tienes en Outlook.\n• SharePoint: copia automática de cotizaciones, facturas y reportes, y tus datos en listas para Power BI y Power Automate.\n• Ajustes → SharePoint y Calendario (con el correo de la empresa conectado)."
   },
   "clientes": {
     "versionCode": 8,
