@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 76,
-    "versionName": "8.5",
+    "versionCode": 77,
+    "versionName": "8.6",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo botón «Levantamiento» en Inicio: la plantilla de la empresa con los datos del cliente, para hacerlo a mano en Samsung Notes, Xodo o Adobe.\n• La app recuerda con qué app lo abres (se cambia en Ajustes).\n• SharePoint y Calendario de Outlook (8.4)."
+    "notas": "• Levantamiento: buscador de clientes por nombre.\n• Botón «Levantamiento» en Inicio con la plantilla de la empresa (8.5).\n• SharePoint y Calendario de Outlook (8.4)."
   },
   "clientes": {
     "versionCode": 8,
