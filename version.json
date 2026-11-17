@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 78,
-    "versionName": "8.7",
+    "versionCode": 79,
+    "versionName": "8.8",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Levantamiento con varias hojas: la primera con los datos del cliente y las demás con el mismo formato, solo con el logo.\n• «+ Hoja» agrega otra hoja a un levantamiento ya empezado.\n• Buscador de clientes en el levantamiento (8.6)."
+    "notas": "• Los levantamientos se registran como visita y salen en los reportes (semanal, mensual, anual y F.V), con la cantidad de hojas.\n• «Registrar» para los que no se registraron.\n• La hora de las visitas no sale en los reportes: queda solo en la app."
   },
   "clientes": {
     "versionCode": 8,
