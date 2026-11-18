@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 79,
-    "versionName": "8.8",
+    "versionCode": 80,
+    "versionName": "8.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Los levantamientos se registran como visita y salen en los reportes (semanal, mensual, anual y F.V), con la cantidad de hojas.\n• «Registrar» para los que no se registraron.\n• La hora de las visitas no sale en los reportes: queda solo en la app."
+    "notas": "• Nuevo «Seguimiento» en Inicio: llamadas a clientes, seguimiento y actualización de cotizaciones, correcciones de planos y otras solicitudes, con cliente y notas.\n• Recordatorios en Inicio y registro en los reportes semanal, mensual y anual.\n• Levantamientos en los reportes (8.8)."
   },
   "clientes": {
     "versionCode": 8,
