@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 84,
-    "versionName": "9.3",
+    "versionCode": 85,
+    "versionName": "9.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Mapa de clientes: las calles se descargan y se guardan en el teléfono (se ven aunque estés sin señal); si un servidor no responde usa otro y avisa si no hay internet.\n• Cada punto abre en Google Maps o en Waze.\n• Botón WhatsApp (9.2)."
+    "notas": "• Navegación dentro de la app (gratis): ruta en el mapa, GPS en vivo, instrucciones por voz en español y recálculo si te sales del camino.\n• «Navegar la ruta en la app» lleva parada por parada por tus visitas del día.\n• Mapa de clientes con calles y sin internet (9.3)."
   },
   "clientes": {
     "versionCode": 8,
