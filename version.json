@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 82,
-    "versionName": "9.1",
+    "versionCode": 83,
+    "versionName": "9.2",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Pedidos en espera: guarda los pedidos sin mercancía (desde PDF, de una cotización o a mano) con la fecha para retomarlos; ese día te avisa para llamar al cliente.\n• Menú principal ordenado por grupos: Ventas, En la calle y Oficina.\n• Ajustes → Menú principal: cambia el estilo, los colores y los botones que se ven."
+    "notas": "• Botón «WhatsApp» en Inicio: abre directo tu WhatsApp (normal o Business) y recuerda cuál usas.\n• Pedidos en espera y menú principal organizado (9.1)."
   },
   "clientes": {
     "versionCode": 8,
