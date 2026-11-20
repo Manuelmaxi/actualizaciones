@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 83,
-    "versionName": "9.2",
+    "versionCode": 84,
+    "versionName": "9.3",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Botón «WhatsApp» en Inicio: abre directo tu WhatsApp (normal o Business) y recuerda cuál usas.\n• Pedidos en espera y menú principal organizado (9.1)."
+    "notas": "• Mapa de clientes: las calles se descargan y se guardan en el teléfono (se ven aunque estés sin señal); si un servidor no responde usa otro y avisa si no hay internet.\n• Cada punto abre en Google Maps o en Waze.\n• Botón WhatsApp (9.2)."
   },
   "clientes": {
     "versionCode": 8,
