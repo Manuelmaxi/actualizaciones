@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 85,
-    "versionName": "9.4",
+    "versionCode": 86,
+    "versionName": "9.5",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Navegación dentro de la app (gratis): ruta en el mapa, GPS en vivo, instrucciones por voz en español y recálculo si te sales del camino.\n• «Navegar la ruta en la app» lleva parada por parada por tus visitas del día.\n• Mapa de clientes con calles y sin internet (9.3)."
+    "notas": "• Nuevo grupo «Con el cliente»: Presentación a pantalla completa, Antes y después con barra deslizante, Medir con la cámara, QR para racks instalados y tu tarjeta digital con QR.\n• Navegación dentro de la app (9.4)."
   },
   "clientes": {
     "versionCode": 8,
