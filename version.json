@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 88,
-    "versionName": "9.7",
+    "versionCode": 89,
+    "versionName": "9.8",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo botón «Proyectos»: carpetas por cliente con fotos (cámara, galería o la nube), PDF y otros archivos; presentar, mover fotos entre carpetas y enviar el proyecto en PDF. Copia en el teléfono (Imágenes y Descargas / Benderrack / Proyectos).\n• QR de racks: «Llamar» marca primero al vendedor; la oficina queda como segunda opción."
+    "notas": "• Proyectos por sistema: Rack selectivo, manual, cantilever… y dentro de cada uno los clientes que lo instalaron. «Seleccionar sistema» para agregar o renombrar tipos.\n• Proyectos con fotos, PDF y archivos por cliente; copia en el teléfono (9.7).\n• QR de racks: llama primero al vendedor."
   },
   "clientes": {
     "versionCode": 8,
