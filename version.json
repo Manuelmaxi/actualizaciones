@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 86,
-    "versionName": "9.5",
+    "versionCode": 88,
+    "versionName": "9.7",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo grupo «Con el cliente»: Presentación a pantalla completa, Antes y después con barra deslizante, Medir con la cámara, QR para racks instalados y tu tarjeta digital con QR.\n• Navegación dentro de la app (9.4)."
+    "notas": "• Nuevo botón «Proyectos»: carpetas por cliente con fotos (cámara, galería o la nube), PDF y otros archivos; presentar, mover fotos entre carpetas y enviar el proyecto en PDF. Copia en el teléfono (Imágenes y Descargas / Benderrack / Proyectos).\n• QR de racks: «Llamar» marca primero al vendedor; la oficina queda como segunda opción."
   },
   "clientes": {
     "versionCode": 8,
