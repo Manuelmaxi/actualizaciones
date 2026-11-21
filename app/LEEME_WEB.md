@@ -1,4 +1,4 @@
-# Benderrack Vendedores – versión web (v8.2)
+# Benderrack Vendedores – versión web (v9.5)
 
 La misma app de vendedores, pero se abre en el navegador (computadora, tablet o celular) y se puede instalar como app.
 
@@ -18,7 +18,7 @@ Al subir una versión nueva, la app se actualiza sola la próxima vez que se abr
 - Funciona sin internet después de abrirla una vez.
 - En el celular, desliza hacia abajo en Inicio para actualizar.
 - En español, inglés o ruso (Ajustes → Idioma).
-- Correo de la empresa (Microsoft 365) cuando IT dé el Client ID; en la web la dirección de regreso es la misma página. El correo con contraseña (IMAP/SMTP: hosting, Google Workspace) funciona solo en la app Android: el navegador no puede conectarse por IMAP.
+- Correo, SharePoint y Calendario de Outlook (Microsoft 365); en la web la dirección de regreso es la misma página. El correo con contraseña (IMAP/SMTP: hosting, Google Workspace) funciona solo en la app Android: el navegador no puede conectarse por IMAP.
 
 ## Diferencias con la app Android
 
@@ -35,5 +35,8 @@ Al subir una versión nueva, la app se actualiza sola la próxima vez que se abr
 | jspdf*, pdf*.js, leaflet.* , logo_*.js | PDF, lectura de PDF, mapa y logos |
 | ocr_core.js, ocr_spa.js | Lector de texto (tarjetas y PDF escaneados) |
 | plantilla_fv.js | Plantilla del Reporte F.V |
+| plantilla_lev.js | Plantilla del levantamiento |
+| qrcode.js | Generador de códigos QR |
+| rack.html | Página que abre el QR de cada rack instalado |
 | Benderrack.apk | App de clientes para enviar por WhatsApp |
 | version-web.txt | Versión publicada |
