@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rack Benderrack</title>
+<style>
+:root{--pri:#16233f;--pri2:#24559b;--nar:#e8892f;--bg:#f2f4f7;--tx:#1d2733;--mut:#6b7785}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:var(--pri);color:#fff;padding:16px 18px 22px;border-radius:0 0 24px 24px}
+header img{height:42px;background:#fff;border-radius:8px;padding:4px 8px}
+.cod{font-size:13px;opacity:.85;margin-top:12px;letter-spacing:.08em}.cli{font-size:22px;font-weight:800;margin-top:2px}
+main{padding:16px;max-width:520px;margin:0 auto}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(22,35,63,.08)}
+.fila{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e3e7ec;font-size:15px}.fila:last-child{border:0}.fila span{color:var(--mut)}
+.cap{background:var(--nar);color:#fff;text-align:center}.cap b{display:block;font-size:30px}
+.aviso{font-size:13px;color:#8a5a00;background:#fff4dc;border-radius:12px;padding:10px 12px;margin-top:10px;text-align:left}
+a.btn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:16px;border-radius:999px;padding:14px;margin-bottom:10px;color:#fff;background:var(--pri2)}
+a.wa{background:#1e8e3e}a.sec{background:#fff;color:var(--pri);border:2px solid var(--pri)}
+.pie{text-align:center;color:var(--mut);font-size:12px;margin:8px 0 24px}
+</style></head><body>
+<header><img id="logo" alt="Benderrack" style="display:none"><div class="cod" id="cod"></div><div class="cli" id="cli">Rack Benderrack</div></header>
+<main>
+ <div class="card cap" id="capc" style="display:none"><div style="font-size:12px;letter-spacing:.06em">CAPACIDAD MÁXIMA POR NIVEL</div><b id="cap"></b><div id="niv" style="font-size:14px"></div>
+  <div class="aviso">⚠️ No exceda la capacidad por nivel. Si el rack está golpeado, doblado o le faltan piezas, no lo cargue y repórtelo.</div></div>
+ <div class="card" id="datos"></div>
+ <a class="btn wa" id="b1">🔧 Pedir repuestos</a>
+ <a class="btn wa" id="b2">⚠️ Reportar un daño</a>
+ <a class="btn" id="b3">🔍 Solicitar una inspección</a>
+ <a class="btn sec" id="b4">📞 Llamar</a>
+ <div class="pie" id="pie">Benderrack</div>
+</main>
+<script src="logo_cot.js"></script>
+<script>
+(function(){var q=new URLSearchParams(location.search),g=function(k){return (q.get(k)||'').trim()};
+ var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+ if(window.LOGO_COT){var l=document.getElementById('logo');l.src=window.LOGO_COT;l.style.display='inline-block'}
+ var cod=g('c'),cli=g('n');document.getElementById('cod').textContent=cod?'INSTALACIÓN '+cod:'';document.getElementById('cli').textContent=cli||'Rack Benderrack';
+ if(g('k')){document.getElementById('capc').style.display='block';document.getElementById('cap').textContent=Number(g('k')).toLocaleString('en-US')+' kg';document.getElementById('niv').textContent=g('l')?g('l')+' niveles':''}
+ var f=g('f'),fe=f?f.split('-').reverse().join('/'):'',filas=[['Ubicación',g('u')],['Sistema',g('s')],['Niveles',g('l')],['Instalado',fe],['Asesor',g('v')]].filter(function(x){return x[1]});
+ document.getElementById('datos').innerHTML=filas.map(function(x){return '<div class="fila"><span>'+x[0]+'</span><b>'+esc(x[1])+'</b></div>'}).join('')||'<div class="fila"><span>Instalación</span><b>Benderrack</b></div>';
+ var w=g('w').replace(/\D/g,''),base='Hola, le escribo por el rack '+(cod||'')+(cli?' de '+cli:'')+(g('u')?' ('+g('u')+')':'')+'. ';
+ var wa=function(t){return w?'https://wa.me/'+w+'?text='+encodeURIComponent(base+t):'https://wa.me/?text='+encodeURIComponent(base+t)};
+ document.getElementById('b1').href=wa('Necesito repuestos: ');document.getElementById('b2').href=wa('Quiero reportar un daño: ');document.getElementById('b3').href=wa('Quisiera solicitar una inspección del rack.');
+ var t=(g('t')||g('w')).replace(/[^\d+]/g,'');if(t)document.getElementById('b4').href='tel:'+t;else document.getElementById('b4').style.display='none';
+ document.getElementById('pie').textContent='Benderrack · Sistemas de almacenaje'+(g('t')?' · Tel. '+g('t'):'')})();
+</script></body></html>
