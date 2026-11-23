@@ -1,4 +1,4 @@
-# Benderrack Vendedores – versión web (v10.2)
+# Benderrack Vendedores – versión web (v10.3)
 
 La misma app de vendedores, pero se abre en el navegador (computadora, tablet o celular) y se puede instalar como app.
 

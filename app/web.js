@@ -76,7 +76,17 @@
     d.innerHTML='<span style="flex:1">🔄 Hay una versión nueva de Benderrack.</span><button style="border:0;border-radius:10px;padding:8px 12px;background:#1e8e3e;color:#fff;font-weight:700">Actualizar</button>';
     d.querySelector('button').onclick=()=>{flush();location.reload()};document.body.appendChild(d)}
 
+  /* ---------- pantalla completa (computadora y Android): botón en el encabezado ---------- */
+  const SVGF=(d)=>'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="'+d+'"/></svg>';
+  const enPantalla=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+  window.__pantallaCompleta=()=>{const d=document.documentElement;try{if(enPantalla())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const r=(d.requestFullscreen||d.webkitRequestFullscreen).call(d);if(r&&r.catch)r.catch(()=>aviso('Tu navegador no permitió la pantalla completa (prueba con F11)'))}}catch(e){aviso('Usa F11 para pantalla completa')}};
+  function botonPantalla(){const h=document.querySelector('header'),d=document.documentElement;if(!h||document.getElementById('wfull')||!(d.requestFullscreen||d.webkitRequestFullscreen))return;
+    const b=document.createElement('button');b.id='wfull';b.type='button';
+    const pinta=()=>{const on=enPantalla();b.innerHTML=SVGF(on?'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5':'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5');b.title=on?'Salir de pantalla completa':'Pantalla completa';b.setAttribute('aria-label',b.title)};
+    b.onclick=()=>window.__pantallaCompleta();document.addEventListener('fullscreenchange',pinta);document.addEventListener('webkitfullscreenchange',pinta);pinta();
+    const bell=document.getElementById('nbell');if(bell&&bell.parentNode===h)h.insertBefore(b,bell);else h.appendChild(b)}
+
   /* ---------- arranque ---------- */
-  function iniciar(){cargar().then(()=>{const src=document.getElementById('appsrc');const s=document.createElement('script');s.textContent=src.textContent;src.remove();document.body.appendChild(s)})}
+  function iniciar(){cargar().then(()=>{const src=document.getElementById('appsrc');const s=document.createElement('script');s.textContent=src.textContent;src.remove();document.body.appendChild(s);setTimeout(botonPantalla,200)})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
 })();

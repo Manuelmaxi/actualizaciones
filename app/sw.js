@@ -1,5 +1,5 @@
-/* Benderrack Vendedores web – funciona sin internet. Versión 10.2-bc6b3e1e6c */
-const CACHE='benderrack-10.2-bc6b3e1e6c',ARCH=["./", "index.html", "web.js", "manifest.webmanifest", "icon192.png", "icon512.png", "jspdf.umd.min.js", "jspdf.plugin.autotable.min.js", "logo_pdf.js", "logo_cot.js", "pdf.min.js", "pdf.worker.min.js", "leaflet.js", "leaflet.css", "ocr_core.js", "ocr_spa.js", "plantilla_fv.js", "plantilla_lev.js", "qrcode.js", "rack.html"];
+/* Benderrack Vendedores web – funciona sin internet. Versión 10.3-710bba8ae7 */
+const CACHE='benderrack-10.3-710bba8ae7',ARCH=["./", "index.html", "web.js", "manifest.webmanifest", "icon192.png", "icon512.png", "jspdf.umd.min.js", "jspdf.plugin.autotable.min.js", "logo_pdf.js", "logo_cot.js", "pdf.min.js", "pdf.worker.min.js", "leaflet.js", "leaflet.css", "ocr_core.js", "ocr_spa.js", "plantilla_fv.js", "plantilla_lev.js", "qrcode.js", "rack.html"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ARCH)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('benderrack-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(u.origin!==location.origin)return;
