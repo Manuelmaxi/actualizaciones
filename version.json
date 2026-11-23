@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 91,
-    "versionName": "10.0",
+    "versionCode": 92,
+    "versionName": "10.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Reporte F.V con la plantilla nueva «Reporte semanal de visitas comerciales» (tal cual la de la empresa).\n• Cliente cero: cronograma de tus clientes desde el primer correo (9.9).\n• Proyectos por sistema (9.8)."
+    "notas": "• Nuevo botón «Pendientes»: todo lo que está por completar en un solo lugar (pedidos por entregar, cobros, cotizaciones, mercancía en espera, seguimientos, visitas, prospectos y levantamientos por cotizar).\n• Reporte F.V con la plantilla nueva (10.0)."
   },
   "clientes": {
     "versionCode": 8,
