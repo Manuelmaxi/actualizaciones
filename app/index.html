@@ -737,7 +737,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v9.5</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v10.2</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -776,7 +776,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v9.5${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v10.2${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -5388,30 +5388,25 @@ async function construirFV(l){if(!window.PLANTILLA_FV)await cargarScript('planti
   const txt=(ref,v)=>celda(ref,v===''||v==null?null:'<is><t xml:space="preserve">'+xmlFV(v)+'</t></is>',v===''||v==null?'':'inlineStr');
   const nro=(ref,v)=>celda(ref,'<v>'+v+'</v>');
   const formV=(ref,v,str)=>{const re=new RegExp('(<c r="'+ref+'"[^>]*>)(<f>[\\s\\S]*?</f>)(?:<v/>|<v>[\\s\\S]*?</v>)?</c>');s=s.replace(re,(a,b,fm)=>b.replace(/ t="\w+"/,'').replace('>',str?' t="str">':'>')+fm+'<v>'+xmlFV(v)+'</v></c>')};
-  /* encabezado: datos de la empresa junto al logo */
-  const run=(t,o)=>'<r><rPr>'+(o.b?'<b/>':'')+'<sz val="'+o.sz+'"/><color rgb="'+o.c+'"/><rFont val="Calibri"/><family val="2"/></rPr><t xml:space="preserve">'+xmlFV(t)+'</t></r>';
-  const l1=[E.nombre||'Bender Trading Co, SRL'],l2=[E.rnc?'RNC: '+E.rnc:'',E.tel?'Tel.: '+E.tel:''].filter(Boolean).join('   ·   '),l3=[E.dir,E.ciudad].filter(Boolean).join(', '),l4=[E.correo,E.web].filter(Boolean).join('   ·   ');
-  celda('A1','<is>'+run(l1[0],{b:1,sz:13,c:'FF001F43'})+[l2,l3,l4].filter(Boolean).map(x=>run('\n'+x,{sz:9,c:'FF595959'})).join('')+'</is>','inlineStr');
-  txt('E4','Del '+fFecha(l)+' al '+fFecha(f));
-  txt('I4',[E.facN||'',E.facC?'· '+E.facC:''].filter(Boolean).join(' ').toUpperCase()||'—');
-  /* lista de fechas de la semana (para el desplegable FECHA VISITA) */
-  for(let i=0;i<7;i++)txt('U'+(5+i),fechaFV(addD(l,i)));for(let i=0;i<4;i++)if(new RegExp('<c r="W'+(8+i)+'"').test(s))txt('W'+(8+i),fechaFV(addD(l,3+i)));
-  /* filas */
-  R.forEach((x,i)=>{const r=9+i;txt('A'+r,x.empresa);txt('B'+r,x.ubic);formV('C'+r,x.prov,1);txt('D'+r,x.sis);txt('E'+r,x.pri);txt('F'+r,x.seg);txt('G'+r,x.est);txt('H'+r,x.fecha);
-    txt('I'+r,x.contacto);txt('J'+r,x.correo);txt('K'+r,x.tel);txt('L'+r,x.rel);txt('M'+r,x.notas);txt('N'+r,x.paso);if(x.prox)nro('O'+r,serialFV(x.prox));
-    /* alto de la fila según el texto más largo (las celdas ajustan el texto) */
-    const W={A:38,B:38,D:20,F:21,H:24,I:16,J:15,K:23,L:23,M:26,N:25},lin=Math.max(1,...Object.keys(W).map(k=>{const v={A:x.empresa,B:x.ubic,D:x.sis,F:x.seg,H:x.fecha,I:x.contacto,J:x.correo,K:x.tel,L:x.rel,M:x.notas,N:x.paso}[k]||'';return Math.ceil(v.length*1.1/W[k])}));
-    if(lin>1)s=s.replace(new RegExp('<row r="'+r+'"([^>]*?) ht="[\\d.]+"'),'<row r="'+r+'"$1 ht="'+Math.min(160,Math.max(18,lin*13.5))+'"')});
+  /* plantilla «Form_Reporte_Sem_Visitas» tal cual: solo se llenan sus celdas (no se cambian formatos, fórmulas, listas ni encabezados) */
+  txt('C4','Del '+fFecha(l)+' al '+fFecha(f));
+  if(E.facN)txt('G4',String(E.facN).toUpperCase());
+  /* la plantilla trae datos de ejemplo en las filas: se vacía la tabla antes de llenarla */
+  for(let r=9;r<=108;r++)'ABCDEFGHIJKL'.split('').forEach(c=>{const re=new RegExp('<c r="'+c+r+'"( s="\\d+")?(?: t="\\w+")?(?:/>|>(?:(?!<f>)[\\s\\S])*?</c>)');s=s.replace(re,(m,st)=>'<c r="'+c+r+'"'+(st||'')+'/>')});
+  /* estatus permitidos por la plantilla: Realizada, No realizada, Reagendada, Sin respuesta */
+  const F=R.map(x=>{const y=Object.assign({},x);if(y.est==='Por referencia'){y.est='Realizada';y.notas=['Por referencia',y.notas].filter(Boolean).join(' – ')}
+    else if(y.est==='Seguimiento'){y.est='';y.notas=['Seguimiento',y.notas].filter(Boolean).join(': ')}return y});
+  F.forEach((x,i)=>{const r=9+i;txt('A'+r,x.empresa);txt('B'+r,x.pri);txt('C'+r,x.seg);txt('D'+r,x.est);txt('E'+r,x.fecha);txt('F'+r,x.contacto);txt('G'+r,x.correo);txt('H'+r,x.tel);
+    txt('I'+r,x.rel);txt('J'+r,x.notas);txt('K'+r,x.paso);if(x.prox)nro('L'+r,serialFV(x.prox))});
   /* valores ya calculados del panel (Excel los vuelve a calcular al abrir) */
-  const cnt=(k,v)=>R.filter(x=>x[k]===v).length,llenos=R.length;
-  const V={T8:llenos,T9:cnt('est','Realizada'),T10:cnt('est','No realizada'),T11:cnt('est','Reagendada'),T12:cnt('est','Sin respuesta'),T13:llenos?cnt('est','Realizada')/llenos:0,T16:cnt('pri','Alta'),T17:cnt('pri','Media'),T18:cnt('pri','Baja'),
-    T21:cnt('rel','Abierta'),T22:cnt('rel','Propuesta enviada'),T23:cnt('rel','En negociación'),T24:cnt('rel','Cotización solicitada'),T25:cnt('rel','Cliente activo'),T26:cnt('rel','Sin interés'),T27:cnt('rel','Baja prioridad'),T30:0,T31:R.filter(x=>x.est==='Realizada'&&!x.fecha).length,T32:R.filter(x=>!x.rel).length};
+  const cnt=(k,v)=>F.filter(x=>x[k]===v).length,llenos=F.length,conEst=F.filter(x=>x.est).length;
+  const V={O8:llenos,O9:cnt('est','Realizada'),O10:cnt('est','No realizada'),O11:cnt('est','Reagendada'),O12:cnt('est','Sin respuesta'),O13:conEst?cnt('est','Realizada')/conEst:0,O16:cnt('pri','Alta'),O17:cnt('pri','Media'),O18:cnt('pri','Baja'),
+    O21:cnt('rel','Abierta'),O22:cnt('rel','Propuesta enviada'),O23:cnt('rel','En negociación'),O24:cnt('rel','Cotización solicitada'),O25:cnt('rel','Cliente activo'),O26:cnt('rel','Sin interés'),O27:cnt('rel','Baja prioridad'),O30:0,O31:F.filter(x=>x.est==='Realizada'&&!x.fecha).length,O32:F.filter(x=>!x.rel).length};
   for(const k in V)formV(k,V[k]);
   T['xl/worksheets/sheet1.xml']=s;
   const ahora=new Date().toISOString().replace(/\.\d+Z$/,'Z');
   T['docProps/core.xml']=T['docProps/core.xml'].replace(/<dc:creator>[^<]*<\/dc:creator>/,'<dc:creator>'+xmlFV(E.facN||'Benderrack')+'</dc:creator>').replace(/(<dcterms:modified[^>]*>)[^<]*/,'$1'+ahora).replace(/(<dcterms:created[^>]*>)[^<]*/,'$1'+ahora);
   const enc=new TextEncoder(),files=Object.keys(T).map(n=>({name:n,data:enc.encode(T[n])}));
-  const LG=window.LOGO_COT||window.LOGO_PDF;try{const b=atob(String(LG||'').split(',')[1]||'');const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);if(u.length)files.push({name:'xl/media/logo.jpeg',data:u})}catch(e){}
   const nombre='Reporte F.V '+fFecha(l).replace(/\//g,'-')+' al '+fFecha(f).replace(/\//g,'-')+' - '+limpio(E.facN||'vendedor')+'.xlsx';
   return{nombre,bytes:XLSX.zip(files),filas:R}}
 async function reporteFV(modo){toast('Preparando el Reporte F.V…');try{const r=await construirFV(repFV||lunes(hoy()));salidaXlsx(r.nombre,r.bytes,modo);return r}catch(e){toast('No se pudo preparar el Reporte F.V: '+e.message)}}
@@ -6762,7 +6757,7 @@ async function pdfEtiquetas(x,n){await qrListo();if(!window.jspdf)await cargarSc
       doc.setFontSize(14);doc.text(num(x.capacidad).toLocaleString('en-US')+' kg'+(x.niveles?'  ·  '+x.niveles+' niveles':''),x0+W/2,y0+51.5,{align:'center'})}
     doc.addImage(qr,'PNG',x0+(W-50)/2,y0+57,50,50);
     doc.setTextColor(22,35,63);doc.setFont('helvetica','bold');doc.setFontSize(8);doc.text('Escanee: repuestos · daños · inspección',x0+W/2,y0+111,{align:'center'});
-    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(110,120,133);doc.text([E.nombre||'Benderrack',E.tel?'Tel. '+E.tel:''].filter(Boolean).join('  ·  '),x0+W/2,y0+116,{align:'center'})}
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(110,120,133);doc.text([E.facN?'Asesor: '+E.facN:'',E.facT||'',E.tel&&waDig(E.tel)!==waDig(E.facT)?'Oficina '+E.tel:''].filter(Boolean).join('  ·  ')||(E.nombre||'Benderrack'),x0+W/2,y0+116,{align:'center'})}
   return doc.output('datauristring').split(',')[1]}
 
 /* ---------- 7. Tarjeta digital por QR ---------- */
@@ -6794,6 +6789,509 @@ MENU_ITEMS.splice(MENU_ITEMS.findIndex(it=>it.g==='c'),0,
   {k:'medir',g:'k',i:'regla',l:'Medir',c:'#d97706',f:'abrirMedir()',id:'bmed'},
   {k:'qrrack',g:'k',i:'qr',l:'QR racks',c:'#16233f',f:'abrirInstalaciones()',id:'bqrr',sub:()=>instalaciones().length+' instalación(es)'},
   {k:'mitarj',g:'k',i:'tarjeta',l:'Mi QR',c:'#0f8b8d',f:'abrirMiTarjeta()',id:'bmiqr',sub:()=>'Tarjeta digital'});
+
+/* ================= Proyectos realizados: carpetas por cliente con fotos, PDF y otros archivos (v9.7) ================= */
+Object.assign(ICO,{carpeta:'M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z'});
+FOTO_KEYS.push('proyfotos');
+const proyectos=()=>db.proyectos||(db.proyectos=[]),proyFotos=()=>db.proyfotos||(db.proyfotos=[]);
+const proy=id=>proyectos().find(p=>p.id===id);
+const proyCliNom=p=>{const c=p.clienteId&&cli(p.clienteId);return c?c.nombre:(p.cliente||'(sin cliente)')};
+const proyCliKey=p=>p.clienteId&&cli(p.clienteId)?p.clienteId:'n:'+norm(p.cliente||'');
+const fotosDe=pid=>proyFotos().filter(f=>f.proyId===pid).sort((a,b)=>(a.creado||0)-(b.creado||0));
+const portadaDe=p=>{const l=fotosDe(p.id);return (l.find(f=>f.id===p.portada)||l[0]||{}).foto||''};
+const proyResumen=p=>{const n=fotosDe(p.id).length,a=(p.adjuntos||[]).length;return [n?n+' foto'+(n>1?'s':''):'',a?a+' archivo'+(a>1?'s':''):''].filter(Boolean).join(' · ')||'Vacía'};
+function reducirUrl(src,max,q){return new Promise((ok,mal)=>{const im=new Image();im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);
+  const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(im,0,0,cv.width,cv.height);ok(cv.toDataURL('image/jpeg',q))};im.onerror=mal;im.src=src})}
+const carpetaIco=(s)=>`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#b45309;background:#fdf3e7">${ico('carpeta',s||34)}</div>`;
+
+/* ---- lista de clientes con proyectos ---- */
+let PQ='';
+function abrirProyectos(){pila.length=0;PQ='';pintarProyectos()}
+function gruposProy(){const G={};proyectos().forEach(p=>{const k=proyCliKey(p);(G[k]=G[k]||{k,nom:proyCliNom(p),l:[]}).l.push(p)});return Object.values(G).sort((a,b)=>a.nom.localeCompare(b.nom))}
+function listaProyHtml(){const q=PQ.trim(),L=gruposProy().filter(g=>!q||coincide(q,g.nom,...g.l.map(p=>[p.nombre,p.ubic,p.sistema,p.desc].join(' '))));
+  if(!L.length)return `<div class="card mut" style="text-align:center;padding:22px">${proyectos().length?'Ningún cliente coincide con la búsqueda.':'Todavía no hay proyectos.<br>Toca <b>+ Nuevo</b>: eliges el cliente, le pones nombre a la carpeta y agregas fotos, PDF o archivos.'}</div>`;
+  return L.map(g=>{const nf=g.l.reduce((a,p)=>a+fotosDe(p.id).length,0),cov=g.l.map(portadaDe).filter(Boolean).slice(0,3);
+    return `<div class="card tap row" style="gap:12px;cursor:pointer" data-pk="${esc(g.k)}" onclick="proyCliente(this.dataset.pk)">${avatar(g.nom,44)}
+      <div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(g.nom)}</b><div class="mut" style="font-size:12px">${g.l.length} proyecto${g.l.length>1?'s':''}${nf?' · '+nf+' foto'+(nf>1?'s':''):''}</div></div>
+      <div class="row" style="gap:3px">${cov.map(f=>`<img src="${f}" style="width:38px;height:38px;object-fit:cover;border-radius:8px">`).join('')}</div></div>`}).join('')}
+/* sistemas de racks: lista guardada (los de fábrica + los que agregue el vendedor) */
+const SIST_DEF=['Rack selectivo','Rack manual','Rack cantilever','Rack drive-in','Rack dinámico','Rack push-back','Entrepiso (mezzanine)','Estantería liviana'];
+const SIN_SIST='Sin sistema';
+function sistemas(){const c=kvJ('proy_sistemas');let l=Array.isArray(c)?c.slice():SIST_DEF.slice();proyectos().forEach(p=>{if(p.sistema&&!l.some(x=>norm(x)===norm(p.sistema)))l.push(p.sistema)});return l}
+const guardarSistemas=l=>kvSet('proy_sistemas',JSON.stringify(l));
+const sistDe=p=>{const s=String(p.sistema||'').trim();if(!s)return SIN_SIST;return sistemas().find(x=>norm(x)===norm(s))||s};
+const sistColor=s=>{const C=['#24559b','#e8892f','#0f8b8d','#7c3aed','#c2417a','#1e8e3e','#b45309','#44546a','#1877c9','#0e7490'];let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))>>>0;return C[h%C.length]};
+function listaSistHtml(){const L=sistemas().map(s=>({s,l:proyectos().filter(p=>sistDe(p)===s)}));const sin=proyectos().filter(p=>sistDe(p)===SIN_SIST);if(sin.length)L.push({s:SIN_SIST,l:sin});
+  const tot=proyectos().length;
+  return `${tot?'':`<div class="card mut" style="text-align:center;padding:16px">Todavía no hay proyectos.<br>Toca <b>+ Nuevo</b>: eliges el cliente y el sistema, le pones nombre a la carpeta y agregas fotos, PDF o archivos.</div>`}
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${L.map(({s,l})=>{const nc=new Set(l.map(proyCliKey)).size,cov=l.map(portadaDe).filter(Boolean)[0],col=sistColor(s);
+    return `<div class="card tap psis" style="padding:0;overflow:hidden;margin:0;cursor:pointer;${l.length?'':'opacity:.55'}" data-s="${esc(s)}" onclick="proySistema(this.dataset.s)">
+      <div style="aspect-ratio:16/9;background:${col}1f;position:relative">${cov?`<img src="${cov}" style="width:100%;height:100%;object-fit:cover;display:block">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${col}">${ico('layers',34)}</div>`}
+       <span style="position:absolute;left:0;top:0;bottom:0;width:5px;background:${col}"></span></div>
+      <div style="padding:8px 10px"><b class="ell" style="display:block;font-size:14px">${esc(s)}</b><div class="mut" style="font-size:11px">${l.length?nc+' cliente'+(nc>1?'s':'')+' · '+l.length+' proyecto'+(l.length>1?'s':''):'Sin proyectos'}</div></div></div>`}).join('')}</div>`}
+function pintarProyectos(){abrirSheet('proy','Proyectos por sistema',`<div class="row" style="gap:8px;margin-bottom:8px"><input id="pq" type="search" autocomplete="off" class="grow" placeholder="🔍 Buscar cliente o proyecto" value="${esc(PQ)}" oninput="PQ=this.value;$('#pql').innerHTML=PQ.trim()?listaProyHtml():listaSistHtml()" style="margin:0">
+   <button class="btn" style="white-space:nowrap" onclick="proyForm()">+ Nuevo</button></div>
+   <button class="btn sec full" id="bselsis" style="margin-bottom:10px" onclick="selSistemas()">${ico('layers',16)} Seleccionar sistema</button>
+   <div id="pql">${PQ.trim()?listaProyHtml():listaSistHtml()}</div>`,()=>pintarProyectos())}
+/* clientes que instalaron un sistema */
+function proySistema(s){const l=proyectos().filter(p=>sistDe(p)===s),G={};l.forEach(p=>{const k=proyCliKey(p);(G[k]=G[k]||{k,nom:proyCliNom(p),l:[]}).l.push(p)});
+  const L=Object.values(G).sort((a,b)=>a.nom.localeCompare(b.nom));
+  abrirSheet('ps:'+s,s,`<div class="mut" style="margin-bottom:8px">${L.length?L.length+' cliente'+(L.length>1?'s':'')+' con '+esc(s)+'. Toca uno para ver sus carpetas.':'Ningún cliente tiene proyectos de este sistema todavía.'}</div>
+   ${L.map(g=>{const nf=g.l.reduce((a,p)=>a+fotosDe(p.id).length,0),cov=g.l.map(portadaDe).filter(Boolean).slice(0,3);
+    return `<div class="card tap row" style="gap:12px;cursor:pointer" data-pk="${esc(g.k)}" onclick="proyCliente(this.dataset.pk,${esc(JSON.stringify(s))})">${avatar(g.nom,44)}
+      <div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(g.nom)}</b><div class="mut" style="font-size:12px">${g.l.length} proyecto${g.l.length>1?'s':''}${nf?' · '+nf+' foto'+(nf>1?'s':''):''}</div></div>
+      <div class="row" style="gap:3px">${cov.map(f=>`<img src="${f}" style="width:38px;height:38px;object-fit:cover;border-radius:8px">`).join('')}</div></div>`}).join('')}
+   <button class="btn full" style="margin-top:6px" onclick="proyForm(null,{sistema:${esc(JSON.stringify(s===SIN_SIST?'':s))}})">+ Nuevo proyecto de ${esc(s)}</button>`,()=>proySistema(s))}
+/* «Seleccionar sistema»: ver, agregar, renombrar y quitar tipos de sistema */
+function selSistemas(){const L=sistemas();
+  abrirSheet('selsis','Seleccionar sistema',`<div class="mut" style="margin-bottom:8px">Estos son los sistemas disponibles para los proyectos. Agrega los que falten con su nombre.</div>
+   <div class="card" style="padding:4px 12px">${L.map((s,i)=>{const n=proyectos().filter(p=>sistDe(p)===s).length;return `<div class="row ssi" style="gap:8px;padding:8px 0;border-bottom:1px solid var(--line)"><span style="width:10px;height:10px;border-radius:50%;background:${sistColor(s)};flex:none"></span>
+     <div class="grow" style="min-width:0;cursor:pointer" onclick="proySistema(${esc(JSON.stringify(s))})"><b class="ell" style="display:block">${esc(s)}</b><div class="mut" style="font-size:11px">${n?n+' proyecto'+(n>1?'s':''):'Sin proyectos'}</div></div>
+     <button class="btn sm sec" onclick="sisRenombrar(${i})" title="Cambiar nombre">✏️</button><button class="btn sm sec" onclick="sisQuitar(${i})" title="Quitar">🗑</button></div>`}).join('')}</div>
+   <div class="card"><label style="margin-top:0">Nuevo sistema</label><div class="row" style="gap:8px"><input id="nsis" class="grow" placeholder="Ej. Rack para llantas, Estantería metálica…" style="margin:0" onkeydown="if(event.key==='Enter')sisAgregar()"><button class="btn" id="nsisok" onclick="sisAgregar()">Agregar</button></div></div>
+   <button class="btn sec full" onclick="if(confirm('¿Volver a la lista de sistemas de fábrica? Los que están en uso se mantienen.')){kvSet('proy_sistemas','');selSistemas()}">${ico('undo',16)} Restablecer lista</button>`,()=>selSistemas())}
+function sisAgregar(){const v=($('#nsis').value||'').trim().replace(/\s+/g,' ');if(!v)return toast('Escribe el nombre del sistema');const L=sistemas();
+  if(L.some(x=>norm(x)===norm(v)))return toast('Ese sistema ya está en la lista');L.push(v);guardarSistemas(L);toast('«'+v+'» agregado');selSistemas()}
+function sisRenombrar(i){const L=sistemas(),viejo=L[i];if(viejo==null)return;const v=(prompt('Nuevo nombre para «'+viejo+'»',viejo)||'').trim().replace(/\s+/g,' ');if(!v||v===viejo)return;
+  if(L.some((x,j)=>j!==i&&norm(x)===norm(v)))return toast('Ya existe un sistema con ese nombre');
+  proyectos().forEach(p=>{if(sistDe(p)===viejo)p.sistema=v});L[i]=v;guardarSistemas(L);save();toast('Sistema renombrado');selSistemas()}
+function sisQuitar(i){const L=sistemas(),s=L[i];if(s==null)return;const n=proyectos().filter(p=>sistDe(p)===s).length;
+  if(n)return toast('«'+s+'» tiene '+n+' proyecto(s): cámbialos de sistema primero o renómbralo');if(!confirm('¿Quitar «'+s+'» de la lista?'))return;L.splice(i,1);guardarSistemas(L);selSistemas()}
+
+/* ---- carpetas (proyectos) de un cliente ---- */
+function proyCliente(k,sis){const T=proyectos().filter(p=>proyCliKey(p)===k),L=T.filter(p=>!sis||sistDe(p)===sis).sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||''))||(b.creado||0)-(a.creado||0));
+  if(!L.length)return sis?proySistema(sis):pintarProyectos();const nom=proyCliNom(L[0]),cid=cli(k)?k:'';
+  abrirSheet('pc:'+k+(sis?'|'+sis:''),nom,`<div class="mut" style="margin-bottom:8px">${sis?'<b>'+esc(sis)+'</b> · ':''}${L.length} carpeta${L.length>1?'s':''} de proyecto. Toca una para ver sus fotos y archivos.</div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${L.map(p=>{const f=portadaDe(p);return `<div class="card tap" style="padding:0;overflow:hidden;margin:0;cursor:pointer" data-pid="${p.id}" onclick="verProyecto('${p.id}')">
+      <div style="aspect-ratio:4/3;background:var(--bg)">${f?`<img src="${f}" style="width:100%;height:100%;object-fit:cover;display:block">`:carpetaIco()}</div>
+      <div style="padding:8px 10px"><div class="row" style="gap:5px"><span style="color:#b45309;flex:none">${ico('carpeta',15)}</span><b class="ell" style="font-size:14px">${esc(p.nombre)}</b></div>
+      <div class="mut" style="font-size:11px">${p.fecha?fFecha(p.fecha)+' · ':''}${proyResumen(p)}</div></div></div>`}).join('')}
+     <button class="card tap" style="margin:0;border:2px dashed var(--line);background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:150px;color:var(--pri2);font-weight:700" onclick="proyForm(null,{clienteId:'${cid}',cliente:${esc(JSON.stringify(cid?'':nom))},sistema:${esc(JSON.stringify(sis&&sis!==SIN_SIST?sis:''))}})">${ico('plus',26)}Nueva carpeta</button></div>
+   ${sis&&T.length>L.length?`<button class="btn sec full" style="margin-top:12px" data-pk="${esc(k)}" onclick="proyCliente(this.dataset.pk)">Ver todos sus proyectos (${T.length})</button>`:''}
+   ${cid?`<button class="btn sec full" style="margin-top:12px" onclick="verCliente('${cid}')">${ico('user',16)} Ver la ficha del cliente</button>`:''}`,()=>proyCliente(k,sis))}
+
+/* ---- crear o editar una carpeta ---- */
+let PFE=null;
+function proyForm(id,pre){const p=id?proy(id):null;PFE=p?{id,clienteId:p.clienteId||'',cliente:p.cliente||'',sistema:p.sistema?sistDe(p):''}:Object.assign({clienteId:'',cliente:'',sistema:''},pre||{});
+  const clis=db.clientes.slice().sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre))),otro=!PFE.clienteId&&!!PFE.cliente;
+  const sist=sistemas();
+  abrirSheet('pf',p?'Editar proyecto':'Nuevo proyecto',`<div class="card">
+   <label>Cliente *</label>${clis.length>6?'<input id="pfq" type="search" autocomplete="off" placeholder="🔍 Buscar cliente…" style="margin-bottom:6px">':''}
+   <select id="pfc"><option value="">— Selecciona —</option>${clis.map(c=>`<option value="${c.id}" ${c.id===PFE.clienteId?'selected':''}>${esc(c.nombre)}</option>`).join('')}<option value="_otro" ${otro?'selected':''}>✏️ Otro (escribir el nombre)</option></select>
+   <input id="pfo" placeholder="Nombre del cliente" value="${esc(PFE.cliente)}" style="margin-top:6px;${otro?'':'display:none'}">
+   <label>Nombre de la carpeta / proyecto *</label><input id="pfn" value="${esc(p?p.nombre:'')}" placeholder="Ej. Rack selectivo – Almacén 2">
+   <div class="row" style="gap:8px"><div class="grow"><label>Fecha</label><input id="pff" type="date" value="${esc(p?p.fecha||'':hoy())}"></div>
+    <div class="grow"><label>Sistema *</label><select id="pfs"><option value="">— Selecciona —</option>${sist.map(s=>`<option ${s===PFE.sistema?'selected':''}>${esc(s)}</option>`).join('')}<option value="_nuevo">➕ Otro sistema (escribir)</option></select></div></div>
+   <input id="pfsn" placeholder="Nombre del nuevo sistema" style="display:none">
+   <label>Ubicación</label><input id="pfu" value="${esc(p?p.ubic||'':'')}" placeholder="Ej. Santo Domingo, nave 3">
+   <label>Descripción / notas</label><textarea id="pfd" placeholder="Qué se hizo, medidas, niveles, capacidad…">${esc(p?p.desc||'':'')}</textarea>
+   <div class="btns" style="margin-top:10px"><button class="btn sec" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="pfok" onclick="proyGuardar()">${p?'Guardar':'Crear carpeta'}</button></div></div>
+   ${p?`<button class="btn sec full" style="color:var(--bad,#c0392b);border-color:var(--bad,#c0392b)" onclick="proyBorrar('${p.id}')">🗑 Eliminar este proyecto</button>`:''}`,()=>proyForm(id,PFE));
+  const ss=$('#pfs');ss.onchange=()=>{$('#pfsn').style.display=ss.value==='_nuevo'?'':'none';if(ss.value==='_nuevo')$('#pfsn').focus()};
+  const sel=$('#pfc'),q=$('#pfq');sel.onchange=()=>{$('#pfo').style.display=sel.value==='_otro'?'':'none';if(sel.value==='_otro')$('#pfo').focus()};
+  if(q)q.oninput=()=>{const v=q.value.trim();[...sel.options].forEach(o=>{if(o.value&&o.value!=='_otro')o.hidden=!!v&&!coincide(v,o.textContent)});const m=[...sel.options].filter(o=>o.value&&o.value!=='_otro'&&!o.hidden);if(v&&m.length===1){sel.value=m[0].value;sel.onchange()}}}
+function proyGuardar(){const sv=$('#pfc').value,nom=$('#pfn').value.trim(),otro=$('#pfo').value.trim();
+  if(!sv||(sv==='_otro'&&!otro))return toast('Elige el cliente');if(!nom)return toast('Ponle nombre a la carpeta');
+  let sis=$('#pfs').value;if(sis==='_nuevo'){sis=($('#pfsn').value||'').trim().replace(/\s+/g,' ');if(!sis)return toast('Escribe el nombre del sistema');const L=sistemas(),ya=L.find(x=>norm(x)===norm(sis));if(ya)sis=ya;else{L.push(sis);guardarSistemas(L)}}
+  if(!sis)return toast('Elige el sistema');
+  const d={clienteId:sv==='_otro'?'':sv,cliente:sv==='_otro'?otro:'',nombre:nom,fecha:$('#pff').value||hoy(),sistema:sis,ubic:$('#pfu').value.trim(),desc:$('#pfd').value.trim(),editado:Date.now()};
+  let p=PFE&&PFE.id?proy(PFE.id):null;if(p)Object.assign(p,d);else{p=Object.assign({id:uid(),creado:Date.now(),adjuntos:[]},d);proyectos().push(p)}
+  save();PFE=null;pila.pop();toast(d.nombre+' guardado');verProyecto(p.id)}
+function proyBorrar(id){const p=proy(id);if(!p)return;const n=fotosDe(id).length,a=(p.adjuntos||[]).length;
+  if(!confirm('¿Eliminar el proyecto «'+p.nombre+'»'+(n||a?' con '+proyResumen(p):'')+'? No se puede deshacer.'))return;
+  (p.adjuntos||[]).forEach(x=>{try{AND&&AND.borrarArchivoPlano&&AND.borrarArchivoPlano(x.fid)}catch(e){}});
+  db.proyfotos=proyFotos().filter(f=>f.proyId!==id);db.proyectos=proyectos().filter(x=>x.id!==id);save();try{limpiarFotos()}catch(e){}
+  toast('Proyecto eliminado');const k=proyCliKey(p),sp=sistDe(p);pila.length=0;proyectos().some(x=>proyCliKey(x)===k&&sistDe(x)===sp)?proyCliente(k,sp):proyectos().some(x=>sistDe(x)===sp)?proySistema(sp):pintarProyectos()}
+
+/* ---- dentro de la carpeta ---- */
+function verProyecto(id){const p=proy(id);if(!p)return pintarProyectos();const F=fotosDe(id),A=p.adjuntos||[];
+  const bt=(i,t,f,c)=>`<button class="card tap" style="margin:0;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700;color:${c||'var(--pri2)'};border:0" onclick="${f}">${i}<span>${t}</span></button>`;
+  abrirSheet('pv:'+id,p.nombre,`<div class="card"><div class="row" style="gap:8px"><span style="color:#b45309">${ico('carpeta',22)}</span><div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(proyCliNom(p))}</b>
+     <div class="mut" style="font-size:12px">${[p.fecha?fFecha(p.fecha):'',p.sistema?sistDe(p):'',p.ubic].filter(Boolean).map(esc).join(' · ')}</div></div><button class="btn sm sec" onclick="proyForm('${id}')">✏️ Editar</button></div>
+    ${p.desc?`<div style="white-space:pre-wrap;margin-top:8px;font-size:14px">${esc(p.desc)}</div>`:''}</div>
+   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
+    ${bt('📷','Cámara',`proyAgregarFotos('${id}',true)`)}${bt('🖼️','Fotos',`proyAgregarFotos('${id}',false)`)}${bt('📄','PDF / archivo',`proyArchivos('${id}')`)}${bt('⤵️','Traer guardadas',`proyImportar('${id}')`)}</div>
+   ${F.length?`<div class="row" style="margin-bottom:6px"><b class="grow">Fotos (${F.length})</b><button class="btn sm" onclick="proyVisor('${id}',0,true)">▶ Presentar</button><button class="btn sm sec" style="margin-left:6px" onclick="proyPdf('${id}')">📤 PDF</button></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${F.map((f,i)=>`<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer" class="pfo" onclick="proyVisor('${id}',${i})"><img src="${f.foto}" style="width:100%;height:100%;object-fit:cover;display:block">${f.id===p.portada?'<span style="position:absolute;top:4px;left:4px;background:#0009;color:#fff;border-radius:8px;font-size:10px;padding:1px 5px">⭐ Portada</span>':''}${f.nota?'<span style="position:absolute;bottom:4px;right:4px;background:#0009;color:#fff;border-radius:8px;font-size:10px;padding:1px 5px">📝</span>':''}</div>`).join('')}</div>`
+    :`<div class="card mut" style="text-align:center;padding:18px">Sin fotos todavía. Usa <b>Cámara</b>, <b>Fotos</b> (varias a la vez) o <b>Traer guardadas</b> (fotos de soporte, galería o antes y después).</div>`}
+   ${A.length?`<b style="display:block;margin:14px 0 6px">Archivos (${A.length})</b><div class="card" style="padding:6px 10px">${A.map(a=>`<div class="row pfa" style="gap:10px;padding:6px 0;border-bottom:1px solid var(--line)">${chipArch(a,40)}
+      <div class="grow" style="min-width:0;cursor:pointer" onclick="proyAbrirArch('${id}','${a.fid}','con')"><b class="ell" style="display:block;font-size:14px">${esc(a.nombre)}</b><div class="mut" style="font-size:11px">${a.tam?fTam(a.tam)+' · ':''}${a.fecha?fFecha(a.fecha):''}</div></div>
+      <button class="btn sm sec" onclick="proyAbrirArch('${id}','${a.fid}','compartir')" title="Compartir">📤</button><button class="btn sm sec" onclick="proyQuitarArch('${id}','${a.fid}')" title="Quitar">🗑</button></div>`).join('')}</div>`:''}
+   ${AND&&AND.guardarEnDispositivo?`<div class="card" id="pdisp" style="margin-top:12px"><label class="row" style="gap:8px;margin:0;color:var(--tx);cursor:pointer"><input type="checkbox" style="width:20px;height:20px" ${proyDispOn()?'checked':''} onchange="proyDispToggle(this.checked)"><b class="grow">💾 Guardar copia en el teléfono</b></label>
+     <div class="mut" style="font-size:12px;margin-top:4px">Fotos en <b>Imágenes/Benderrack/Proyectos/${esc(proyCarpetaDisp(p))}</b>; PDF y otros archivos en <b>Descargas/Benderrack/Proyectos/…</b>. Se ven en la galería y en «Archivos».</div>
+     ${proyPendDisp(p)?`<button class="btn sm full" style="margin-top:8px" onclick="proyGuardarDisp('${id}',true);verProyecto('${id}')">Copiar ahora (${proyPendDisp(p)} pendiente${proyPendDisp(p)>1?'s':''})</button>`:(F.length||A.length)?'<div style="font-size:12px;margin-top:6px;color:#1e8e3e">✔ Todo copiado al teléfono</div>':''}</div>`:''}`,()=>verProyecto(id))}
+function proyRefrescar(id){const t=pila[pila.length-1];if(t&&t.key==='pv:'+id)verProyecto(id)}
+
+/* fotos: cámara o varias de la galería del teléfono */
+function proyAgregarFotos(id,cam){const i=document.createElement('input');i.type='file';i.accept='image/*';if(cam)i.capture='environment';else i.multiple=true;i.style.display='none';document.body.appendChild(i);
+  i.onchange=async()=>{const fs=[...i.files];i.remove();if(!fs.length)return;if(fs.length>1)toast('Procesando '+fs.length+' foto(s)…');let n=0;const t0=Date.now();
+    for(const f of fs){try{const d=await reducir(f,1600,0.8);proyFotos().push({id:uid(),proyId:id,foto:d,nota:'',creado:t0+n});n++}catch(e){}}
+    if(!n)return toast('No se pudo leer la imagen');const p=proy(id);if(p)p.editado=Date.now();save();proyAutoDisp(id);toast(n+' foto(s) agregada(s)');proyRefrescar(id)};i.click()}
+async function proyAgregarFotosUrl(id,urls){let n=0;const t0=Date.now();for(const u of urls){try{const d=u.startsWith('data:image/jpeg')&&u.length<900000?u:await reducirUrl(u,1600,0.8);proyFotos().push({id:uid(),proyId:id,foto:d,nota:'',creado:t0+n});n++}catch(e){}}
+  const p=proy(id);if(p)p.editado=Date.now();save();return n}
+
+/* PDF y otros archivos (mismo selector que los planos); las imágenes elegidas así pasan a fotos */
+function proyArchivos(id){elegirArchivosPlano({proyId:id})}
+const _archPlano0=window.__archivoPlano;
+window.__archivoPlano=async l=>{const d=_destArch;if(!(d&&d.proyId))return _archPlano0(l);_destArch=null;const p=proy(d.proyId);if(!p||!l||!l.length)return;
+  const fotos=[],otros=[];
+  for(const a of l){const m=mimeDe(a);let src=null;if(/^image\/(jpeg|png|webp|gif|bmp)/.test(m)){try{src=_memArch[a.fid]||(AND&&AND.leerArchivoPlanoB64?(b=>b?'data:'+m+';base64,'+b:null)(AND.leerArchivoPlanoB64(a.fid)):null)}catch(e){}}
+    if(src)fotos.push([a,src]);else otros.push(Object.assign({fecha:hoy(),creado:Date.now()},a))}
+  let n=0;if(fotos.length){n=await proyAgregarFotosUrl(p.id,fotos.map(x=>x[1]));fotos.forEach(([a])=>{try{AND&&AND.borrarArchivoPlano&&AND.borrarArchivoPlano(a.fid)}catch(e){}delete _memArch[a.fid]})}
+  if(otros.length)p.adjuntos=(p.adjuntos||[]).concat(otros);p.editado=Date.now();save();proyAutoDisp(p.id);
+  toast([n?n+' foto(s)':'',otros.length?otros.length+' archivo(s)':''].filter(Boolean).join(' y ')+' agregado(s) a «'+p.nombre+'»');
+  const t=pila[pila.length-1];if(t&&t.key==='pv:'+p.id)verProyecto(p.id);else{pila.length=0;verProyecto(p.id)}};
+function proyAbrirArch(id,fid,modo){const p=proy(id),a=p&&(p.adjuntos||[]).find(x=>x.fid===fid);if(!a)return;
+  if(AND&&AND.abrirArchivoPlano)return AND.abrirArchivoPlano(fid,a.nombre,mimeDe(a),modo,'');
+  window.__abierto={fid,modo,mime:mimeDe(a)};const d=_memArch[fid];if(d){const x=document.createElement('a');x.href=d;x.download=a.nombre;document.body.appendChild(x);x.click();x.remove()}else toast('El archivo está en el teléfono donde se agregó')}
+function proyQuitarArch(id,fid){const p=proy(id);if(!p||!confirm('¿Quitar este archivo del proyecto?'))return;p.adjuntos=(p.adjuntos||[]).filter(x=>x.fid!==fid);
+  try{AND&&AND.borrarArchivoPlano&&AND.borrarArchivoPlano(fid)}catch(e){}save();verProyecto(id)}
+/* archivos compartidos a la app (desde WhatsApp, correo…): opción de guardarlos en un proyecto */
+const _recibidos0=window.__archivosRecibidos;
+window.__archivosRecibidos=l=>{_recibidos0(l);try{if(!l||!l.length||(typeof bloqueada!=='undefined'&&bloqueada)||!proyectos().length||!$('#sbody'))return;
+  const ps=proyectos().slice().sort((a,b)=>(b.editado||b.creado||0)-(a.editado||a.creado||0)),d=document.createElement('div');d.className='card';d.id='rproy';
+  d.innerHTML=`<b>📁 O guárdalo en un proyecto</b><select id="rpy" style="margin-top:6px">${ps.map(p=>`<option value="${p.id}">${esc(proyCliNom(p)+' – '+p.nombre)}</option>`).join('')}</select><button class="btn full" style="margin-top:8px" id="rpyok">Guardar en el proyecto</button>`;
+  $('#sbody').appendChild(d);$('#rpyok').onclick=()=>{const pid=$('#rpy').value;pila.length=0;cerrarTodo();_destArch={proyId:pid};window.__archivoPlano(l)}}catch(e){}};
+
+/* traer fotos que ya están en la app: soporte del cliente, galería y antes y después */
+let PIMP=null;
+function proyImportar(id){const p=proy(id);if(!p)return;const L=[];
+  if(p.clienteId)(db.soporte||[]).filter(x=>x.clienteId===p.clienteId&&!x.borrada).sort((a,b)=>(b.creado||0)-(a.creado||0)).forEach(x=>L.push({o:'Fotos de soporte',src:x.thumb,full:()=>(AND&&AND.leerFotoSoporte&&AND.leerFotoSoporte(x.id))||x.thumb,t:x.nota||fFecha(x.fecha)}));
+  comparaciones().filter(c=>!p.clienteId||c.clienteId===p.clienteId).forEach(c=>[['antes','Antes'],['despues','Después']].forEach(([k,t])=>{const f=adFoto(c[k]);if(f&&f.foto)L.push({o:'Antes y después',src:f.foto,full:()=>f.foto,t:(c.titulo||'')+' · '+t})}));
+  (db.galeria||[]).slice().sort((a,b)=>(b.creado||0)-(a.creado||0)).forEach(g=>{if(g.foto)L.push({o:'Galería'+(g.album?' · '+g.album:''),src:g.foto,full:()=>g.foto,t:g.titulo||''})});
+  PIMP={id,L,sel:new Set()};
+  if(!L.length)return toast('No hay fotos guardadas para traer'+(p.clienteId?' de este cliente':''));
+  const grupos=[...new Set(L.map(x=>x.o))];
+  abrirSheet('pimp','Traer fotos guardadas',`<div class="mut" style="margin-bottom:8px">Toca las fotos que quieres copiar a «${esc(p.nombre)}».</div>
+   ${grupos.map(g=>`<b style="display:block;margin:10px 0 6px">${esc(g)}</b><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">${L.map((x,i)=>x.o!==g?'':`<div class="pim" data-i="${i}" onclick="proyImpSel(${i},this)" style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer;outline:3px solid transparent;outline-offset:-3px"><img src="${x.src}" style="width:100%;height:100%;object-fit:cover;display:block"><span class="pimk" style="display:none;position:absolute;top:3px;right:3px;background:var(--pri2);color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;text-align:center;line-height:20px">✓</span></div>`).join('')}</div>`).join('')}
+   <div style="position:sticky;bottom:0;background:var(--bg);padding:10px 0 2px;margin-top:10px"><button class="btn full" id="pimok" onclick="proyImpOk()" disabled>Agregar 0 foto(s)</button></div>`,()=>proyImportar(id))}
+function proyImpSel(i,el){const s=PIMP.sel;s.has(i)?s.delete(i):s.add(i);const on=s.has(i);el.style.outlineColor=on?'var(--pri2)':'transparent';el.querySelector('.pimk').style.display=on?'':'none';
+  const b=$('#pimok');b.disabled=!s.size;b.textContent='Agregar '+s.size+' foto(s)'}
+async function proyImpOk(){if(!PIMP||!PIMP.sel.size)return;const {id,L,sel}=PIMP;const n=await proyAgregarFotosUrl(id,[...sel].sort((a,b)=>a-b).map(i=>L[i].full()));PIMP=null;pila.pop();proyAutoDisp(id);toast(n+' foto(s) agregada(s)');verProyecto(id)}
+
+/* ---- visor a pantalla completa (también modo presentación) ---- */
+let PV=null;
+function proyVisor(id,i,pres){const l=fotosDe(id);if(!l.length)return toast('Este proyecto no tiene fotos');PV={id,i:Math.max(0,Math.min(i||0,l.length-1)),pres:!!pres,ui:true};
+  const b=(t,f)=>`<button onclick="${f}" style="border:0;border-radius:999px;background:#ffffff22;color:#fff;padding:9px 13px;font-size:13px;font-weight:600">${t}</button>`;
+  const d=capaCompleta('pvis',`<div class="pvui row" style="padding:12px;gap:10px"><button onclick="pvCerrar()" style="border:0;background:#ffffff22;color:#fff;border-radius:50%;width:38px;height:38px;font-size:18px">✕</button><div class="grow" style="min-width:0"><b class="ell" id="pvt" style="display:block"></b><span id="pvn" style="font-size:12px;opacity:.7"></span></div></div>
+   <div id="pvz" style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative"><img id="pvi" style="max-width:100%;max-height:100%;object-fit:contain;user-select:none">
+    <button class="pvui" onclick="event.stopPropagation();pvMover(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);border:0;background:#0006;color:#fff;border-radius:50%;width:42px;height:42px;font-size:24px">‹</button>
+    <button class="pvui" onclick="event.stopPropagation();pvMover(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:#0006;color:#fff;border-radius:50%;width:42px;height:42px;font-size:24px">›</button></div>
+   <div class="pvui" style="padding:10px 12px 18px"><div id="pvnota" style="text-align:center;font-size:14px;opacity:.92;white-space:pre-wrap;min-height:18px"></div>
+    ${PV.pres?'':`<div class="row" style="gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px">${b('📤 Compartir','pvCompartir()')}${b('📝 Nota','pvNota()')}${b('⭐ Portada','pvPortada()')}${b('📁 Mover','pvMoverA()')}${b('🗑','pvBorrar()')}</div>`}</div>`);
+  let x0=null;d.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});d.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50)pvMover(dx<0?1:-1)});
+  $('#pvz').onclick=()=>{PV.ui=!PV.ui;d.querySelectorAll('.pvui').forEach(e=>e.style.visibility=PV.ui?'':'hidden')};
+  window.__presTec=e=>{if(e.key==='ArrowRight')pvMover(1);else if(e.key==='ArrowLeft')pvMover(-1)};document.addEventListener('keydown',window.__presTec);pvPintar()}
+function pvPintar(){const l=fotosDe(PV.id),p=proy(PV.id);if(!l.length||!p)return pvCerrar();PV.i=Math.max(0,Math.min(PV.i,l.length-1));const f=l[PV.i];
+  $('#pvi').src=f.foto;$('#pvt').textContent=p.nombre;$('#pvn').textContent=proyCliNom(p)+' · '+(PV.i+1)+' de '+l.length;$('#pvnota').textContent=f.nota||''}
+function pvMover(k){const n=fotosDe(PV.id).length;PV.i=(PV.i+k+n)%n;pvPintar()}
+function pvCerrar(){const id=PV&&PV.id;cerrarCapa();PV=null;if(id)proyRefrescar(id)}
+const pvFoto=()=>fotosDe(PV.id)[PV.i];
+function pvCompartir(){const f=pvFoto(),p=proy(PV.id);if(!f)return;const b64=f.foto.split(',')[1],nombre=limpioNom(proyCliNom(p)+' - '+p.nombre+' '+(PV.i+1))+'.jpg',txt=[p.nombre,proyCliNom(p),f.nota].filter(Boolean).join(' – ');
+  if(AND&&AND.shareFileB64)return spX.shareFileB64(nombre,'image/jpeg',b64,txt);
+  try{const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const file=new File([u],nombre,{type:'image/jpeg'});
+    if(navigator.canShare&&navigator.canShare({files:[file]}))return navigator.share({files:[file],text:txt}).catch(()=>{})}catch(e){}
+  const a=document.createElement('a');a.href=f.foto;a.download=nombre;document.body.appendChild(a);a.click();a.remove();toast('Foto descargada')}
+const limpioNom=s=>String(s||'').replace(/[\\/:*?"<>|]+/g,'_').trim().slice(0,90);
+function pvNota(){const f=pvFoto();if(!f)return;capaDialogo('Nota de la foto',`<textarea id="pvtx" style="min-height:90px" placeholder="Ej. Nivel 3, vista desde el pasillo">${esc(f.nota||'')}</textarea><button class="btn full" style="margin-top:8px" onclick="pvNotaOk()">Guardar</button>`);setTimeout(()=>{const t=$('#pvtx');t&&t.focus()},50)}
+function pvNotaOk(){const f=pvFoto();if(f){f.nota=$('#pvtx').value.trim();save()}cerrarDlgCapa();pvPintar()}
+function pvPortada(){const f=pvFoto(),p=proy(PV.id);if(!f||!p)return;p.portada=f.id;save();toast('⭐ Portada de la carpeta')}
+function pvBorrar(){const f=pvFoto();if(!f||!confirm('¿Borrar esta foto del proyecto?'))return;db.proyfotos=proyFotos().filter(x=>x.id!==f.id);save();try{limpiarFotos()}catch(e){}toast('Foto borrada');pvPintar()}
+function pvMoverA(){const p=proy(PV.id),k=proyCliKey(p),L=proyectos().filter(x=>x.id!==p.id).sort((a,b)=>(proyCliKey(b)===k)-(proyCliKey(a)===k)||proyCliNom(a).localeCompare(proyCliNom(b)));
+  if(!L.length)return toast('Crea otra carpeta primero');
+  capaDialogo('Mover la foto a…',L.map(x=>`<button class="card tap row" style="width:100%;gap:10px;text-align:left;border:0;margin-bottom:6px" onclick="pvMoverOk('${x.id}')"><span style="color:#b45309">${ico('carpeta',20)}</span><div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(x.nombre)}</b><div class="mut" style="font-size:12px">${esc(proyCliNom(x))}</div></div></button>`).join(''))}
+function pvMoverOk(dest){const f=pvFoto(),q=proy(dest);if(!f||!q)return;f.proyId=dest;f.creado=Date.now();save();cerrarDlgCapa();toast('Movida a «'+q.nombre+'»');pvPintar()}
+const _onBackPv=window.onBack;window.onBack=function(){if(!$('#capdlg')&&$('#capa')&&$('#capa').dataset.k==='pvis'){pvCerrar();return true}return _onBackPv.apply(this,arguments)};
+
+/* ---- copia visible en el teléfono: Imágenes/Benderrack/Proyectos/<cliente>/<proyecto> (fotos) y Descargas/… (PDF y otros) ---- */
+const proyDispOn=()=>!!(AND&&AND.guardarEnDispositivo)&&kvGet('proy_disp')!=='0';
+const proyCarpetaDisp=p=>limpioNom(proyCliNom(p))+'/'+limpioNom(p.nombre);
+const proyPendDisp=p=>fotosDe(p.id).filter(f=>!f.disp).length+(p.adjuntos||[]).filter(a=>!a.disp).length;
+function proyGuardarDisp(id,avisar){const p=proy(id);if(!p||!(AND&&AND.guardarEnDispositivo))return 0;const car=proyCarpetaDisp(p);let n=0,err='';
+  fotosDe(id).forEach((f,i)=>{if(f.disp)return;const r=String(AND.guardarEnDispositivo(car,limpioNom(p.nombre)+' '+String(i+1).padStart(3,'0')+'_'+f.id.slice(-4)+'.jpg','image/jpeg',f.foto.split(',')[1],'')||'');if(r.startsWith('OK|')){f.disp=r.slice(3);n++}else err=r.replace(/^ERR\|/,'')});
+  (p.adjuntos||[]).forEach(a=>{if(a.disp)return;const r=String(AND.guardarEnDispositivo(car,a.nombre,mimeDe(a),'',a.fid)||'');if(r.startsWith('OK|')){a.disp=r.slice(3);n++}else err=r.replace(/^ERR\|/,'')});
+  if(n)save();if(avisar)toast(n?'💾 '+n+' archivo(s) copiado(s) al teléfono':err?'No se pudo copiar: '+err:'Ya está todo en el teléfono');return n}
+function proyAutoDisp(id){if(proyDispOn())try{proyGuardarDisp(id,false)}catch(e){}}
+function proyDispToggle(v){kvSet('proy_disp',v?'1':'0');if(v&&PV==null){const t=pila[pila.length-1];const id=t&&t.key.startsWith('pv:')?t.key.slice(3):'';if(id)proyGuardarDisp(id,true)}const t=pila[pila.length-1];if(t)t.fn()}
+
+/* ---- PDF del proyecto para enviar al cliente o a un prospecto ---- */
+async function proyPdf(id){const p=proy(id),F=fotosDe(id);if(!p||!F.length)return;if(!window.jspdf)await cargarScript('jspdf.umd.min.js');if(!window.LOGO_COT)try{await cargarScript('logo_cot.js')}catch(e){}
+  toast('Preparando el PDF…');const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'letter'}),W=215.9,H=279.4,M=14,E=db.empresa||{};
+  const enc=(t)=>{doc.setFillColor(22,35,63);doc.rect(0,0,W,22,'F');if(window.LOGO_COT)try{doc.addImage(window.LOGO_COT,'JPEG',M,4,36,14)}catch(e){}
+    doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text(doc.splitTextToSize(t,110)[0],W-M,13.5,{align:'right'})};
+  const pie=()=>{doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,120,133);doc.text([E.nombre||'Benderrack',E.facN?'Asesor: '+E.facN:'',E.facT||E.tel||''].filter(Boolean).join('  ·  '),W/2,H-8,{align:'center'})};
+  enc('PROYECTO REALIZADO');let y=36;doc.setTextColor(22,35,63);doc.setFont('helvetica','bold');doc.setFontSize(20);doc.splitTextToSize(p.nombre,W-2*M).slice(0,2).forEach(l=>{doc.text(l,M,y);y+=9});
+  doc.setFontSize(13);doc.setTextColor(36,85,155);doc.text(proyCliNom(p),M,y);y+=8;doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(70,80,95);
+  [['Fecha',p.fecha?fFecha(p.fecha):''],['Sistema',p.sistema],['Ubicación',p.ubic]].filter(x=>x[1]).forEach(([k,v])=>{doc.setFont('helvetica','bold');doc.text(k+':',M,y);doc.setFont('helvetica','normal');doc.text(String(v),M+24,y);y+=6});
+  if(p.desc){y+=2;doc.splitTextToSize(p.desc,W-2*M).slice(0,8).forEach(l=>{doc.text(l,M,y);y+=5.2})}
+  const img=src=>new Promise(ok=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=src});
+  const caja=async(f,x,yy,w,h)=>{const im=await img(f.foto);if(!im)return;const r=Math.min(w/im.width,(h-(f.nota?7:0))/im.height),iw=im.width*r,ih=im.height*r;doc.addImage(f.foto,'JPEG',x+(w-iw)/2,yy,iw,ih);
+    if(f.nota){doc.setFontSize(9);doc.setTextColor(70,80,95);doc.text(doc.splitTextToSize(f.nota,w)[0],x+w/2,yy+ih+5,{align:'center'})}};
+  const port=F.find(f=>f.id===p.portada)||F[0];y+=4;await caja(port,M,y,W-2*M,H-y-18);pie();
+  const resto=F.filter(f=>f!==port);for(let i=0;i<resto.length;i+=2){doc.addPage();enc(p.nombre);const h=(H-22-18-12)/2;await caja(resto[i],M,28,W-2*M,h);if(resto[i+1])await caja(resto[i+1],M,28+h+6,W-2*M,h);pie()}
+  const nombre=limpioNom('Proyecto '+p.nombre+' - '+proyCliNom(p))+'.pdf',b64=doc.output('datauristring').split(',')[1];
+  if(AND&&AND.sharePdfB64)return spX.sharePdfB64(nombre,b64,'Proyecto '+p.nombre+' – '+(E.nombre||'Benderrack'));
+  if(AND&&AND.saveFileB64)return spX.saveFileB64(nombre,'application/pdf',b64);doc.save(nombre);toast('PDF descargado')}
+
+/* ---- en la ficha del cliente: sus carpetas de proyectos ---- */
+const _verCliente0=verCliente;
+verCliente=function(id){_verCliente0(id);try{const c=cli(id),sb=$('#sbody');if(!c||!sb||$('#cproy'))return;
+  const L=proyectos().filter(p=>p.clienteId===id).sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||'')));
+  const d=document.createElement('div');d.className='card';d.id='cproy';
+  d.innerHTML=`<div class="row" style="gap:8px"><span style="color:#b45309">${ico('carpeta',20)}</span><b class="grow">Proyectos realizados${L.length?' ('+L.length+')':''}</b>${L.length?`<button class="btn sm sec" onclick="proyCliente('${id}')">Ver todos</button>`:''}</div>
+   <div style="display:flex;gap:8px;overflow-x:auto;margin-top:8px;padding-bottom:2px">${L.map(p=>{const f=portadaDe(p);return `<div class="tap" style="flex:none;width:104px;cursor:pointer" onclick="verProyecto('${p.id}')"><div style="width:104px;height:78px;border-radius:10px;overflow:hidden;background:var(--bg)">${f?`<img src="${f}" style="width:100%;height:100%;object-fit:cover;display:block">`:carpetaIco(28)}</div><div class="ell" style="font-size:12px;font-weight:700;margin-top:3px">${esc(p.nombre)}</div><div class="mut" style="font-size:10px">${proyResumen(p)}</div></div>`}).join('')}
+    <button class="tap" style="flex:none;width:${L.length?'78px':'100%'};height:78px;border:2px dashed var(--line);border-radius:10px;background:none;color:var(--pri2);font-weight:700;font-size:12px" onclick="proyForm(null,{clienteId:'${id}'})">+ ${L.length?'Nueva':'Agregar el primer proyecto (fotos, PDF…)'}</button></div>`;
+  const per=sb.querySelector('.perfil');if(per&&per.parentNode===sb)sb.insertBefore(d,per.nextSibling);else sb.appendChild(d)}catch(e){}};
+
+/* ---- botón en el menú principal (grupo «Con el cliente») ---- */
+MENU_ITEMS.splice(Math.max(0,MENU_ITEMS.findIndex(it=>it.k==='pres')),0,{k:'proy',g:'k',i:'carpeta',l:'Proyectos',c:'#b45309',f:'abrirProyectos()',id:'bproy',sub:()=>{const n=proyectos().length;return n?n+' proyecto(s)':'Fotos y PDF por cliente'}});
+
+/* ================= Cliente cero: cronograma de clientes desde el primer correo (v9.9) ================= */
+Object.assign(ICO,{cero:'M4 20V5M4 5h11l-2 3.5L15 12H4M18 20a2 2 0 1 0 0-4 2 2 0 1 0 0 4'});
+(()=>{const st=document.createElement('style');st.textContent='.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:ptrg .8s linear infinite;vertical-align:-2px;margin-right:6px}';document.head.appendChild(st)})();
+let CC=null,CCF='todos',CCQ='',CCLIM=150,CCEST=null;
+function ccDb(){if(!CC){let s=null;try{s=AND&&AND.leerTexto?AND.leerTexto(DEMO_ON?'cliente_cero_demo.json':'cliente_cero.json'):LSX.getItem(DEMO_ON?'cliente_cero_demo':'cliente_cero')}catch(e){}
+  try{CC=s?JSON.parse(s):null}catch(e){CC=null}CC=CC||{};CC.c=CC.c||{};CC.ocultos=CC.ocultos||[];CC.nombres=CC.nombres||{}}return CC}
+function guardarCc(){const s=JSON.stringify(ccDb());try{if(AND&&AND.guardarTexto)AND.guardarTexto(DEMO_ON?'cliente_cero_demo.json':'cliente_cero.json',s);else LSX.setItem(DEMO_ON?'cliente_cero_demo':'cliente_cero',s)}catch(e){toast('No se pudo guardar la lista')}}
+/* correos que no son clientes: avisos automáticos, redes, bancos de notificaciones… */
+const CC_RUIDO=/(^|[._+-])(no-?reply|donotreply|do-not-reply|mailer-daemon|postmaster|notifica\w*|notification\w*|alertas?|alerts?|newsletter|boletin|bounces?|mailer|automated|auto-?confirm|calendar-notification|reply)([._+-]|$)/i;
+const CC_DOM_RUIDO=/(^|\.)(google\.com|googlemail\.com|microsoft\.com|microsoftonline\.com|office365\.com|office\.com|sharepointonline\.com|facebookmail\.com|facebook\.com|instagram\.com|linkedin\.com|twitter\.com|x\.com|amazonses\.com|amazon\.com|mailchimpapp\.net|mcsv\.net|sendgrid\.net|apple\.com|whatsapp\.com|zoom\.us|dropbox\.com|docusign\.net|adobe\.com|canva\.com|paypal\.com|github\.com|slack\.com|youtube\.com|hubspot\.com|mailgun\.org|teams\.mail\.microsoft)$/i;
+const ccCorreo=e=>String(e||'').trim().toLowerCase().replace(/^.*<|>.*$/g,'');
+function ccEsRuido(e){const[l,d]=e.split('@');return !d||!/\./.test(d)||dominioPropio(e)||CC_DOM_RUIDO.test(d)||CC_RUIDO.test(l)}
+function ccAgregar(e,nombre,fecha,env){e=ccCorreo(e);if(!esCorreo(e)||ccEsRuido(e))return;const f=String(fecha||'').slice(0,19);if(!f)return;const C=ccDb().c,x=C[e];nombre=String(nombre||'').replace(/["']/g,'').trim();if(nombre&&nombre.toLowerCase()===e)nombre='';
+  if(!x){C[e]=[nombre,f,f,env?0:1,env?1:0];return}
+  if(f<x[1])x[1]=f;if(f>x[2])x[2]=f;x[env?4:3]++;if(nombre&&(!x[0]||!env))x[0]=nombre}
+const ccDom=e=>e.split('@')[1]||'';
+const ccClave=e=>{const d=ccDom(e);return DOM_PUBLICOS.includes(d)?e:d};
+function ccNombreDom(d){const base=d.replace(/\.(com|net|org|gob|gov|edu|info|biz|co)(\.[a-z]{2})?$|\.[a-z]{2}$/i,'').split('.').pop()||d;return base.charAt(0).toUpperCase()+base.slice(1)}
+/* índice de clientes de la app por correo y por dominio de empresa */
+function ccIndiceClientes(){const P={},D={};db.clientes.forEach(c=>{let L=[];try{L=correosConocidos(c.id)}catch(e){L=String(c.correo||'').split(/[,;\s]+/)}
+  L.map(ccCorreo).filter(esCorreo).forEach(a=>{P[a]=P[a]||c.id;const d=ccDom(a);if(!DOM_PUBLICOS.includes(d)&&!dominioPropio(a))D[d]=D[d]||c.id})});return{P,D}}
+/* empresas (por dominio) o personas (correo público), ordenadas por su primer correo */
+function ccEmpresas(){const C=ccDb().c,G={},I=ccIndiceClientes();
+  for(const[e,x]of Object.entries(C)){const k=ccClave(e);const g=G[k]=G[k]||{k,dom:ccDom(e),pub:k===e,ct:[],p:x[1],u:x[2],r:0,s:0,cli:''};
+    g.ct.push({e,n:x[0],p:x[1],u:x[2],r:x[3],s:x[4]});if(x[1]<g.p)g.p=x[1];if(x[2]>g.u)g.u=x[2];g.r+=x[3];g.s+=x[4];if(!g.cli)g.cli=I.P[e]||(!g.pub&&I.D[g.dom])||''}
+  const L=Object.values(G);L.forEach(g=>{g.ct.sort((a,b)=>(b.r+b.s)-(a.r+a.s));const c=g.cli&&cli(g.cli),top=g.ct.find(x=>x.n);
+    g.nom=ccDb().nombres[g.k]||(c?c.nombre:g.pub?(top?top.n:g.k):ccNombreDom(g.dom));g.oculto=ccDb().ocultos.includes(g.k)});
+  return L.sort((a,b)=>a.p.localeCompare(b.p)).map((g,i)=>Object.assign(g,{i:i+1}))}
+
+/* ---- análisis del correo: lo ya guardado en la app + todo el buzón (Microsoft 365 o correo con contraseña) ---- */
+function ccDesdeGuardados(){const D=correosDb();let n=0;for(const m of Object.values(D.msgs||{})){const de=ccCorreo(m.de);if(!m.fecha)continue;n++;
+    if(dominioPropio(de)||m.env){(m.paraC||m.para||[]).forEach((p,i)=>{const a=ccCorreo(p);if(esCorreo(a))ccAgregar(a,(m.para||[])[i]!==p?(m.para||[])[i]:'',m.fecha,true)})}else ccAgregar(de,m.deN,m.fecha,false)}return n}
+async function ccEscanearGraph(est){let yo='';try{const r=await graph('GET','/me?$select=mail,userPrincipalName');yo=ccCorreo(r.json&&(r.json.mail||r.json.userPrincipalName))}catch(e){}
+  const fuera=new Set();for(const f of ['junkemail','deleteditems','drafts']){try{const r=await graph('GET','/me/mailFolders/'+f+'?$select=id');if(r.status===200&&r.json&&r.json.id)fuera.add(r.json.id)}catch(e){}}
+  let url='/me/messages?$select=from,toRecipients,ccRecipients,receivedDateTime,parentFolderId&$top=999';
+  while(url){if(est.cancel)break;const r=await graph('GET',url);if(r.status!==200)throw new Error(errGraph(r));
+    for(const m of (r.json&&r.json.value)||[]){if(fuera.has(m.parentFolderId))continue;est.n++;const de=ccCorreo(m.from&&m.from.emailAddress&&m.from.emailAddress.address),f=m.receivedDateTime;
+      if((yo&&de===yo)||dominioPropio(de))[...(m.toRecipients||[]),...(m.ccRecipients||[])].forEach(p=>p&&p.emailAddress&&ccAgregar(p.emailAddress.address,p.emailAddress.name,f,true));
+      else ccAgregar(de,m.from&&m.from.emailAddress&&m.from.emailAddress.name,f,false)}
+    ccProgreso(est);url=r.json&&r.json['@odata.nextLink']}}
+async function ccEscanearImap(est){for(const car of ['INBOX','\\Sent']){if(est.cancel)break;est.car=car==='INBOX'?'Recibidos':'Enviados';ccProgreso(est);
+    const r=await imapLlamar('imapListar',car,'ALL',50000,false);
+    for(const m of r.msgs||[]){est.n++;if(car!=='INBOX')(m.paraC||[]).forEach((a,i)=>ccAgregar(a,(m.para||[])[i]!==a?(m.para||[])[i]:'',m.fecha,true));else ccAgregar(m.de,m.deN,m.fecha,false)}ccProgreso(est)}}
+function ccProgreso(est){const e=$('#ccprog');if(e)e.innerHTML=`<span class="spin"></span> Analizando${est.car?' '+est.car:''}… <b>${est.n.toLocaleString('en-US')}</b> correos`}
+async function ccAnalizar(){if(CCEST)return toast('Ya se está analizando…');const m365=m365Conectado(),imap=!m365&&imapConectado(),guard=Object.keys(correosDb().msgs||{}).length;
+  if(!m365&&!imap&&!guard)return irConfigCorreo();
+  const D=ccDb(),antes=D.c;D.c={};const est=CCEST={n:0,cancel:false};pintarCc();let fuente=[];
+  try{const g=ccDesdeGuardados();if(g)fuente.push('guardados');est.n=g;
+    if(m365){await ccEscanearGraph(est);fuente.push('m365')}else if(imap){await ccEscanearImap(est);fuente.push('imap')}
+    D.gen=new Date().toISOString();D.n=est.n;D.fuente=fuente.join('+');D.completo=!!(m365||imap)&&!est.cancel;guardarCc();
+    toast('✔ '+ccEmpresas().length+' empresas y personas encontradas')}
+  catch(e){D.c=Object.keys(antes).length?antes:D.c;alert('No se pudo analizar todo el correo: '+e.message+(Object.keys(D.c).length?'\nSe guardó lo que se alcanzó a leer.':''));if(Object.keys(D.c).length){D.gen=new Date().toISOString();D.n=est.n;D.fuente=fuente.join('+');D.completo=false;guardarCc()}}
+  finally{CCEST=null;const t=pila[pila.length-1];if(t&&t.key==='cc')pintarCc()}}
+
+/* ---- pantalla ---- */
+function abrirClienteCero(){pila.length=0;CCF='todos';CCQ='';CCLIM=150;pintarCc()}
+const ccFecha=f=>f?fFecha(f.slice(0,10)):'';
+function ccFiltrar(L){const q=CCQ.trim();return L.filter(g=>(CCF==='ocultos'?g.oculto:!g.oculto)&&(CCF!=='clientes'||g.cli)&&(CCF!=='nuevos'||!g.cli)&&(!q||coincide(q,g.nom,g.dom,...g.ct.map(c=>c.e+' '+c.n))))}
+function ccListaHtml(L){const F=ccFiltrar(L);if(!F.length)return `<div class="card mut" style="text-align:center;padding:18px">Nada que mostrar con este filtro.</div>`;
+  let h='',año='';const V=F.slice(0,CCLIM);
+  V.forEach(g=>{const a=g.p.slice(0,4);if(a!==año){año=a;const n=F.filter(x=>x.p.slice(0,4)===a).length;h+=`<div class="row" style="margin:14px 2px 6px"><b class="grow" style="font-size:17px">${a}</b><span class="mut" style="font-size:12px">${n} nuevo${n>1?'s':''} contacto${n>1?'s':''}</span></div>`}
+    h+=`<div class="card tap row ccrow" style="gap:10px;cursor:pointer;padding:10px 12px" data-k="${esc(g.k)}" onclick="ccDetalle(this.dataset.k)">
+      <div style="flex:none;width:34px;text-align:center;font-weight:800;color:${g.i===1?'#e8892f':'var(--mut)'};font-size:${g.i>999?11:13}px">#${g.i}</div>
+      <div class="grow" style="min-width:0"><div class="row" style="gap:6px"><b class="ell">${esc(g.nom)}</b>${g.i===1?'<span class="badge" style="background:#fdeedd;color:#9a4d00;flex:none">🏁 Cliente cero</span>':''}</div>
+       <div class="mut ell" style="font-size:12px">${g.pub?esc(g.k):esc(g.dom)+' · '+g.ct.length+' contacto'+(g.ct.length>1?'s':'')} · ↙${g.r} ↗${g.s}</div>
+       <div class="mut" style="font-size:11px">Primero ${ccFecha(g.p)} · Último ${ccFecha(g.u)}</div></div>
+      <span class="badge ${g.cli?'b-ent':''}" style="flex:none;${g.cli?'':'background:#e8eefb;color:#24559b'}">${g.cli?'✔ Cliente':'Nuevo'}</span></div>`});
+  if(F.length>V.length)h+=`<button class="btn sec full" onclick="CCLIM+=300;pintarCc()">Ver más (${F.length-V.length} restantes)</button>`;return h}
+function pintarCc(){const D=ccDb(),L=Object.keys(D.c).length?ccEmpresas():[],vis=L.filter(g=>!g.oculto),cnt={todos:vis.length,clientes:vis.filter(g=>g.cli).length,nuevos:vis.filter(g=>!g.cli).length,ocultos:L.length-vis.length};
+  const fuente=D.fuente?{guardados:'correos guardados en la app',m365:'todo el buzón (Microsoft 365)',imap:'todo el buzón (Recibidos y Enviados)'}:{};
+  const enc=CCEST?`<div class="card" id="ccprog" style="text-align:center"><span class="spin"></span> Analizando tu correo…</div><button class="btn sec full" onclick="if(CCEST)CCEST.cancel=true">Detener</button>`
+   :!L.length?`<div class="card" style="text-align:center;padding:20px"><div style="font-size:40px">🏁</div><b style="font-size:17px">¿Quién fue tu cliente cero?</b>
+      <p class="mut" style="margin:8px 0 12px">La app revisa tu correo desde el <b>primer correo</b> hasta el último (recibidos y enviados), y arma la lista de empresas y personas con las que has tenido contacto, en orden de fecha. Así sabes qué clientes tienes y cuáles faltan en la app.</p>
+      <button class="btn full" id="ccgo" onclick="ccAnalizar()">🔄 Analizar mi correo</button>
+      <div class="mut" style="font-size:12px;margin-top:8px">${m365Conectado()?'Se leerá todo tu buzón de Microsoft 365.':imapConectado()?'Se leerán tus carpetas Recibidos y Enviados.':Object.keys(correosDb().msgs||{}).length?'Se usarán los correos ya guardados en la app. Para el historial completo conecta tu correo en Ajustes.':'Primero conecta tu correo institucional en Ajustes.'}</div></div>`
+   :`<div class="card"><div class="row" style="gap:10px"><div style="font-size:30px">📅</div><div class="grow"><b>Del ${ccFecha(L[0].p)} al ${ccFecha(L.reduce((a,g)=>g.u>a?g.u:a,'').slice(0,10))}</b>
+      <div class="mut" style="font-size:12px">${(D.n||0).toLocaleString('en-US')} correos · ${cnt.todos} empresas y personas · ${cnt.nuevos} no están en tus clientes</div>
+      <div class="mut" style="font-size:11px">Analizado ${fHora(D.gen)} con ${(D.fuente||'').split('+').map(k=>fuente[k]||k).join(' y ')}${D.completo?'':' · <span style="color:#b45309">parcial</span>'}</div></div></div>
+      <div class="btns" style="margin-top:10px"><button class="btn sec" onclick="ccAnalizar()">🔄 Actualizar</button><button class="btn sec" onclick="ccExportar()">📤 Exportar</button></div></div>
+     ${L[0]?`<div class="card tap" style="background:linear-gradient(135deg,#16233f,#24559b);color:#fff;cursor:pointer" data-k="${esc(L[0].k)}" onclick="ccDetalle(this.dataset.k)"><div style="font-size:12px;opacity:.8;letter-spacing:.06em">🏁 CLIENTE CERO · ${ccFecha(L[0].p)}</div><b style="font-size:19px;display:block;margin-top:2px">${esc(L[0].nom)}</b><div style="font-size:12px;opacity:.85">${esc(L[0].pub?L[0].k:L[0].dom)} · ${L[0].r+L[0].s} correos hasta ${ccFecha(L[0].u)}</div></div>`:''}
+     <input id="ccq" type="search" autocomplete="off" placeholder="🔍 Buscar empresa, persona o correo" value="${esc(CCQ)}" oninput="CCQ=this.value;CCLIM=150;$('#ccl').innerHTML=ccListaHtml(ccEmpresas())" style="margin-top:4px">
+     <div class="chips" style="flex-wrap:wrap;overflow:visible">${[['todos','Todos'],['nuevos','No están en la app'],['clientes','Ya son clientes'],['ocultos','Ocultos']].map(([k,t])=>`<button class="chip ${CCF===k?'on':''}" data-f="${k}" onclick="CCF='${k}';CCLIM=150;pintarCc()">${t} (${cnt[k]})</button>`).join('')}</div>
+     <div id="ccl">${ccListaHtml(L)}</div>`;
+  abrirSheet('cc','Cliente cero',enc,()=>pintarCc());const q=$('#ccq');if(q&&CCQ){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}
+function ccDetalle(k){const g=ccEmpresas().find(x=>x.k===k);if(!g)return pintarCc();const c=g.cli&&cli(g.cli);
+  abrirSheet('ccd',g.nom,`<div class="card"><div class="row" style="gap:8px"><b class="grow" style="font-size:16px">#${g.i} · ${esc(g.nom)}</b><span class="badge ${g.cli?'b-ent':''}" style="${g.cli?'':'background:#e8eefb;color:#24559b'}">${g.cli?'✔ Cliente':'Nuevo'}</span></div>
+    <div class="mut" style="font-size:13px;margin-top:4px">${esc(g.pub?g.k:g.dom)}<br>Primer correo <b>${ccFecha(g.p)}</b> · Último <b>${ccFecha(g.u)}</b><br>${g.r} recibido${g.r!==1?'s':''} · ${g.s} enviado${g.s!==1?'s':''}</div></div>
+   <b style="display:block;margin:6px 2px">Contactos (${g.ct.length})</b><div class="card" style="padding:4px 12px">${g.ct.map(x=>`<div class="row" style="gap:8px;padding:8px 0;border-bottom:1px solid var(--line)">${avatar(x.n||x.e,34)}<div class="grow" style="min-width:0"><b class="ell" style="display:block;font-size:14px">${esc(x.n||x.e.split('@')[0])}</b><div class="mut ell" style="font-size:12px">${esc(x.e)}</div><div class="mut" style="font-size:11px">${ccFecha(x.p)} → ${ccFecha(x.u)} · ↙${x.r} ↗${x.s}</div></div>
+     <button class="btn sm sec" onclick="redactarA(${esc(JSON.stringify(x.e))})" title="Escribir">${ico('mail',15)}</button></div>`).join('')}</div>
+   ${c?`<button class="btn full" onclick="verCliente('${c.id}')">${ico('user',16)} Ver cliente en la app</button>`:`<button class="btn full" id="ccadd" onclick="ccAgregarCliente(${esc(JSON.stringify(k))})">${ico('plus',16)} Agregar como cliente</button>`}
+   <div class="btns" style="margin-top:8px"><button class="btn sec" onclick="ccRenombrar(${esc(JSON.stringify(k))})">✏️ Cambiar nombre</button><button class="btn sec" id="ccocu" onclick="ccOcultar(${esc(JSON.stringify(k))})">${g.oculto?'👁 Mostrar':'🙈 No es cliente'}</button></div>`,()=>ccDetalle(k))}
+function redactarA(e){try{if(typeof redactarCorreo==='function')return redactarCorreo({para:e})}catch(x){}abrirEnlace('mailto:'+e)}
+function ccAgregarCliente(k){const g=ccEmpresas().find(x=>x.k===k);if(!g)return;const top=g.ct[0]||{};
+  formCliente(null,()=>{},g.nom);setTimeout(()=>{const s=(id,v)=>{const e=$(id);if(e&&!e.value&&v)e.value=v};s('#cco',g.ct.slice(0,3).map(x=>x.e).join(', '));s('#cct',top.n||'')},30)}
+function ccRenombrar(k){const g=ccEmpresas().find(x=>x.k===k);if(!g)return;const v=(prompt('Nombre de la empresa o persona',g.nom)||'').trim();if(!v||v===g.nom)return;ccDb().nombres[k]=v;guardarCc();ccDetalle(k)}
+function ccOcultar(k){const D=ccDb(),i=D.ocultos.indexOf(k);if(i>=0)D.ocultos.splice(i,1);else D.ocultos.push(k);guardarCc();toast(i>=0?'Vuelve a la lista':'Oculto: no aparecerá en la lista');pila.pop();pintarCc()}
+function ccExportar(){const L=ccEmpresas().filter(g=>!g.oculto),q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const filas=[['#','Empresa / persona','Dominio','Contactos','Correos de contacto','Primer correo','Último correo','Recibidos','Enviados','En la app']].concat(L.map(g=>[g.i,g.nom,g.pub?'':g.dom,g.ct.length,g.ct.map(x=>(x.n?x.n+' <'+x.e+'>':x.e)).join('; '),g.p.slice(0,10),g.u.slice(0,10),g.r,g.s,g.cli?'Sí':'No']));
+  guardarArchivo('Cliente cero '+hoy()+'.csv','text/csv','﻿'+filas.map(f=>f.map(q).join(',')).join('\r\n'))}
+
+/* botón en el menú principal (Ventas) */
+MENU_ITEMS.splice(MENU_ITEMS.findIndex(it=>it.k==='cli')+1,0,{k:'cero',g:'v',i:'cero',l:'Cliente cero',c:'#0f766e',f:'abrirClienteCero()',id:'bcero',sub:()=>{const n=Object.keys(ccDb().c).length;return n?'Cronograma de clientes':'Clientes desde tu correo'}});
+
+/* ================= Pendientes: todo lo que está por completar en un solo lugar (v10.1) ================= */
+Object.assign(ICO,{pendiente:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2M4 4l2 2M20 4l-2 2'});
+const pdDias=f=>f?diasEntre(hoy(),f):null;
+const pdCuando=f=>{if(!f)return '';const d=pdDias(f);return d===0?'Hoy':d<0?'Vencido '+fFecha(f):d===1?'Mañana':fFecha(f)};
+const pdColor=f=>!f?'var(--mut)':f<hoy()?'var(--bad)':f===hoy()?'#b45309':'var(--mut)';
+const cliNom=id=>{const c=id&&cli(id);return c?c.nombre:'(sin cliente)'};
+/* cada categoría: id, título, ícono, color, lista de pendientes {t,d,f,m,abrir} y si «urge» (vencido u hoy) */
+function pdCategorias(){const H=hoy(),C=[];
+  const ped=db.pedidos.filter(p=>p.estado==='pendiente').sort((a,b)=>(a.fechaEntrega||'9').localeCompare(b.fechaEntrega||'9'));
+  C.push({k:'ped',t:'Pedidos por entregar',i:'box',c:'#24559b',sub:'Pedidos tomados que faltan por entregar',
+    L:ped.map(p=>({t:cliNom(p.clienteId),d:'Pedido #'+p.numero+(p.items&&p.items[0]?' · '+p.items[0].desc+(p.items.length>1?' y '+(p.items.length-1)+' más':''):''),f:p.fechaEntrega||'',m:total(p),abrir:`verPedido('${p.id}')`,u:vencido(p)}))});
+  const cob=db.pedidos.filter(p=>p.estado!=='cancelado'&&balance(p)>0).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+  C.push({k:'cob',t:'Cobros pendientes',i:'cash',c:'#c0392b',sub:'Pedidos con balance por cobrar',
+    L:cob.map(p=>{const dd=-diasEntre(hoy(),p.fecha||hoy());return{t:cliNom(p.clienteId),d:'Pedido #'+p.numero+' · '+(estPago(p)||[''])[0]+(dd>0?' · hace '+dd+' día'+(dd>1?'s':''):''),f:'',m:balance(p),abrir:`verPedido('${p.id}')`,u:dd>30}})});
+  const cq=db.cotizaciones.filter(q=>(q.estado||'pendiente')==='pendiente').sort((a,b)=>(a.vence||a.fecha||'').localeCompare(b.vence||b.fecha||''));
+  C.push({k:'cot',t:'Cotizaciones por responder',i:'doc',c:'#e8892f',sub:'Enviadas y sin respuesta del cliente',
+    L:cq.map(q=>({t:cliNom(q.clienteId),d:'Cotización '+numCotR(q)+(q.producto?' · '+q.producto:'')+(vencidaQ(q)?' · vencida':''),f:q.vence||'',m:total(q),abrir:`verCotizacion('${q.id}')`,u:vencidaQ(q)||q.vence===H}))});
+  const ea=esperas().filter(espActiva).sort((a,b)=>(a.fecha||'9').localeCompare(b.fecha||'9'));
+  C.push({k:'esp',t:'Mercancía en espera',i:'pausa',c:'#7c3aed',sub:'Pedidos en espera porque no hay mercancía',id:'besp',
+    L:ea.map(x=>({t:espCli(x),d:x.detalle||'',f:x.fecha||'',m:num(x.total),abrir:`abrirEspera()`,u:espHoy(x)})),todo:'abrirEspera()'});
+  const sg=segs().filter(sdPend).sort((a,b)=>(a.prox||a.fecha||'').localeCompare(b.prox||b.fecha||''));
+  C.push({k:'seg',t:'Seguimientos',i:'checklist',c:'#0e7490',sub:'Llamadas, cotizaciones y planos por completar',
+    L:sg.map(x=>({t:cliNom(x.clienteId),d:(SD_T[x.tipo]||[x.tipo])[0]+(x.notas?' · '+x.notas:''),f:x.prox||x.fecha||'',m:0,abrir:`abrirSeguimiento()`,u:sdVence(x)})),todo:'abrirSeguimiento()'});
+  const vs=db.visitas.filter(v=>v.estado==='programada'&&v.fecha<=addD(H,7)).sort((a,b)=>(a.fecha+(a.hora||'')).localeCompare(b.fecha+(b.hora||'')));
+  C.push({k:'vis',t:'Visitas programadas',i:'cal',c:'#1e8e3e',sub:'Atrasadas, de hoy y de los próximos 7 días',
+    L:vs.map(v=>({t:cliNom(v.clienteId),d:[v.motivo,v.hora].filter(Boolean).join(' · '),f:v.fecha,m:0,abrir:`verVisita('${v.id}')`,u:v.fecha<=H}))});
+  const pr=(db.prospectos||[]).filter(p=>{const x=proxPend(p);return x&&x.fecha<=addD(H,7)}).sort((a,b)=>proxPend(a).fecha.localeCompare(proxPend(b).fecha));
+  C.push({k:'pro',t:'Prospectos por contactar',i:'target',c:'#c2417a',sub:'Captación: próximo contacto vencido o esta semana',
+    L:pr.map(p=>{const x=proxPend(p);return{t:p.nombre||'(sin nombre)',d:x.plan||'',f:x.fecha,m:0,abrir:`verProspecto('${p.id}')`,u:x.fecha<=H}})});
+  /* levantamientos registrados que todavía no tienen cotización después */
+  const lv=db.visitas.filter(v=>v.levId&&v.clienteId&&!db.cotizaciones.some(q=>q.clienteId===v.clienteId&&(q.fecha||'')>=v.fecha)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  C.push({k:'lev',t:'Levantamientos por cotizar',i:'pen',c:'#0f766e',sub:'Se hizo el levantamiento y falta la cotización',
+    L:lv.map(v=>{const d=-diasEntre(H,v.fecha);return{t:cliNom(v.clienteId),d:'Levantamiento del '+fFecha(v.fecha),f:'',m:0,abrir:`formCotizacion(null,'${v.clienteId}')`,u:d>7}})});
+  const sp=(db.soporte||[]).filter(x=>!x.borrada&&(x.estado==='pendiente'||x.estado==='error'));
+  if(sp.length)C.push({k:'sop',t:'Fotos de soporte sin subir',i:'cam',c:'#44546a',sub:'Fotos que faltan por enviar al servidor',
+    L:sp.map(x=>({t:cliNom(x.clienteId),d:(x.nota||'Foto')+(x.estado==='error'?' · error al subir':''),f:x.fecha||'',m:0,abrir:`verFotoSop('${x.id}')`,u:x.estado==='error'}))});
+  return C}
+const pdUrgentes=C=>C.reduce((a,c)=>a+c.L.filter(x=>x.u).length,0);
+let PDQ='';
+function abrirPendientes(){pila.length=0;PDQ='';pintarPendientes()}
+function pintarPendientes(){const C=pdCategorias(),tot=C.reduce((a,c)=>a+c.L.length,0),urg=pdUrgentes(C),cobrar=(C.find(c=>c.k==='cob')||{L:[]}).L.reduce((a,x)=>a+x.m,0);
+  abrirSheet('pend','Pendientes',`<div class="card"><div class="row" style="gap:12px"><span class="pi" style="background:#b45309;color:#fff;width:44px;height:44px">${ico('pendiente',22)}</span><div class="grow"><b>${tot?tot+' cosa'+(tot>1?'s':'')+' por completar':'¡Todo al día!'}</b>
+     <div class="mut" style="font-size:12px">${urg?'<b style="color:var(--bad)">'+urg+' vencido'+(urg>1?'s':'')+' o para hoy</b>':'Nada vencido'}${cobrar?' · '+fmt(cobrar)+' por cobrar':''}</div></div></div></div>
+   <input id="pdq" type="search" autocomplete="off" placeholder="🔍 Buscar en todos los pendientes" value="${esc(PDQ)}" oninput="PDQ=this.value;$('#pdl').innerHTML=pdBusqueda()" style="margin-bottom:10px">
+   <div id="pdl">${PDQ.trim()?pdBusqueda():pdMenu(C)}</div>`,()=>pintarPendientes())}
+function pdMenu(C){return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${C.map(c=>{const u=c.L.filter(x=>x.u).length,m=c.L.reduce((a,x)=>a+(x.m||0),0);
+    return `<button class="card tap pdc" ${c.id?'id="'+c.id+'"':''} data-k="${c.k}" onclick="pdAbrir('${c.k}')" style="margin:0;border:0;text-align:left;padding:12px;position:relative;${c.L.length?'':'opacity:.6'}">
+      <span class="pi" style="background:${c.c}1f;color:${c.c};width:38px;height:38px">${ico(c.i,20)}</span>${u?`<b class="mpn" style="position:absolute;top:8px;right:8px;position:absolute">${u}</b>`:''}
+      <b style="display:block;margin-top:8px;font-size:14px;line-height:1.2">${esc(c.t)}</b>
+      <div class="mut" style="font-size:12px;margin-top:2px">${c.L.length?c.L.length+' pendiente'+(c.L.length>1?'s':''):'Nada pendiente'}${m?' · '+fmt(m):''}</div></button>`}).join('')}</div>`}
+function pdFila(x,c){return `<div class="card tap row" style="gap:10px;cursor:pointer;border-left:4px solid ${x.u?'var(--bad)':c.c}" onclick="${x.abrir}"><div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(x.t)}</b>
+    ${x.d?`<div class="mut ell" style="font-size:12px">${esc(x.d)}</div>`:''}</div><div style="text-align:right;flex:none">${x.m?`<b style="font-size:13px">${fmt(x.m)}</b>`:''}${x.f?`<div style="font-size:11px;font-weight:600;color:${pdColor(x.f)}">${pdCuando(x.f)}</div>`:''}</div></div>`}
+function pdBusqueda(){const q=PDQ.trim(),C=pdCategorias();const h=C.map(c=>{const L=c.L.filter(x=>coincide(q,x.t,x.d));return L.length?`<b style="display:block;margin:10px 2px 6px;color:${c.c}">${esc(c.t)} (${L.length})</b>`+L.map(x=>pdFila(x,c)).join(''):''}).join('');
+  return h||`<div class="card mut" style="text-align:center;padding:18px">No hay pendientes con «${esc(q)}».</div>`}
+function pdAbrir(k){const c=pdCategorias().find(x=>x.k===k);if(!c)return;if(k==='esp')return abrirEspera();
+  const u=c.L.filter(x=>x.u),r=c.L.filter(x=>!x.u),tot=c.L.reduce((a,x)=>a+(x.m||0),0);
+  abrirSheet('pd:'+k,c.t,`<div class="mut" style="margin-bottom:8px">${esc(c.sub)}${c.L.length?' · '+c.L.length+' pendiente'+(c.L.length>1?'s':''):''}${tot?' · <b>'+fmt(tot)+'</b>':''}</div>
+   ${!c.L.length?`<div class="card mut" style="text-align:center;padding:20px">✅ Nada pendiente aquí.</div>`:''}
+   ${u.length?`<b style="display:block;margin:6px 2px;color:var(--bad)">Vencidos o para hoy (${u.length})</b>${u.map(x=>pdFila(x,c)).join('')}`:''}
+   ${r.length?`${u.length?`<b style="display:block;margin:12px 2px 6px">Los demás (${r.length})</b>`:''}${r.map(x=>pdFila(x,c)).join('')}`:''}
+   ${c.todo?`<button class="btn sec full" style="margin-top:8px" onclick="${c.todo}">Abrir ${esc(c.t.toLowerCase())}</button>`:''}`,()=>pdAbrir(k))}
+
+/* en el menú principal: «Pendientes» reemplaza a «En espera» (que ahora está adentro) */
+(()=>{const i=MENU_ITEMS.findIndex(it=>it.k==='esp');const it={k:'pend',g:'v',i:'pendiente',l:'Pendientes',c:'#b45309',f:'abrirPendientes()',id:'bpend',
+  n:()=>{try{return pdUrgentes(pdCategorias())}catch(e){return 0}},sub:()=>{try{const C=pdCategorias(),t=C.reduce((a,c)=>a+c.L.length,0);return t?t+' por completar':'Todo al día'}catch(e){return ''}}};
+  if(i>=0)MENU_ITEMS.splice(i,1,it);else MENU_ITEMS.splice(0,0,it)})();
+
+/* ================= Cotizaciones pendientes: solicitudes de cotización y su estado (v10.2) ================= */
+const SC_EST=[['pendiente','Pendiente','#c0392b','⏳'],['cotizando','Cotizando','#e8892f','🛠'],['revision','En revisión','#7c3aed','🔎'],['realizada','Realizada','#1e8e3e','✅'],['enviada','Enviada al cliente','#24559b','📨'],['cancelada','Cancelada','#6b7280','✖']];
+const SC_SIN=['pendiente','cotizando','revision'];
+const scE=k=>SC_EST.find(e=>e[0]===k)||SC_EST[0];
+const solcots=()=>db.solcot||(db.solcot=[]);
+const solc=id=>solcots().find(x=>x.id===id);
+const scSin=x=>SC_SIN.includes(x.estado||'pendiente');
+const scCli=x=>{const c=x.clienteId&&cli(x.clienteId);return c?c.nombre:(x.cliente||'(sin cliente)')};
+const scDias=x=>Math.max(0,diasEntre(x.fecha||hoy(),hoy()));
+const scUrge=x=>scSin(x)&&((x.compromiso&&x.compromiso<=hoy())||scDias(x)>=7);
+let SCF='sin',SCQ='';
+function abrirSolCot(){SCF='sin';SCQ='';pintarSolCot()}
+function scLista(){const q=SCQ.trim();return solcots().filter(x=>SCF==='todas'||(SCF==='sin'?scSin(x):!scSin(x))).filter(x=>!q||coincide(q,scCli(x),x.desc,x.notas,scE(x.estado)[1]))
+  .sort((a,b)=>SCF==='sin'?((a.compromiso||'9')+a.fecha).localeCompare((b.compromiso||'9')+b.fecha):(b.editado||b.creado||0)-(a.editado||a.creado||0))}
+function scTarjeta(x){const e=scE(x.estado),d=scDias(x),q=x.cotId&&cot(x.cotId);
+  return `<div class="card scf" data-id="${x.id}" style="border-left:4px solid ${e[2]};padding:12px">
+    <div class="row" style="gap:8px;align-items:flex-start"><div class="grow" style="min-width:0;cursor:pointer" onclick="scForm('${x.id}')"><b class="ell" style="display:block">${esc(scCli(x))}</b>
+      <div style="font-size:13px;margin-top:2px">${esc(x.desc||'(sin detalle)')}</div>
+      <div class="mut" style="font-size:11.5px;margin-top:3px">Solicitada ${fFecha(x.fecha)}${scSin(x)?' · <b style="color:'+(d>=7?'var(--bad)':'inherit')+'">'+d+' día'+(d!==1?'s':'')+'</b>':''}${x.compromiso?' · Entrega <b style="color:'+(scSin(x)&&x.compromiso<=hoy()?'var(--bad)':'inherit')+'">'+pdCuando(x.compromiso)+'</b>':''}${q?' · '+numCotR(q):''}</div></div>
+     <select class="scsel" aria-label="Estado de la cotización" onchange="scEstado('${x.id}',this.value)" style="width:auto;flex:none;margin:0;padding:6px 8px;font-size:13px;font-weight:700;color:${e[2]};border-color:${e[2]}">${SC_EST.map(s=>`<option value="${s[0]}" ${s[0]===(x.estado||'pendiente')?'selected':''}>${s[3]} ${s[1]}</option>`).join('')}</select></div>
+    ${x.notas?`<div class="mut" style="font-size:12px;margin-top:6px;white-space:pre-wrap">📝 ${esc(x.notas)}</div>`:''}</div>`}
+function pintarSolCot(){const A=solcots(),S=A.filter(scSin),U=S.filter(scUrge),cnt={};SC_EST.forEach(e=>cnt[e[0]]=A.filter(x=>(x.estado||'pendiente')===e[0]).length);
+  abrirSheet('solc','Cotizaciones pendientes',`<div class="card"><div class="row" style="gap:12px"><span class="pi" style="background:#e8892f;color:#fff;width:44px;height:44px">${ico('doc',22)}</span><div class="grow"><b>${S.length} sin realizar</b>
+     <div class="mut" style="font-size:12px">${SC_SIN.map(k=>cnt[k]?scE(k)[1]+': '+cnt[k]:'').filter(Boolean).join(' · ')||'Todo realizado'}${U.length?' · <b style="color:var(--bad)">'+U.length+' urgente'+(U.length>1?'s':'')+'</b>':''}</div></div></div>
+    <div class="btns" style="margin-top:10px"><button class="btn" onclick="scForm()">+ Nueva</button><button class="btn grn" id="scwa" onclick="scEnviarWa()">${ico('wa',16)} Reporte por WhatsApp</button></div></div>
+   ${scDesdeLev().length?`<button class="btn sec full" id="sclev" style="margin-bottom:10px" onclick="scImportarLev()">⤵️ Agregar ${scDesdeLev().length} levantamiento(s) por cotizar</button>`:''}
+   <input id="scq" type="search" autocomplete="off" placeholder="🔍 Buscar cliente o detalle" value="${esc(SCQ)}" oninput="SCQ=this.value;$('#scl').innerHTML=scListaHtml()" style="margin-bottom:6px">
+   <div class="chips">${[['sin','Sin realizar',S.length],['hechas','Realizadas / enviadas',A.length-S.length],['todas','Todas',A.length]].map(([k,t,n])=>`<button class="chip ${SCF===k?'on':''}" data-f="${k}" onclick="SCF='${k}';pintarSolCot()">${t} (${n})</button>`).join('')}</div>
+   <div id="scl">${scListaHtml()}</div>`,()=>pintarSolCot())}
+function scListaHtml(){const L=scLista();return L.length?L.map(scTarjeta).join(''):`<div class="card mut" style="text-align:center;padding:20px">${solcots().length?'Nada con este filtro.':'Todavía no hay solicitudes.<br>Toca <b>+ Nueva</b> cada vez que un cliente te pida una cotización, y ve cambiando su estado.'}</div>`}
+function scEstado(id,v){const x=solc(id);if(!x||x.estado===v)return;x.estado=v;x.editado=Date.now();(x.hist=x.hist||[]).push({f:new Date().toISOString(),e:v});if(v==='realizada'&&!x.realizada)x.realizada=hoy();save();
+  toast(scE(v)[3]+' '+scCli(x)+': '+scE(v)[1]);const t=pila[pila.length-1];if(t&&t.key==='solc')setTimeout(pintarSolCot,250)}
+/* crear / editar */
+let SCE=null;
+function scForm(id,pre){const x=id?solc(id):null;SCE=x?{id,clienteId:x.clienteId||'',cliente:x.cliente||''}:Object.assign({clienteId:'',cliente:''},pre||{});
+  const clis=db.clientes.slice().sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre))),otro=!SCE.clienteId&&!!SCE.cliente,qs=x&&x.clienteId?db.cotizaciones.filter(q=>q.clienteId===x.clienteId):[];
+  abrirSheet('scf',x?'Cotización pendiente':'Nueva solicitud de cotización',`<div class="card">
+   <label>Cliente *</label>${clis.length>6?'<input id="scfq" type="search" autocomplete="off" placeholder="🔍 Buscar cliente…" style="margin-bottom:6px">':''}
+   <select id="scfc"><option value="">— Selecciona —</option>${clis.map(c=>`<option value="${c.id}" ${c.id===SCE.clienteId?'selected':''}>${esc(c.nombre)}</option>`).join('')}<option value="_otro" ${otro?'selected':''}>✏️ Otro (escribir el nombre)</option></select>
+   <input id="scfo" placeholder="Nombre del cliente" value="${esc(SCE.cliente)}" style="margin-top:6px;${otro?'':'display:none'}">
+   <label>¿Qué hay que cotizar? *</label><textarea id="scfd" placeholder="Ej. Rack selectivo 3 niveles, 40 posiciones, altura 6 m">${esc(x?x.desc:(pre&&pre.desc)||'')}</textarea>
+   <div class="row" style="gap:8px"><div class="grow"><label>Solicitada</label><input id="scff" type="date" value="${esc(x?x.fecha:hoy())}"></div><div class="grow"><label>Entregar para</label><input id="scfe" type="date" value="${esc(x?x.compromiso||'':'')}"></div></div>
+   <label>Estado</label><select id="scfs">${SC_EST.map(s=>`<option value="${s[0]}" ${s[0]===(x?x.estado||'pendiente':'pendiente')?'selected':''}>${s[3]} ${s[1]}</option>`).join('')}</select>
+   ${qs.length?`<label>Cotización hecha en la app (opcional)</label><select id="scfq2"><option value="">—</option>${qs.map(q=>`<option value="${q.id}" ${x.cotId===q.id?'selected':''}>${numCotR(q)} · ${fFecha(q.fecha)}</option>`).join('')}</select>`:''}
+   <label>Notas</label><textarea id="scfn" placeholder="Quién la está haciendo, qué falta, medidas pendientes…">${esc(x?x.notas||'':(pre&&pre.notas)||'')}</textarea>
+   <div class="btns" style="margin-top:10px"><button class="btn sec" onclick="cerrarSheet()">Cancelar</button><button class="btn" id="scfok" onclick="scGuardar()">Guardar</button></div></div>
+   ${x?`<button class="btn sec full" onclick="scBorrar('${x.id}')" style="color:var(--bad);border-color:var(--bad)">🗑 Eliminar</button>${(x.hist||[]).length?`<div class="mut" style="font-size:11.5px;margin:10px 4px">Historial: ${x.hist.map(h=>scE(h.e)[1]+' '+fHora(h.f)).join(' → ')}</div>`:''}`:''}`,()=>scForm(id,SCE));
+  const sel=$('#scfc'),q=$('#scfq');sel.onchange=()=>{$('#scfo').style.display=sel.value==='_otro'?'':'none'};
+  if(q)q.oninput=()=>{const v=q.value.trim();[...sel.options].forEach(o=>{if(o.value&&o.value!=='_otro')o.hidden=!!v&&!coincide(v,o.textContent)});const m=[...sel.options].filter(o=>o.value&&o.value!=='_otro'&&!o.hidden);if(v&&m.length===1){sel.value=m[0].value;sel.onchange()}}}
+function scGuardar(){const sv=$('#scfc').value,otro=$('#scfo').value.trim(),desc=$('#scfd').value.trim();
+  if(!sv||(sv==='_otro'&&!otro))return toast('Elige el cliente');if(!desc)return toast('Escribe qué hay que cotizar');
+  const est=$('#scfs').value,d={clienteId:sv==='_otro'?'':sv,cliente:sv==='_otro'?otro:'',desc,fecha:$('#scff').value||hoy(),compromiso:$('#scfe').value,notas:$('#scfn').value.trim(),editado:Date.now()};
+  if($('#scfq2'))d.cotId=$('#scfq2').value;
+  let x=SCE&&SCE.id?solc(SCE.id):null;if(x){Object.assign(x,d);if(x.estado!==est)scEstado(x.id,est)}else{x=Object.assign({id:uid(),creado:Date.now(),estado:est,hist:[{f:new Date().toISOString(),e:est}]},d);solcots().push(x)}
+  save();SCE=null;pila.pop();toast('Guardada');pintarSolCot()}
+function scBorrar(id){if(!confirm('¿Eliminar esta solicitud de cotización?'))return;db.solcot=solcots().filter(x=>x.id!==id);save();pila.pop();pintarSolCot()}
+/* levantamientos hechos y sin cotización que todavía no están en la lista */
+function scDesdeLev(){return db.visitas.filter(v=>v.levId&&v.clienteId&&!db.cotizaciones.some(q=>q.clienteId===v.clienteId&&(q.fecha||'')>=v.fecha)&&!solcots().some(x=>x.levVisita===v.id))}
+function scImportarLev(){const L=scDesdeLev();L.forEach(v=>{const p=typeof plano==='function'&&plano(v.levId);solcots().push({id:uid(),creado:Date.now(),estado:'pendiente',hist:[{f:new Date().toISOString(),e:'pendiente'}],clienteId:v.clienteId,cliente:'',
+  desc:'Cotización del levantamiento del '+fFecha(v.fecha)+(p&&p.titulo?' – '+p.titulo:''),fecha:v.fecha,compromiso:'',notas:v.notas||'',levVisita:v.id})});save();toast(L.length+' agregada(s)');pintarSolCot()}
+/* reporte para la empresa: las que están sin realizar */
+function scTextoReporte(){const S=solcots().filter(scSin),E=db.empresa||{},yo=E.facN||'';
+  let t=`*Cotizaciones pendientes${yo?' – '+yo:''}*\n${fFecha(hoy())} · ${S.length} sin realizar\n`;
+  if(!S.length)return t+'\n✅ No tengo cotizaciones pendientes.';
+  SC_SIN.forEach(k=>{const L=S.filter(x=>(x.estado||'pendiente')===k).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));if(!L.length)return;const e=scE(k);
+    t+=`\n${e[3]} *${e[1]} (${L.length})*\n`+L.map((x,i)=>`${i+1}. ${scCli(x)} – ${x.desc}\n    Solicitada ${fFecha(x.fecha)} (${scDias(x)} día${scDias(x)!==1?'s':''})${x.compromiso?' · Entregar para '+fFecha(x.compromiso):''}${x.notas?'\n    Nota: '+x.notas.replace(/\s+/g,' '):''}`).join('\n')+'\n'});
+  return t.trim()}
+function scEnviarWa(){const t=scTextoReporte();abrirSheet('scwa','Reporte por WhatsApp',`<div class="card"><div class="mut" style="font-size:12px;margin-bottom:6px">Así sale el mensaje (las que están sin realizar):</div><pre id="scwat" style="white-space:pre-wrap;font-family:inherit;font-size:13px;margin:0">${esc(t)}</pre></div>
+   <div class="btns"><button class="btn sec" onclick="copiarTexto($('#scwat').textContent)">${ico('copy',16)} Copiar</button><button class="btn grn" id="scwaok" onclick="abrirWa('',$('#scwat').textContent)">${ico('wa',16)} Enviar por WhatsApp</button></div>`)}
+
+/* dentro de Pendientes */
+const _pdCat0=pdCategorias;pdCategorias=function(){const C=_pdCat0.apply(this,arguments),S=solcots().filter(scSin).sort((a,b)=>((a.compromiso||'9')+a.fecha).localeCompare((b.compromiso||'9')+b.fecha));
+  const it={k:'solc',t:'Cotizaciones pendientes',i:'doc',c:'#d35400',sub:'Solicitudes de cotización sin realizar',id:'bsolc',todo:'abrirSolCot()',
+    L:S.map(x=>({t:scCli(x),d:scE(x.estado)[1]+' · '+x.desc,f:x.compromiso||'',m:0,abrir:'abrirSolCot()',u:scUrge(x)}))};
+  const i=C.findIndex(c=>c.k==='cot');C.splice(i>=0?i:2,0,it);return C};
+const _pdAbrir0=pdAbrir;pdAbrir=function(k){if(k==='solc')return abrirSolCot();return _pdAbrir0.apply(this,arguments)};
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){

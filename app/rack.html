@@ -23,7 +23,8 @@ a.wa{background:#1e8e3e}a.sec{background:#fff;color:var(--pri);border:2px solid 
  <a class="btn wa" id="b1">🔧 Pedir repuestos</a>
  <a class="btn wa" id="b2">⚠️ Reportar un daño</a>
  <a class="btn" id="b3">🔍 Solicitar una inspección</a>
- <a class="btn sec" id="b4">📞 Llamar</a>
+ <a class="btn sec" id="b4">📞 Llamar a mi asesor</a>
+ <a class="btn sec" id="b5" style="border-width:1px;font-size:14px;padding:11px">🏢 Llamar a la oficina</a>
  <div class="pie" id="pie">Benderrack</div>
 </main>
 <script src="logo_cot.js"></script>
@@ -38,6 +39,9 @@ a.wa{background:#1e8e3e}a.sec{background:#fff;color:var(--pri);border:2px solid 
  var w=g('w').replace(/\D/g,''),base='Hola, le escribo por el rack '+(cod||'')+(cli?' de '+cli:'')+(g('u')?' ('+g('u')+')':'')+'. ';
  var wa=function(t){return w?'https://wa.me/'+w+'?text='+encodeURIComponent(base+t):'https://wa.me/?text='+encodeURIComponent(base+t)};
  document.getElementById('b1').href=wa('Necesito repuestos: ');document.getElementById('b2').href=wa('Quiero reportar un daño: ');document.getElementById('b3').href=wa('Quisiera solicitar una inspección del rack.');
- var t=(g('t')||g('w')).replace(/[^\d+]/g,'');if(t)document.getElementById('b4').href='tel:'+t;else document.getElementById('b4').style.display='none';
+ /* primero el vendedor; la oficina queda como segunda opción */
+ var dig=function(x){return String(x||'').replace(/\D/g,'')},of=dig(g('t')),b4=document.getElementById('b4'),b5=document.getElementById('b5');
+ if(w){b4.href='tel:+'+w;if(g('v'))b4.textContent='📞 Llamar a '+g('v').split(' ')[0]+' (asesor)'}else if(of){b4.href='tel:'+of;b4.textContent='📞 Llamar'}else b4.style.display='none';
+ if(w&&of&&w.slice(-10)!==of.slice(-10))b5.href='tel:'+of;else b5.style.display='none';
  document.getElementById('pie').textContent='Benderrack · Sistemas de almacenaje'+(g('t')?' · Tel. '+g('t'):'')})();
 </script></body></html>
