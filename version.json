@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 89,
-    "versionName": "9.8",
+    "versionCode": 91,
+    "versionName": "10.0",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyectos por sistema: Rack selectivo, manual, cantilever… y dentro de cada uno los clientes que lo instalaron. «Seleccionar sistema» para agregar o renombrar tipos.\n• Proyectos con fotos, PDF y archivos por cliente; copia en el teléfono (9.7).\n• QR de racks: llama primero al vendedor."
+    "notas": "• Reporte F.V con la plantilla nueva «Reporte semanal de visitas comerciales» (tal cual la de la empresa).\n• Cliente cero: cronograma de tus clientes desde el primer correo (9.9).\n• Proyectos por sistema (9.8)."
   },
   "clientes": {
     "versionCode": 8,
