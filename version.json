@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 97,
-    "versionName": "10.6",
+    "versionCode": 98,
+    "versionName": "10.7",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo «Reporte y estado del cliente»: buscas el cliente y ves su ficha, estado (activo, en riesgo, dormido), totales, balance por antigüedad, lo pendiente, lo que más compra y todo su historial; cada pedido, cotización o visita se abre con un toque. Reporte en PDF y resumen por WhatsApp.\n• Cotizaciones por clientes (10.5)."
+    "notas": "• App más rápida y liviana: abre en la mitad del tiempo y pesa 1.5 MB (antes 5 MB).\n• Fotos livianas en Proyectos, Galería y Antes y después.\n• Ajustes → Tamaño del texto.\n• Reporte y estado del cliente (10.6)."
   },
   "clientes": {
     "versionCode": 8,
