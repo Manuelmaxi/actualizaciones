@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 98,
-    "versionName": "10.7",
+    "versionCode": 99,
+    "versionName": "10.8",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• App más rápida y liviana: abre en la mitad del tiempo y pesa 1.5 MB (antes 5 MB).\n• Fotos livianas en Proyectos, Galería y Antes y después.\n• Ajustes → Tamaño del texto.\n• Reporte y estado del cliente (10.6)."
+    "notas": "• Embudo de ventas: prospecto → por cotizar → cotizado → negociación → ganado / perdido, con pronóstico del mes y tasa de cierre.\n• Pendientes → Clientes dormidos: los que dejaron de comprar, con WhatsApp de reactivación.\n• App más rápida y liviana (10.7)."
   },
   "clientes": {
     "versionCode": 8,
