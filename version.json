@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 94,
-    "versionName": "10.3",
+    "versionCode": 96,
+    "versionName": "10.5",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Versión web: usa toda la pantalla de la computadora y tiene botón de pantalla completa.\n• Cotizaciones pendientes con estado y reporte por WhatsApp (10.2)."
+    "notas": "• Botón «Cotización» → «Cotizaciones por clientes»: busca el cliente, elige una de sus cotizaciones y prepara el archivo (PDF, Excel, WhatsApp o correo).\n• Contactos de Gmail → Clientes (10.4)."
   },
   "clientes": {
     "versionCode": 8,
