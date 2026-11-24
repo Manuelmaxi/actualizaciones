@@ -1,0 +1,14 @@
+{
+  "vendedores": {
+    "versionCode": 94,
+    "versionName": "10.3",
+    "apk": "Benderrack_Vendedores.apk",
+    "notas": "• Versión web: usa toda la pantalla de la computadora y tiene botón de pantalla completa.\n• Cotizaciones pendientes con estado y reporte por WhatsApp (10.2)."
+  },
+  "clientes": {
+    "versionCode": 8,
+    "versionName": "2.2",
+    "apk": "Benderrack_Clientes.apk",
+    "notas": "• Tus pedidos y solicitudes de cotización se envían en PDF con el formato de Benderrack.\n• Mis listas y \"Pedir otra vez\" con un toque.\n• Ofertas y novedades con su etiqueta."
+  }
+}
