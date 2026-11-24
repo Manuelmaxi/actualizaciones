@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 99,
-    "versionName": "10.8",
+    "versionCode": 100,
+    "versionName": "10.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Embudo de ventas: prospecto → por cotizar → cotizado → negociación → ganado / perdido, con pronóstico del mes y tasa de cierre.\n• Pendientes → Clientes dormidos: los que dejaron de comprar, con WhatsApp de reactivación.\n• App más rápida y liviana (10.7)."
+    "notas": "• Escanear QR dentro de la app: etiquetas de racks (abre la instalación y registra la inspección), tarjetas con QR (crea el cliente o prospecto) y cotizaciones.\n• Las cotizaciones en PDF traen un QR para que el cliente las apruebe por WhatsApp.\n• Clientes dormidos y embudo de ventas (10.8)."
   },
   "clientes": {
     "versionCode": 8,
