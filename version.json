@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 108,
-    "versionName": "11.7",
+    "versionCode": 109,
+    "versionName": "11.8",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Buscar en todo desde Inicio: clientes, cotizaciones, pedidos, proyectos, planos y más.\n• Respaldo en la nube también de los archivos (PDF, planos, adjuntos), con una pantalla de estado.\n• Aviso de «Sin internet» arriba; al volver la conexión se sube solo.\n• Proyecto desde cero:\n  - Deshacer y rehacer.\n  - Reglas de materiales propias.\n  - Plantillas de almacén.\n  - Pellizcar para acercar.\n  - Medir distancias en el plano."
+    "notas": "• Proyecto desde cero: cada línea lleva su letra para ponerle la medida, también las paredes interiores. La que está de frente a otra y mide lo mismo queda «igual que» y toma su medida (se puede separar).\n• Buscar en todo, respaldo de archivos en la nube y aviso de sin internet (11.7)."
   },
   "clientes": {
     "versionCode": 8,
