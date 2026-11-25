@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 100,
-    "versionName": "10.9",
+    "versionCode": 101,
+    "versionName": "11.0",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Escanear QR dentro de la app: etiquetas de racks (abre la instalación y registra la inspección), tarjetas con QR (crea el cliente o prospecto) y cotizaciones.\n• Las cotizaciones en PDF traen un QR para que el cliente las apruebe por WhatsApp.\n• Clientes dormidos y embudo de ventas (10.8)."
+    "notas": "• Nuevo «Proyecto desde cero»: tu plano a mano se convierte en un plano profesional; la app endereza las paredes, pones las medidas, eliges el sistema y acomoda los racks con pasillos. Saca marcos, vigas y posiciones, arma el PDF con tus colores y hace la cotización.\n• Lector de QR y QR para aprobar cotizaciones (10.9)."
   },
   "clientes": {
     "versionCode": 8,
