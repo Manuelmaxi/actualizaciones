@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 103,
-    "versionName": "11.2",
+    "versionCode": 105,
+    "versionName": "11.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: íconos de puertas, puerta doble, salida de emergencia, portón, andén, ventana, escalera, ascensor, montacargas, rampa, columna, oficina, baño, cuarto eléctrico, extintor y zonas. Con sus medidas se dibujan a escala, y los racks no se ponen encima ni frente a las puertas.\n• Plano desde una foto o PDF del teléfono y eliminar proyectos (11.1)."
+    "notas": "• Proyecto desde cero: al calcar el plano, el punto verde cierra el área y el punto mamey termina el trazo para que dibujes otra pared. Las paredes interiores salen a escala, con su medida, y los racks no se ponen encima.\n• Ubicar los elementos con el dedo en el plano (11.3)."
   },
   "clientes": {
     "versionCode": 8,
