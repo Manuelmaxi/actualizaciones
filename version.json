@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 106,
-    "versionName": "11.5",
+    "versionCode": 107,
+    "versionName": "11.6",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero:\n  - Varias opciones del mismo almacén para comparar.\n  - Lista de materiales con precios y total, que pasa a la cotización.\n  - Vista 3D.\n  - Tipos de rack: drive-in, cantilever, carga manual y entrepiso.\n  - Pasillo según el montacargas y niveles según la altura del techo.\n  - Filas de racks que mueves con el dedo.\n  - Paredes interiores también en el plano a mano y en el área rectangular, con medida por tramo.\n  - Medida conocida al calcar una foto.\n  - Firma del cliente y QR para aprobar el plano."
+    "notas": "• Proyecto desde cero: cada trazo queda tal cual lo dibujas. Una pared en L y una recta salen las dos con su forma, al calcar una foto y en el plano a mano. El punto verde solo cierra el área (4 esquinas o más).\n• Opciones, precios, vista 3D, tipos de rack y más (11.5)."
   },
   "clientes": {
     "versionCode": 8,
