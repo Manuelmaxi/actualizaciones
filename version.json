@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 102,
-    "versionName": "11.1",
+    "versionCode": 103,
+    "versionName": "11.2",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: ahora puedes elegir el plano desde una carpeta del teléfono (foto o PDF). Tocas las esquinas sobre el plano y la app las pone a 90°.\n• Eliminar un proyecto desde la lista (🗑) o desde el resultado.\n• Proyecto desde cero (11.0): del plano a mano a un plano profesional con racks."
+    "notas": "• Proyecto desde cero: íconos de puertas, puerta doble, salida de emergencia, portón, andén, ventana, escalera, ascensor, montacargas, rampa, columna, oficina, baño, cuarto eléctrico, extintor y zonas. Con sus medidas se dibujan a escala, y los racks no se ponen encima ni frente a las puertas.\n• Plano desde una foto o PDF del teléfono y eliminar proyectos (11.1)."
   },
   "clientes": {
     "versionCode": 8,
