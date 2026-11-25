@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 101,
-    "versionName": "11.0",
+    "versionCode": 102,
+    "versionName": "11.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo «Proyecto desde cero»: tu plano a mano se convierte en un plano profesional; la app endereza las paredes, pones las medidas, eliges el sistema y acomoda los racks con pasillos. Saca marcos, vigas y posiciones, arma el PDF con tus colores y hace la cotización.\n• Lector de QR y QR para aprobar cotizaciones (10.9)."
+    "notas": "• Proyecto desde cero: ahora puedes elegir el plano desde una carpeta del teléfono (foto o PDF). Tocas las esquinas sobre el plano y la app las pone a 90°.\n• Eliminar un proyecto desde la lista (🗑) o desde el resultado.\n• Proyecto desde cero (11.0): del plano a mano a un plano profesional con racks."
   },
   "clientes": {
     "versionCode": 8,
