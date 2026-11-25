@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 107,
-    "versionName": "11.6",
+    "versionCode": 108,
+    "versionName": "11.7",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: cada trazo queda tal cual lo dibujas. Una pared en L y una recta salen las dos con su forma, al calcar una foto y en el plano a mano. El punto verde solo cierra el área (4 esquinas o más).\n• Opciones, precios, vista 3D, tipos de rack y más (11.5)."
+    "notas": "• Buscar en todo desde Inicio: clientes, cotizaciones, pedidos, proyectos, planos y más.\n• Respaldo en la nube también de los archivos (PDF, planos, adjuntos), con una pantalla de estado.\n• Aviso de «Sin internet» arriba; al volver la conexión se sube solo.\n• Proyecto desde cero:\n  - Deshacer y rehacer.\n  - Reglas de materiales propias.\n  - Plantillas de almacén.\n  - Pellizcar para acercar.\n  - Medir distancias en el plano."
   },
   "clientes": {
     "versionCode": 8,
