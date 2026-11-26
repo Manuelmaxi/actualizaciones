@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 110,
-    "versionName": "11.9",
+    "versionCode": 112,
+    "versionName": "12.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: racks en automático o a mano (cuántas filas, de cuántos módulos, dobles o sencillas y dónde van).\n• Medidas estándar de escaleras (altura, fondo, calibre) y largueros (largo, perfil) para escoger; salen en la lista de materiales.\n• Una letra en cada línea (11.8)."
+    "notas": "• Proyecto desde cero: toca una línea del dibujo y sale la casilla para ponerle la medida. «Guardar y siguiente» pasa sola a la próxima letra sin medida, también en paredes interiores.\n• Versión web: los adjuntos se quedan guardados y suben a la nube (12.0)."
   },
   "clientes": {
     "versionCode": 8,
