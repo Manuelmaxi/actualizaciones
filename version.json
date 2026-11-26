@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 123,
-    "versionName": "13.2",
+    "versionCode": 124,
+    "versionName": "13.3",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo botón ITT (inspección técnica del almacén): hallazgos con nivel de riesgo, elemento, causa y tratamiento (con el criterio y la acción: monitorear, cargar al 50% o descargar), fotos, deflexiones (L/180), aplomes (h×4/1000), repuestos, plano en la hoja de levantamiento e informe PDF para el cliente.\n• Levantamiento mejorado (13.1)."
+    "notas": "• Proyecto desde cero: con las tablas de Kingmore la app recomienda la escala (según la altura del 1er larguero) y el larguero de caja (según el largo), avisa en rojo si no aguantan la carga y los pone en la lista de materiales.\n• ITT: pestaña «Cargas»: compara la carga de cada módulo con la escala y el larguero y marca la sobrecarga (105% bajo, 110% medio, más alto); con un toque queda como hallazgo.\n• ITT – inspección técnica (13.2)."
   },
   "clientes": {
     "versionCode": 8,
