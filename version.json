@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 119,
-    "versionName": "12.8",
+    "versionCode": 120,
+    "versionName": "12.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: «📷 Con la cámara (RA)». Apunta el círculo a cada esquina del piso y la app mide las paredes; el plano sale en la hoja en limpio con sus medidas para revisarlo y seguir como siempre. Necesita un teléfono compatible con ARCore (Servicios de Google Play para RA).\n• Líneas en diagonal (12.7)."
+    "notas": "• Plano en limpio: botón «💾 Guardar». Guarda el dibujo tal como está, sin racks, para seguirlo después. Salen en Proyecto desde cero → «Planos en limpio guardados» (abrir, cambiar nombre o borrar). Si sales con cambios, te pregunta si quieres guardarlos.\n• Plano con la cámara (RA) para teléfonos compatibles con ARCore (12.8)."
   },
   "clientes": {
     "versionCode": 8,
