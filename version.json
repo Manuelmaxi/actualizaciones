@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 112,
-    "versionName": "12.1",
+    "versionCode": 113,
+    "versionName": "12.2",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: toca una línea del dibujo y sale la casilla para ponerle la medida. «Guardar y siguiente» pasa sola a la próxima letra sin medida, también en paredes interiores.\n• Versión web: los adjuntos se quedan guardados y suben a la nube (12.0)."
+    "notas": "• Proyecto desde cero: los pasillos salen en verde con su medida en el plano y en el PDF. En «Ubicar en el plano», el botón «↔ Pasillo» (al lado de Medir) deja tocar un pasillo, escribir su ancho y se corrige solo, uno o todos.\n• Tocar una línea del dibujo para ponerle la medida (12.1)."
   },
   "clientes": {
     "versionCode": 8,
