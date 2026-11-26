@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 120,
-    "versionName": "12.9",
+    "versionCode": 121,
+    "versionName": "13.0",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Plano en limpio: botón «💾 Guardar». Guarda el dibujo tal como está, sin racks, para seguirlo después. Salen en Proyecto desde cero → «Planos en limpio guardados» (abrir, cambiar nombre o borrar). Si sales con cambios, te pregunta si quieres guardarlos.\n• Plano con la cámara (RA) para teléfonos compatibles con ARCore (12.8)."
+    "notas": "• Ajustes → Menú principal: cambia la forma de los íconos (redondeados, súper redondeados, redondos, cuadrados, gota u hoja), la sombra y el tamaño. Se aplica en toda la app.\n• Plano en limpio: botón «💾 Guardar» para guardarlo sin racks (12.9).\n• Plano con la cámara (RA) (12.8)."
   },
   "clientes": {
     "versionCode": 8,
