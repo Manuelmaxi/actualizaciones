@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 117,
-    "versionName": "12.6",
+    "versionCode": 118,
+    "versionName": "12.7",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero y la página del QR con los nombres de Benderrack: filas → hileras, marcos → escalas, fondo → ancho y, en el rack manual, entrepaños → ubicaciones.\n• QR de racks con el plano aprobado y la vista 3D (12.5)."
+    "notas": "• Proyecto desde cero: líneas en diagonal. Al dibujar escoges 90° (como antes), 45° o Libre, en el calcado, el Plano en limpio, las paredes interiores y el plano a mano. Las diagonales llevan letra y medida, y funcionan con puertas, racks, pasillos, 3D, PDF y QR.\n• Nombres: hileras, escalas, ancho y ubicaciones (12.6)."
   },
   "clientes": {
     "versionCode": 8,
