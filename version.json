@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 116,
-    "versionName": "12.5",
+    "versionCode": 117,
+    "versionName": "12.6",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• QR de racks: al escanearlo, el cliente ve, además de lo de antes, el plano aprobado («Usted está aquí» en su fila), la vista 3D que puede girar y los detalles (niveles, posiciones, medidas, perfil, calibre, capacidad, pasillo). La instalación se crea desde el proyecto con un toque.\n• Plano en limpio (12.4)."
+    "notas": "• Proyecto desde cero y la página del QR con los nombres de Benderrack: filas → hileras, marcos → escalas, fondo → ancho y, en el rack manual, entrepaños → ubicaciones.\n• QR de racks con el plano aprobado y la vista 3D (12.5)."
   },
   "clientes": {
     "versionCode": 8,
