@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 115,
-    "versionName": "12.4",
+    "versionCode": 116,
+    "versionName": "12.5",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero → «📝 Plano en limpio»: hoja cuadriculada en blanco para dibujar tu plano con los puntos verde y mamey. Cada cuadro mide lo que escojas (1 m por defecto), así las paredes salen con su medida. Después sigues con letras, puertas, racks, pasillos, 3D y PDF.\n• Carpeta de planos en «Desde un plano a mano» (12.3)."
+    "notas": "• QR de racks: al escanearlo, el cliente ve, además de lo de antes, el plano aprobado («Usted está aquí» en su fila), la vista 3D que puede girar y los detalles (niveles, posiciones, medidas, perfil, calibre, capacidad, pasillo). La instalación se crea desde el proyecto con un toque.\n• Plano en limpio (12.4)."
   },
   "clientes": {
     "versionCode": 8,
