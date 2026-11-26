@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 122,
-    "versionName": "13.1",
+    "versionCode": 123,
+    "versionName": "13.2",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Levantamiento: escoge el sistema y salen las preguntas que no se pueden olvidar (pallet, peso, montacargas, altura libre, piso, sismo…); lo que falta sale en rojo.\n• Llénalo aquí en la app (escribes y dibujas con el dedo) o en tu otra app, como antes.\n• «📐 Proyecto»: hace el Proyecto desde cero con los datos (área rectangular o calcando la hoja).\n• «📧 Cotizar»: un correo con un solo PDF (datos, hojas y plano) para quien cotiza, y avisa si pasan 3 días sin cotización.\n• Forma de los íconos (13.0)."
+    "notas": "• Nuevo botón ITT (inspección técnica del almacén): hallazgos con nivel de riesgo, elemento, causa y tratamiento (con el criterio y la acción: monitorear, cargar al 50% o descargar), fotos, deflexiones (L/180), aplomes (h×4/1000), repuestos, plano en la hoja de levantamiento e informe PDF para el cliente.\n• Levantamiento mejorado (13.1)."
   },
   "clientes": {
     "versionCode": 8,
