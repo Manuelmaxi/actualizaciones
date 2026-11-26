@@ -5,7 +5,7 @@
 (function(){
   'use strict';
   /* ---------- almacenamiento ---------- */
-  const DBN='benderrack_web',ST='kv';let idb=null;const pend=new Map();let tFlush=null;
+  const DBN='benderrack_web',ST='kv',SA='arch';const ARCH=new Map();let idb=null;const pend=new Map();let tFlush=null;
   class WebStore{
     getItem(k){return Object.prototype.hasOwnProperty.call(this,k)?this[k]:null}
     setItem(k,v){v=String(v);this[k]=v;pend.set(k,v);prog()}
@@ -21,12 +21,17 @@
     const tx=idb.transaction(ST,'readwrite'),os=tx.objectStore(ST);pend.forEach((v,k)=>{v==null?os.delete(k):os.put(v,k)});pend.clear()}
   window.__webFlush=flush;
   addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
-  function abrir(){return new Promise(ok=>{if(!window.indexedDB)return ok(null);let r;try{r=indexedDB.open(DBN,1)}catch(e){return ok(null)}
-    r.onupgradeneeded=()=>r.result.createObjectStore(ST);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null);r.onblocked=()=>ok(null)})}
+  function abrir(){return new Promise(ok=>{if(!window.indexedDB)return ok(null);let r;try{r=indexedDB.open(DBN,2)}catch(e){return ok(null)}
+    r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(ST))d.createObjectStore(ST);if(!d.objectStoreNames.contains(SA))d.createObjectStore(SA)};r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null);r.onblocked=()=>ok(null)})}
   function leerTodo(db){return new Promise(ok=>{const out={};const tx=db.transaction(ST,'readonly'),os=tx.objectStore(ST);const c=os.openCursor();
     c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else ok(out)};c.onerror=()=>ok(out)})}
+  /* archivos adjuntos (PDF, planos, documentos): guardados en el navegador, se quedan aunque recargues */
+  function leerArch(db){return new Promise(ok=>{try{const tx=db.transaction(SA,'readonly'),c=tx.objectStore(SA).openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){ARCH.set(String(cur.key),String(cur.value));cur.continue()}else ok()};c.onerror=()=>ok()}catch(e){ok()}})}
+  function archPut(fid,b64){ARCH.set(fid,b64);if(!idb)return;try{idb.transaction(SA,'readwrite').objectStore(SA).put(b64,fid)}catch(e){}}
+  function archDel(fid){ARCH.delete(fid);if(!idb)return;try{idb.transaction(SA,'readwrite').objectStore(SA).delete(fid)}catch(e){}}
+  const fidOk=f=>String(f||'').replace(/[^A-Za-z0-9]/g,'');
   async function cargar(){idb=await abrir();let datos={};
-    if(idb)datos=await leerTodo(idb);
+    if(idb){datos=await leerTodo(idb);await leerArch(idb)}
     else{try{Object.keys(localStorage).filter(k=>k.startsWith('bw_')).forEach(k=>datos[k.slice(3)]=localStorage.getItem(k))}catch(e){}}
     /* primera vez: trae lo que hubiera en localStorage (versiones anteriores de la página) */
     if(!Object.keys(datos).length){try{Object.keys(localStorage).forEach(k=>{if(!k.startsWith('bw_'))datos[k]=localStorage.getItem(k)})}catch(e){}
@@ -58,6 +63,15 @@
     borrarFotoSoporte:id=>{fotos.delete(id);LSX.removeItem('sopfull_'+id)},
     _guardarFotoWeb:(id,dataUrl)=>{fotos.set(id,dataUrl);LSX.setItem('sopfull_'+id,dataUrl)},
     _descargar:descargar,
+    guardarDocB64:b64=>{const fid='pd'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);archPut(fid,String(b64).replace(/\s/g,''));return fid},
+    guardarDocConId:(fid,b64)=>{fid=fidOk(fid);if(!fid)return false;archPut(fid,String(b64).replace(/\s/g,''));return true},
+    leerArchivoPlanoB64:fid=>{const b=ARCH.get(fidOk(fid));return b&&b.length<=5400000?b:null},
+    tamArchivoPlano:fid=>{const b=ARCH.get(fidOk(fid));return b?Math.floor(b.length*3/4)-(b.endsWith('==')?2:b.endsWith('=')?1:0):-1},
+    borrarArchivoPlano:fid=>archDel(fidOk(fid)),
+    abrirArchivoPlano:(fid,nombre,mime,modo,tel)=>{const b=ARCH.get(fidOk(fid));if(!b)return aviso('Ese archivo no está guardado en este navegador');
+      if(modo==='compartir'||modo==='whatsapp')return compartir(nombre,mime,b,'',modo==='whatsapp'?tel:'');
+      const blob=b64aBlob(b,mime);if(modo==='guardar'||!/^(application\/pdf|image\/|text\/)/.test(mime||''))return descargar(nombre,blob);const u=URL.createObjectURL(blob),w=window.open(u,'_blank');if(!w)descargar(nombre,blob);setTimeout(()=>URL.revokeObjectURL(u),60000)},
+    _archivos:()=>ARCH.size,
     loginMicrosoft:(url)=>{try{sessionStorage.setItem('br_pkce',JSON.stringify(window.__pkceWeb()||null))}catch(e){}location.href=url}
   };
 
