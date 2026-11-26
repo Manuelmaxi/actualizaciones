@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 125,
-    "versionName": "13.4",
+    "versionCode": 126,
+    "versionName": "13.5",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Nuevo botón «Tramería» (Oficina): con el peso por paleta, paletas por nivel, niveles, largo del larguero y altura del 1er larguero, recomienda el larguero y la escala Kingmore con su foto, el % de uso y otras opciones; los pasa a un proyecto o los compartes.\n• Escalas y largueros Kingmore en Proyecto e ITT (13.3)."
+    "notas": "• Tramería más completa: escala 120×75 del catálogo Kingmore, medidas de la paleta → largo del larguero, fondo y altura de la escala con holguras, y aviso si cabe bajo el techo o los rociadores.\n• Nueva pestaña «Sistemas de racks»: guía de 11 sistemas con sugerencia según el cliente."
   },
   "clientes": {
     "versionCode": 8,
