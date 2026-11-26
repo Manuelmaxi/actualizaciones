@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 121,
-    "versionName": "13.0",
+    "versionCode": 122,
+    "versionName": "13.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Ajustes → Menú principal: cambia la forma de los íconos (redondeados, súper redondeados, redondos, cuadrados, gota u hoja), la sombra y el tamaño. Se aplica en toda la app.\n• Plano en limpio: botón «💾 Guardar» para guardarlo sin racks (12.9).\n• Plano con la cámara (RA) (12.8)."
+    "notas": "• Levantamiento: escoge el sistema y salen las preguntas que no se pueden olvidar (pallet, peso, montacargas, altura libre, piso, sismo…); lo que falta sale en rojo.\n• Llénalo aquí en la app (escribes y dibujas con el dedo) o en tu otra app, como antes.\n• «📐 Proyecto»: hace el Proyecto desde cero con los datos (área rectangular o calcando la hoja).\n• «📧 Cotizar»: un correo con un solo PDF (datos, hojas y plano) para quien cotiza, y avisa si pasan 3 días sin cotización.\n• Forma de los íconos (13.0)."
   },
   "clientes": {
     "versionCode": 8,
