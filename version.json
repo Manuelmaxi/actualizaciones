@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 124,
-    "versionName": "13.3",
+    "versionCode": 125,
+    "versionName": "13.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero: con las tablas de Kingmore la app recomienda la escala (según la altura del 1er larguero) y el larguero de caja (según el largo), avisa en rojo si no aguantan la carga y los pone en la lista de materiales.\n• ITT: pestaña «Cargas»: compara la carga de cada módulo con la escala y el larguero y marca la sobrecarga (105% bajo, 110% medio, más alto); con un toque queda como hallazgo.\n• ITT – inspección técnica (13.2)."
+    "notas": "• Nuevo botón «Tramería» (Oficina): con el peso por paleta, paletas por nivel, niveles, largo del larguero y altura del 1er larguero, recomienda el larguero y la escala Kingmore con su foto, el % de uso y otras opciones; los pasa a un proyecto o los compartes.\n• Escalas y largueros Kingmore en Proyecto e ITT (13.3)."
   },
   "clientes": {
     "versionCode": 8,
