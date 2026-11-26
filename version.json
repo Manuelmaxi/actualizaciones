@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 114,
-    "versionName": "12.3",
+    "versionCode": 115,
+    "versionName": "12.4",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Proyecto desde cero → «Desde un plano a mano»: escoge la carpeta del teléfono donde guardas los planos. La app muestra sus fotos y PDF (lo más nuevo arriba), queda recordada y con un toque lo abres para calcarlo.\n• Pasillos marcados en verde y su medida se corrige tocándolos (12.2)."
+    "notas": "• Proyecto desde cero → «📝 Plano en limpio»: hoja cuadriculada en blanco para dibujar tu plano con los puntos verde y mamey. Cada cuadro mide lo que escojas (1 m por defecto), así las paredes salen con su medida. Después sigues con letras, puertas, racks, pasillos, 3D y PDF.\n• Carpeta de planos en «Desde un plano a mano» (12.3)."
   },
   "clientes": {
     "versionCode": 8,
