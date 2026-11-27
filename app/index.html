@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v13.8</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v13.9</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v13.8${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v13.9${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -9584,6 +9584,113 @@ const _aplicarCli138=aplicarClientes;aplicarClientes=function(){const I=IMPCL,L=
 plantillaClientes=function(){const L=db.clientes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre));
   const rows=[['Nombre','Contacto','Teléfono','Correo','RNC','Dirección','Zona','Frecuencia de visita','Notas']].concat(L.length?L.map(c=>[c.nombre,c.contacto||'',c.tel||'',c.correo||'',c.rnc||'',c.dir||'',c.zona||'',c.frecVis?VFREC_N[c.frecVis]:'',c.notas||'']):[['Ferretería El Martillo, SRL','Juan Pérez','809-555-1234','compras@elmartillo.com.do','101234567','Av. Duarte 45, Santiago','Santiago','Cada mes','']]);
   guardarExcel('clientes_benderrack_'+hoy()+'.xlsx',[{name:'Clientes',rows,widths:[36,24,16,30,14,44,18,20,30]}])};
+
+
+/* ================= v13.9: solicitudes al arquitecto por WhatsApp con recordatorios hasta que la cotización llegue al cliente ================= */
+const PROY_DEF=[{id:'gel',n:'Gelson Estepan',tel:'829-284-9893'},{id:'car',n:'Carolina Victoria',tel:'829-284-9894'},{id:'edw',n:'Edward Capellán',tel:'829-284-9892'},{id:'mer',n:'Mercedes Guillén',tel:'829-292-0342'},{id:'grp',n:'Bender R. y Paul Ventas',grupo:true}];
+const proyectistas=()=>{const L=kvJ('proyectistas');return Array.isArray(L)&&L.length?L:PROY_DEF};
+const proyG=id=>proyectistas().find(p=>p.id===id)||null;
+const scDiasAviso=()=>Math.max(1,+(kvGet('sc_dias')||2));
+const scProyN=x=>{const p=proyG(x.proy);return p?p.n:''};
+const scPrimer=n=>String(n||'').split(' ')[0];
+const scVence=x=>scSin(x)&&(x.compromiso?x.compromiso<=hoy():scDias(x)>=scDiasAviso());
+const scListaEnviar=()=>solcots().filter(x=>x.estado==='realizada');
+const scEsperando=()=>solcots().filter(x=>scSin(x)&&x.proy);
+/* mandar por WhatsApp: a una persona (con el PDF si hay) o al grupo (eliges el chat) */
+function scWa(p,msg,pdf){const g=!p||p.grupo||!p.tel;
+  if(pdf&&AND&&AND.sharePdfWa&&!g){spX.sharePdfWa(pdf.nombre,pdf.b64,telWa(p.tel),msg);return}
+  if(pdf&&AND&&AND.sharePdfB64){copiarTexto(msg);spX.sharePdfB64(pdf.nombre,pdf.b64,msg);toast('Mensaje copiado: elige '+(g?'el grupo':'el chat')+' y pégalo junto al PDF');return}
+  if(pdf&&!AND){try{const a=document.createElement('a');a.href='data:application/pdf;base64,'+pdf.b64;a.download=pdf.nombre;a.click()}catch(e){}toast('PDF descargado: adjúntalo en WhatsApp')}
+  if(g){copiarTexto(msg);abrirWa('',msg);return}abrirWa(p.tel,msg)}
+function scDescLev(p){try{const D=levDat(p),L=[levSisN(D.sis)].filter(Boolean);levPregs(D.sis).forEach(q=>{const v=levValor(q,D[q.k]);if(v&&L.length<8)L.push(q.l+': '+v)});return L.join(' · ')}catch(e){return ''}}
+/* ---- enviar al arquitecto ---- */
+let SCA=null;
+function scEnviarArq(o){o=o||{};const x=o.id&&solc(o.id),lid=o.levId||(x&&x.levId),p=lid&&plano(lid);
+  if(!SCA||SCA.k!==(o.id||o.levId||'n'))SCA={k:o.id||o.levId||'n',proy:x&&x.proy||kvGet('sc_ult_proy')||'gel',dias:String(scDiasAviso()),fecha:'',desc:x?x.desc:p?scDescLev(p):(o.desc||''),pdf:!!p,clienteId:x?x.clienteId:p?p.clienteId:(o.clienteId||''),cliente:x?scCli(x):p?(p.cliente||''):''};
+  const S=SCA,P=proyectistas(),cn=S.clienteId&&cli(S.clienteId)?cli(S.clienteId).nombre:S.cliente;
+  abrirSheet('scarq','Enviar al arquitecto',`<div class="card"><b>${esc(cn||'Sin cliente')}</b>${p?`<div class="mut" style="font-size:12px">Levantamiento del ${fFecha(p.fecha)}</div>`:''}
+     <label>¿A quién?</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${P.map(q=>`<button class="chip ${S.proy===q.id?'on':''}" data-p="${q.id}">${q.grupo?'👥 ':''}${esc(q.n)}</button>`).join('')}</div>
+     <label>¿Para cuándo la necesitas?</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${[['1','Mañana'],['2','2 días'],['3','3 días'],['7','1 semana'],['f','Fecha…']].map(([k,t])=>`<button class="chip ${S.dias===k?'on':''}" data-d="${k}">${t}</button>`).join('')}</div>
+     ${S.dias==='f'?`<input id="scaf" type="date" value="${esc(S.fecha||addD(hoy(),2))}">`:''}
+     <label>¿Qué hay que cotizar?</label><textarea id="scad" style="min-height:90px" placeholder="Ej.: rack selectivo 3 niveles, 40 posiciones, altura 6 m">${esc(S.desc)}</textarea>
+     ${p?`<label class="row" style="gap:8px;color:var(--tx);margin-top:8px"><input type="checkbox" id="scap" ${S.pdf?'checked':''} style="width:20px;height:20px"> Adjuntar el PDF del levantamiento (datos, hojas y plano)</label>`:''}</div>
+   <button class="btn full" id="scaok">📲 Enviar por WhatsApp</button>
+   <div class="mut" style="font-size:11.5px;margin:6px 4px">Queda en «Cotizaciones pendientes». Si no llega para la fecha, te aviso y le puedes recordar con un toque.</div>`,()=>scEnviarArq(o));
+  const lee=()=>{S.desc=$('#scad').value;if($('#scaf'))S.fecha=$('#scaf').value;if($('#scap'))S.pdf=$('#scap').checked};
+  document.querySelectorAll('#sbody [data-p]').forEach(b=>b.onclick=()=>{lee();S.proy=b.dataset.p;scEnviarArq(o)});
+  document.querySelectorAll('#sbody [data-d]').forEach(b=>b.onclick=()=>{lee();S.dias=b.dataset.d;scEnviarArq(o)});
+  $('#scaok').onclick=async()=>{lee();const q=proyG(S.proy);if(!q)return toast('Elige a quién');if(!S.desc.trim())return toast('Escribe qué hay que cotizar');
+    const comp=S.dias==='f'?(S.fecha||addD(hoy(),2)):addD(hoy(),+S.dias);let y=x;
+    if(!y){y={id:uid(),creado:Date.now(),estado:'pendiente',hist:[{f:new Date().toISOString(),e:'pendiente'}],clienteId:S.clienteId,cliente:S.clienteId?'':S.cliente,desc:S.desc.trim(),fecha:hoy(),notas:''};if(p){y.levId=p.id;const v=db.visitas.find(v=>v.levId===p.id);if(v)y.levVisita=v.id}solcots().push(y)}
+    Object.assign(y,{desc:S.desc.trim(),compromiso:comp,proy:q.id,enviado:Date.now(),editado:Date.now()});if(p)p.cotizar={fecha:hoy(),para:q.n,via:'whatsapp'};kvSet('sc_ult_proy',q.id);save();
+    const msg=`Buenas${q.grupo?'':', '+scPrimer(q.n)}. Le envío esta solicitud de cotización:\n\n*Cliente:* ${cn||'—'}\n*Qué cotizar:* ${S.desc.trim()}\n*La necesito para:* ${diaDe(comp)} ${fFecha(comp)}\n\nSolicitud ${y.id.slice(-5).toUpperCase()}${p&&S.pdf?'\nVa el PDF del levantamiento.':''}\nGracias.`;
+    let pdf=null;if(p&&S.pdf){toast('⏳ Preparando el PDF…');try{const r=await levPaquete(p.id,{});pdf={nombre:r.nombre,b64:r.doc.output('datauristring').split(',')[1]}}catch(e){toast('No se pudo hacer el PDF: va solo el mensaje')}}
+    scWa(q,msg,pdf);SCA=null;pila.pop();toast('📲 Enviada a '+q.n+' · te aviso el '+fFecha(comp));programarAvisos();setTimeout(()=>{SCF='sin';pintarSolCot()},400)}}
+/* ---- recordar al arquitecto ---- */
+function scRecordar(id){const x=solc(id),q=x&&proyG(x.proy);if(!x)return;if(!q)return scEnviarArq({id});
+  const msg=`Buenas${q.grupo?'':', '+scPrimer(q.n)}. ¿Cómo va la cotización de *${scCli(x)}*${x.desc?' ('+x.desc.slice(0,80)+')':''} que le envié el ${fFecha(x.fecha)}?${x.compromiso&&x.compromiso<hoy()?' Estaba para el '+fFecha(x.compromiso)+'.':''} El cliente la está esperando. Gracias.`;
+  (x.recs=x.recs||[]).push(Date.now());x.editado=Date.now();save();scWa(q,msg,null)}
+function scRecordarTodas(pid){const q=proyG(pid),L=scEsperando().filter(x=>x.proy===pid);if(!q||!L.length)return;
+  const msg=`Buenas${q.grupo?'':', '+scPrimer(q.n)}. Estas son las cotizaciones que tengo pendientes con usted:\n\n${L.map((x,i)=>`${i+1}. *${scCli(x)}* – ${String(x.desc||'').slice(0,70)} (enviada ${fFecha(x.fecha)}${x.compromiso?', para '+fFecha(x.compromiso):''})`).join('\n')}\n\n¿Me dice cuándo las tendría? Gracias.`;
+  L.forEach(x=>{(x.recs=x.recs||[]).push(Date.now())});save();scWa(q,msg,null)}
+/* ---- llegó la cotización y enviarla al cliente ---- */
+function scLlego(id){const x=solc(id);if(!x)return;const i=document.createElement('input');i.type='file';i.accept='application/pdf,image/*';
+  abrirSheet('sclleg','Llegó la cotización',`<div class="card"><b>${esc(scCli(x))}</b><div class="mut" style="font-size:12.5px">${esc(x.desc||'')}</div></div>
+   <button class="btn full" id="scl1">📎 Elegir el PDF que te mandó</button><button class="btn sec full" id="scl2" style="margin-top:8px">Marcar como lista sin el archivo</button>
+   <div class="mut" style="font-size:11.5px;margin:6px 4px">El PDF de WhatsApp suele estar en Documentos o Descargas › WhatsApp. Se guarda con la solicitud para mandárselo al cliente.</div>`);
+  const listo=()=>{scEstado(id,'realizada');x.llego=hoy();save();pila.pop();scEnviarCli(id)};
+  $('#scl2').onclick=listo;$('#scl1').onclick=()=>{i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const b64=String(r.result).split(',')[1];const fid=AND&&AND.guardarDocB64?AND.guardarDocB64(b64):null;
+      x.pdf={fid,nombre:f.name,mime:f.type||'application/pdf'};if(!fid)window.__scPdf=Object.assign(window.__scPdf||{},{[id]:b64})}catch(e){}listo()};r.readAsDataURL(f)};i.click()}}
+function scEnviarCli(id){const x=solc(id);if(!x)return;const c=cli(x.clienteId)||{};
+  abrirSheet('sccli','Enviar al cliente',`<div class="card"><b>${esc(scCli(x))}</b><div class="mut" style="font-size:12.5px">${esc(x.desc||'')}</div>${x.pdf?`<div style="margin-top:6px">📎 ${esc(x.pdf.nombre)}</div>`:''}</div>
+   <label>Mensaje</label><textarea id="scm" style="min-height:90px">Buenas${c.contacto?' '+scPrimer(c.contacto):''}, le comparto la cotización ${x.desc?'de '+x.desc.slice(0,60)+' ':''}que nos solicitó. Quedo atento a cualquier pregunta.</textarea>
+   <div class="btns"><button class="btn" id="scew">📲 WhatsApp</button><button class="btn sec" id="scec">✉️ Correo</button></div>
+   <label class="row" style="gap:8px;color:var(--tx);margin-top:8px"><input type="checkbox" id="sces" checked style="width:20px;height:20px"> Recordarme darle seguimiento en 3 días</label>`);
+  const hecho=()=>{scEstado(id,'enviada');x.enviadoCli=hoy();if($('#sces').checked)db.notas.push({id:uid(),creado:hoy(),titulo:'Seguimiento: cotización de '+scCli(x),texto:'Se le envió el '+fFecha(hoy())+'. '+(x.desc||''),recordar:addD(hoy(),3),hora:'',clienteId:x.clienteId||'',hecha:false});save();programarAvisos();pila.pop();setTimeout(pintarSolCot,300)};
+  const b64=()=>{const b=x.pdf&&(x.pdf.fid&&AND&&AND.leerArchivoPlanoB64?AND.leerArchivoPlanoB64(x.pdf.fid):(window.__scPdf||{})[id]);return b||null};
+  $('#scew').onclick=()=>{const m=$('#scm').value,b=b64();if(b&&AND&&AND.sharePdfWa)spX.sharePdfWa(x.pdf.nombre,b,telWa(c.tel||''),m);else{abrirWa(c.tel||'',m);if(x.pdf)toast('Adjunta el PDF en el chat')}hecho()};
+  $('#scec').onclick=()=>{const m=$('#scm').value,b=b64();if(b)mandarCorreo({para:c.correo||'',asunto:'Cotización '+(db.empresa&&db.empresa.nombre||'Benderrack'),cuerpo:m,nombre:x.pdf.nombre,b64:b});else abrirEnlace('mailto:'+(c.correo||'')+'?subject='+encodeURIComponent('Cotización')+'&body='+encodeURIComponent(m));hecho()}}
+/* ---- en la lista de cotizaciones pendientes ---- */
+const _scTarj139=scTarjeta;scTarjeta=function(x){let h=_scTarj139.apply(this,arguments);try{const q=proyG(x.proy),r=(x.recs||[]).length,v=scVence(x);let b='';
+  if(scSin(x))b=`<button class="btn ${v?'':'sec'} sm" onclick="scRecordar('${x.id}')">🔔 Recordarle${q?' a '+esc(scPrimer(q.n)):''}</button><button class="btn sec sm" onclick="scLlego('${x.id}')">Ya llegó</button>${q?'':`<button class="btn sec sm" onclick="scEnviarArq({id:'${x.id}'})">📲 Enviar al arquitecto</button>`}`;
+  else if(x.estado==='realizada')b=`<button class="btn sm" onclick="scEnviarCli('${x.id}')">📨 Enviar al cliente</button>`;
+  const info=q?`<div class="mut" style="font-size:11.5px;margin-top:4px">👷 ${esc(q.n)}${r?' · recordado '+r+(r>1?' veces':' vez')+' (último '+fFecha(new Date(x.recs[r-1]).toISOString().slice(0,10))+')':''}${v?' · <b style="color:var(--bad)">ya pasó la fecha</b>':''}</div>`:'';
+  if(b||info)h=h.replace(/<\/div>\s*$/,`${info}${b?`<div class="btns" style="margin-top:8px;flex-wrap:wrap">${b}</div>`:''}</div>`)}catch(e){}return h};
+const _pintSc139=pintarSolCot;pintarSolCot=function(){const r=_pintSc139.apply(this,arguments);try{const sb=$('#sbody');if(!sb||$('#scarqs'))return r;const E=scEsperando(),L=scListaEnviar(),P=proyectistas().map(p=>({p,n:E.filter(x=>x.proy===p.id).length,v:E.filter(x=>x.proy===p.id&&scVence(x)).length})).filter(z=>z.n);
+  const d=document.createElement('div');d.id='scarqs';d.className='card';
+  d.innerHTML=`<div class="row"><b class="grow">👷 Con los arquitectos</b><button class="btn sm" style="width:auto" onclick="scEnviarArq({})">📲 Nueva</button></div>
+   ${P.length?P.map(z=>`<div class="row" style="gap:8px;padding:6px 0;border-top:1px solid var(--line)"><div class="grow"><b>${esc(z.p.n)}</b><div class="mut" style="font-size:12px">${z.n} pendiente(s)${z.v?` · <b style="color:var(--bad)">${z.v} atrasada(s)</b>`:''}</div></div><button class="btn ${z.v?'':'sec'} sm" style="width:auto" onclick="scRecordarTodas('${z.p.id}')">🔔 ${z.n>1?'Pedir todas':'Pedírsela'}</button></div>`).join(''):'<div class="mut" style="font-size:12.5px;margin-top:4px">No tienes solicitudes esperando al arquitecto.</div>'}
+   ${L.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:#24559b;font-weight:700">📨 ${L.length} lista(s) para enviar al cliente</div>`:''}`;
+  const f=sb.firstElementChild;if(f&&f.nextSibling)sb.insertBefore(d,f.nextSibling);else sb.appendChild(d)}catch(e){console.log('scarqs',e)}return r};
+/* ---- desde el levantamiento y desde la visita ---- */
+const _levCot139=levCotizar;levCotizar=function(pid){const r=_levCot139.apply(this,arguments);try{const sb=$('#sbody');if(sb&&!$('#lcarq')){const d=document.createElement('div');d.id='lcarq';
+  d.innerHTML=`<button class="btn full" onclick="scEnviarArq({levId:'${pid}'})">📲 Enviar al arquitecto por WhatsApp</button><div class="mut" style="text-align:center;font-size:12px;margin:6px 0 10px">o por correo, abajo</div>`;const f=sb.firstElementChild;if(f&&f.nextSibling)sb.insertBefore(d,f.nextSibling);else sb.prepend(d)}}catch(e){}return r};
+if(typeof vPasos==='function'){const _vPasos139=vPasos;vPasos=function(v){const P=_vPasos139.apply(this,arguments);try{if(v.resultado==='Levantamiento realizado'){const lid=v.levId||'',ya=solcots().some(x=>x.levVisita===v.id||(lid&&x.levId===lid));
+  if(!ya)P.unshift(['📲 Enviar al arquitecto',lid?`scEnviarArq({levId:'${lid}'})`:`scEnviarArq({clienteId:'${v.clienteId}'})`,1])}}catch(e){}return P}}
+/* ---- avisos: en Inicio, en la campana y en el teléfono ---- */
+const _alIni139=alertasInicio;alertasInicio=function(){let h=_alIni139.apply(this,arguments);try{const V=scEsperando().filter(scVence),L=scListaEnviar();let a='';
+  if(V.length){const m=Math.max(...V.map(scDias));a+=alerta('doc','#c0392b',V.length+' cotización(es) esperando al arquitecto','La más vieja: '+m+' día(s) · toca para recordarle','abrirSolCot()')}
+  if(L.length)a+=alerta('send','#24559b',L.length+' cotización(es) lista(s) para enviar al cliente','Toca para enviarlas',"SCF='todas';pintarSolCot()");
+  if(a)h=h?h.replace('<div class="alertas">','<div class="alertas">'+a):'<div class="alertas">'+a+'</div>'}catch(e){}return h};
+const _notif139=notificaciones;notificaciones=function(){const R=_notif139.apply(this,arguments);try{const h=hoy(),V=scEsperando().filter(scVence),L=scListaEnviar();
+  if(V.length)R.unshift({id:'ag:sc:'+h+':'+V.length,tipo:'agenda',tit:V.length+' cotización(es) esperando al arquitecto',txt:V.map(scCli).slice(0,4).join(', '),f:h,acc:'abrirSolCot()',urg:true,leida:false});
+  if(L.length)R.unshift({id:'ag:scl:'+h+':'+L.length,tipo:'agenda',tit:L.length+' cotización(es) para enviar al cliente',txt:L.map(scCli).slice(0,4).join(', '),f:h,acc:"SCF='todas';pintarSolCot()",leida:false})}catch(e){}return R};
+const _calcAv139=calcularAvisos;calcularAvisos=function(){const L=_calcAv139.apply(this,arguments);try{const c=avisoCfg();if(!c.on)return L;const ahora=Date.now(),E=scEsperando();
+  for(let i=0;i<7;i++){const f=addD(hoy(),i),V=E.filter(x=>(x.compromiso||addD(x.fecha,scDiasAviso()))<=f),t=momento(f,c.hora)+5*60000;
+    if(V.length&&t>ahora)L.push({id:3000+i,t,titulo:'👷 '+V.length+' cotización(es) del arquitecto sin llegar',texto:V.map(x=>scCli(x)+(scProyN(x)?' ('+scPrimer(scProyN(x))+')':'')).slice(0,4).join(', ')+' · toca para recordarle',abrir:'solc'})}}catch(e){}return L.slice(0,60)};
+const _abrirAv139=window.__abrirAviso;window.__abrirAviso=function(a){if(String(a)==='solc'){if(bloqueada){window.__avisoTrasDesbloquear=a;return}pila.length=0;cerrarTodo();return abrirSolCot()}return _abrirAv139.apply(this,arguments)};
+/* ---- Ajustes: arquitectos y días ---- */
+function scProyForm(){const P=proyectistas().map(p=>Object.assign({},p));
+  abrirSheet('scproy','Arquitectos / proyectistas',`<div class="card mut" style="font-size:12.5px">A quién le envías las solicitudes de cotización. Si es un grupo de WhatsApp, deja el teléfono vacío: la app te deja elegir el grupo.</div>
+   <div id="scpl">${P.map((p,i)=>`<div class="card row" style="gap:6px"><div class="grow"><input data-i="${i}" data-k="n" value="${esc(p.n)}" placeholder="Nombre"><input data-i="${i}" data-k="tel" type="tel" value="${esc(p.tel||'')}" placeholder="WhatsApp (vacío = grupo)" style="margin-top:6px"></div><button class="btn sec sm" style="width:auto" data-del="${i}">🗑</button></div>`).join('')}</div>
+   <button class="btn sec full" id="scpadd">+ Agregar</button>
+   <div class="card"><label style="margin-top:0">Avisarme y sugerir recordarle si no llega en</label><select id="scpd">${[1,2,3,4,5,7].map(n=>`<option value="${n}" ${scDiasAviso()===n?'selected':''}>${n} día${n>1?'s':''}</option>`).join('')}</select><div class="mut" style="font-size:12px">Cuando la solicitud no tiene fecha de entrega.</div></div>
+   <button class="btn full" id="scpok">Guardar</button>`);
+  const lee=()=>document.querySelectorAll('#scpl [data-i]').forEach(e=>{P[+e.dataset.i][e.dataset.k]=e.value.trim()});
+  document.querySelectorAll('#scpl [data-del]').forEach(b=>b.onclick=()=>{lee();P.splice(+b.dataset.del,1);kvSet('proyectistas',JSON.stringify(P));pila.pop();scProyForm()});
+  $('#scpadd').onclick=()=>{lee();P.push({id:uid(),n:'',tel:''});kvSet('proyectistas',JSON.stringify(P));pila.pop();scProyForm()};
+  $('#scpok').onclick=()=>{lee();const Q=P.filter(p=>p.n).map(p=>Object.assign(p,{grupo:!soloDig(p.tel)}));kvSet('proyectistas',JSON.stringify(Q));kvSet('sc_dias',$('#scpd').value);save();programarAvisos();toast('Guardado');pila.pop();if(pila.length)pila[pila.length-1].fn();else render()}}
+const _bloqAv139=bloqueAvisos;bloqueAvisos=function(){return _bloqAv139.apply(this,arguments)+`<div class="card tap" id="ajproy" onclick="scProyForm()"><div class="row"><b class="grow">👷 Arquitectos / proyectistas</b><span class="mut">›</span></div><div class="mut" style="font-size:12.5px">${proyectistas().map(p=>esc(p.n)).join(' · ')} · aviso a los ${scDiasAviso()} día(s)</div></div>`};
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){

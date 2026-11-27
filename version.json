@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 129,
-    "versionName": "13.8",
+    "versionCode": 130,
+    "versionName": "13.9",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Menú principal más simple: de 24 a 13 iconos (Clientes, Planos, QR, Calculadora y Visitas abren su menú).\n• Visitas: «Siguiente paso» según el resultado y «Planificar la semana» por frecuencia y zona.\n• El Excel de clientes ahora trae «Frecuencia de visita» y «Zona»."
+    "notas": "• Solicitudes al arquitecto por WhatsApp: desde el levantamiento (o la visita) se envía con el PDF y la fecha; si no llega te aviso y le recuerdas con un toque; al llegar, «Enviar al cliente» y seguimiento en 3 días.\n• Menú más simple (13 iconos), «Siguiente paso» en visitas, planificar la semana y frecuencia/zona desde el Excel."
   },
   "clientes": {
     "versionCode": 8,
