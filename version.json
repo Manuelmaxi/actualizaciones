@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 128,
-    "versionName": "13.7",
+    "versionCode": 129,
+    "versionName": "13.8",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Menú principal más simple: de 24 a 13 iconos. Clientes, Planos, QR, Calculadora y Visitas abren un menú con todo lo de antes.\n• Pendientes trae arriba el Seguimiento del día y las Notas; el Embudo de ventas está en la pestaña Cotizaciones."
+    "notas": "• Menú principal más simple: de 24 a 13 iconos (Clientes, Planos, QR, Calculadora y Visitas abren su menú).\n• Visitas: «Siguiente paso» según el resultado y «Planificar la semana» por frecuencia y zona.\n• El Excel de clientes ahora trae «Frecuencia de visita» y «Zona»."
   },
   "clientes": {
     "versionCode": 8,

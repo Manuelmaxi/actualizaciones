@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v12.6</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v13.8</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v12.6${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v13.8${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -7730,15 +7730,15 @@ function pdcContorno(trazos){const T=(trazos||[]).filter(t=>t.k!=='t'&&t.p&&t.p.
   seg=unir(seg).filter(s=>Math.abs(s.d)>per*0.03);seg=unir(seg);
   if(seg.length>1&&seg[0].h===seg[seg.length-1].h){const a=seg.pop();seg[0].d+=a.d;seg[0].c=(seg[0].c+a.c)/2}
   const ok=seg.length>=4&&seg.length%2===0&&seg.every((s,i)=>s.h!==seg[(i+1)%seg.length].h);
-  let V;if(ok){V=seg.map((s,i)=>{const n=seg[(i+1)%seg.length];return s.h?[n.c,s.c]:[s.c,n.c]})}
+  let V,okD=false;const VD=pdcVerticesDiag(S,per);if(VD){V=VD;okD=true}else if(ok){V=seg.map((s,i)=>{const n=seg[(i+1)%seg.length];return s.h?[n.c,s.c]:[s.c,n.c]})}
   else V=[[B[0],B[1]],[B[2],B[1]],[B[2],B[3]],[B[0],B[3]]];
   /* paredes: dirección y largo en el dibujo */
-  const W=V.map((v,i)=>{const n=V[(i+1)%V.length],dx=n[0]-v[0],dy=n[1]-v[1];return{dir:Math.abs(dx)>=Math.abs(dy)?(dx>=0?'E':'W'):(dy>=0?'S':'N'),sk:Math.max(1,Math.hypot(dx,dy)),m:'',mx:(v[0]+n[0])/2,my:(v[1]+n[1])/2}}).filter(w=>w.sk>2);
+  const W=V.map((v,i)=>{const n=V[(i+1)%V.length],dx=n[0]-v[0],dy=n[1]-v[1],aa=pdcAngDe(dx,dy);return{dir:aa.dir,ang:aa.ang,sk:Math.max(1,Math.hypot(dx,dy)),m:'',mx:(v[0]+n[0])/2,my:(v[1]+n[1])/2}}).filter(w=>w.sk>2);
   /* medidas escritas con la herramienta Texto cerca de cada pared */
   const TX=(trazos||[]).filter(t=>t.k==='t'&&/\d/.test(t.s||''));
   W.forEach(w=>{let m=null,md=70;TX.forEach(t=>{const d=Math.hypot(t.p[0][0]-w.mx,t.p[0][1]-w.my);const v=pdcN((String(t.s).match(/\d+(?:[.,]\d+)?/)||[''])[0]);if(d<md&&v>0){md=d;m=v}});if(m)w.m=String(m)});
   const xsV=V.map(v=>v[0]),ysV=V.map(v=>v[1]),x0=Math.min(...xsV),y0=Math.min(...ysV);
-  return{walls:W.map(({dir,sk,m})=>({dir,sk:Math.round(sk*10)/10,m})),ok,muros:murosDe(otros),muBox:{x0,y0,w:Math.max(1,Math.max(...xsV)-x0),h:Math.max(1,Math.max(...ysV)-y0)}}}
+  return{walls:W.map(({dir,ang,sk,m})=>Object.assign({dir,sk:Math.round(sk*10)/10,m},ang!=null?{ang}:{})),ok:ok||okD,muros:murosDe(otros),muBox:{x0,y0,w:Math.max(1,Math.max(...xsV)-x0),h:Math.max(1,Math.max(...ysV)-y0)}}}
 /* ---- 2. con las medidas: polígono en metros (se ajusta para que cierre) ---- */
 function pdcPoligono(pd){const EFp=pdcEfectivas(pd),W=(pd.walls||[]).map((w,i)=>Object.assign({},w,{m:EFp.val['w'+i]}));if(W.length<4)return null;
   const dados=W.filter(w=>pdcN(w.m)>0),esc=dados.length?dados.map(w=>pdcN(w.m)/w.sk).sort((a,b)=>a-b)[Math.floor(dados.length/2)]:20/Math.max(...W.map(w=>w.sk));
@@ -7793,7 +7793,7 @@ function pdcSvg(pd,A,o){o=o||{};const C=pdcCol(),G=A.G,S=A.S,u=100,W=G.ancho*u,H
   /* cotas de cada pared */
   const P=G.P;for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length],dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy);if(L<0.05)continue;
     const nxv=dy/L,nyv=-dx/L,mid=[(a[0]+b[0])/2,(a[1]+b[1])/2],sgn=pdcDentro(P,mid[0]+nxv*0.3,mid[1]+nyv*0.3)?-1:1,off=fs*1.6*sgn,
-      ax=a[0]*u+m+nxv*off,ay=a[1]*u+m+nyv*off,bx=b[0]*u+m+nxv*off,by=b[1]*u+m+nyv*off,tx=(ax+bx)/2+nxv*fs*0.9*sgn,ty=(ay+by)/2+nyv*fs*0.9*sgn+fs*0.35,ang=Math.abs(dx)>=Math.abs(dy)?0:-90;
+      ax=a[0]*u+m+nxv*off,ay=a[1]*u+m+nyv*off,bx=b[0]*u+m+nxv*off,by=b[1]*u+m+nyv*off,tx=(ax+bx)/2+nxv*fs*0.9*sgn,ty=(ay+by)/2+nyv*fs*0.9*sgn+fs*0.35,ang=(()=>{let q=Math.atan2(dy,dx)*180/Math.PI;if(q>90)q-=180;if(q<=-90)q+=180;return Math.abs(Math.abs(q)-90)<0.5?-90:Math.abs(q)<0.5?0:Math.round(q*10)/10})();
     s+=`<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#555" stroke-width="${lw}" marker-start="url(#pfl)" marker-end="url(#pfl)"/><line x1="${a[0]*u+m}" y1="${a[1]*u+m}" x2="${ax+nxv*fs*0.3*sgn}" y2="${ay+nyv*fs*0.3*sgn}" stroke="#999" stroke-width="${lw*0.6}"/><line x1="${b[0]*u+m}" y1="${b[1]*u+m}" x2="${bx+nxv*fs*0.3*sgn}" y2="${by+nyv*fs*0.3*sgn}" stroke="#999" stroke-width="${lw*0.6}"/>
       <text x="${tx}" y="${ty}" font-size="${fs}" font-weight="bold" fill="#222" text-anchor="middle" ${ang?`transform="rotate(${ang} ${tx} ${ty-fs*0.35})"`:''}>${pdcF(L)} m</text>`}
   /* pasillo: ancho indicado entre las dos primeras hileras paralelas */
@@ -7831,8 +7831,8 @@ function pdcEditar(id){const x=pdcG(id);if(!x)return abrirPdc();const G=pdcPolig
      <label>Cliente</label><select id="pdcl"><option value="">— ${esc(x.cliente||'Sin cliente')} —</option>${clis.map(c=>`<option value="${c.id}" ${c.id===x.clienteId?'selected':''}>${esc(c.nombre)}</option>`).join('')}</select></div>
    <h3>1. Medidas de las paredes</h3><div class="card">${prev}
      <div class="mut" style="font-size:12px;margin:6px 0">${x.planoId?(x.enderezado===false?'⚠ No se pudo seguir bien el contorno; revisa las paredes. ':'✔ Se enderezó tu dibujo. '):''}Escribe la medida real de cada letra en metros. Las paredes que están de frente y miden lo mismo en el dibujo no llevan letra: toman la medida de su pareja. Las que dejes vacías se calculan en proporción para que el área cierre.</div>
-     ${(x.walls||[]).map((w,i)=>igual(i)?`<div class="row pdwig" style="gap:8px;margin-top:6px"><b style="width:22px;color:#9aa4b1">=</b><span style="width:24px;font-size:18px;color:#9aa4b1">${PDC_DN[w.dir]}</span><input class="pdw" data-i="${i}" type="hidden" value="${esc(w.m)}"><span class="grow mut" style="font-size:13px">Igual que <b>${igual(i)}</b> (de frente)${G?' · '+pdcF(G.L[i])+' m':''}</span><button class="btn sm sec" onclick="pdcLeer('${id}');pdcG('${id}').walls[${i}].suelta=true;save();pdcEditar('${id}')">Separar</button></div>`
-       :`<div class="row" style="gap:8px;margin-top:6px"><b style="width:22px;color:#c0392b">${letra(i)}</b><span style="width:24px;font-size:18px">${PDC_DN[w.dir]}</span><input class="pdw grow" data-i="${i}" type="number" inputmode="decimal" step="0.01" value="${esc(w.m)}" placeholder="${G?pdcF(G.L[i]):''} m" style="margin:0">${w.suelta?`<button class="btn sm sec" title="Volver a igualar con la de enfrente" onclick="pdcLeer('${id}');delete pdcG('${id}').walls[${i}].suelta;save();pdcEditar('${id}')">↔</button>`:''}</div>`).join('')}
+     ${(x.walls||[]).map((w,i)=>igual(i)?`<div class="row pdwig" style="gap:8px;margin-top:6px"><b style="width:22px;color:#9aa4b1">=</b><span style="width:24px;font-size:18px;color:#9aa4b1">${pdcFlecha(w)}</span><input class="pdw" data-i="${i}" type="hidden" value="${esc(w.m)}"><span class="grow mut" style="font-size:13px">Igual que <b>${igual(i)}</b> (de frente)${G?' · '+pdcF(G.L[i])+' m':''}</span><button class="btn sm sec" onclick="pdcLeer('${id}');pdcG('${id}').walls[${i}].suelta=true;save();pdcEditar('${id}')">Separar</button></div>`
+       :`<div class="row" style="gap:8px;margin-top:6px"><b style="width:22px;color:#c0392b">${letra(i)}</b><span style="width:24px;font-size:18px">${pdcFlecha(w)}</span><input class="pdw grow" data-i="${i}" type="number" inputmode="decimal" step="0.01" value="${esc(w.m)}" placeholder="${G?pdcF(G.L[i]):''} m" style="margin:0">${w.suelta?`<button class="btn sm sec" title="Volver a igualar con la de enfrente" onclick="pdcLeer('${id}');delete pdcG('${id}').walls[${i}].suelta;save();pdcEditar('${id}')">↔</button>`:''}</div>`).join('')}
      ${G&&G.aviso.length?`<div style="color:var(--bad);font-size:12.5px;margin-top:6px">⚠ ${G.aviso.map(esc).join(' ')}</div>`:''}
      <div class="mut" style="font-size:12px;margin-top:6px">${G?'Área: <b>'+pdcF(G.area)+' m²</b> · '+pdcF(G.ancho)+' × '+pdcF(G.largo)+' m':''}</div>
      <button class="btn sec sm" style="margin-top:8px" onclick="pdcLeer('${id}');pdcEditar('${id}')">🔄 Actualizar dibujo</button></div>
@@ -7940,7 +7940,7 @@ function pdcCalcar(url,nombre,ini){ini=ini||{};PDT={url,nombre:String(nombre||'P
   const bt=(t,f,id,ex)=>`<button class="btn sec" ${id?'id="'+id+'"':''} style="background:#ffffff22;color:#fff;border:0;${ex||''}" onclick="${f}">${t}</button>`;
   capaCompleta('pdct',`<div class="row" style="padding:10px 12px;gap:8px;background:#0b0f17"><button onclick="cerrarCapa();PDT=null" style="border:0;background:#ffffff22;color:#fff;border-radius:50%;width:38px;height:38px;font-size:18px">✕</button>
      <div class="grow" style="min-width:0"><b style="display:block">${PDT.modo==='muros'?'Dibuja las paredes interiores':PDT.modo==='limpio'?'Dibuja tu plano':'Toca las esquinas'}</b><span id="pdtn" style="font-size:12px;opacity:.85"></span></div></div>
-   <div style="padding:4px 12px 6px;background:#0b0f17;font-size:11.5px;opacity:.9;display:flex;gap:14px;flex-wrap:wrap"><span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${PDC_VERDE};vertical-align:-1px"></i> ${PDT.modo==='muros'?'Inicio del trazo':'Inicio: tócalo para cerrar el área (4 esquinas o más)'}</span><span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${PDC_MAMEY};box-shadow:0 0 0 2px #fff;vertical-align:-1px"></i> Fin: tócalo para terminar ese trazo y dibujar otra pared</span></div>
+   <div style="padding:4px 12px 6px;background:#0b0f17;font-size:11.5px;opacity:.9;display:flex;gap:14px;flex-wrap:wrap"><span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${PDC_VERDE};vertical-align:-1px"></i> ${PDT.modo==='muros'?'Inicio del trazo':'Inicio: tócalo para cerrar el área'}</span><span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${PDC_MAMEY};box-shadow:0 0 0 2px #fff;vertical-align:-1px"></i> Fin: tócalo para terminar ese trazo y dibujar otra pared</span></div>
    <div id="pdtrefbox" class="row" style="display:none;gap:8px;padding:6px 12px;background:#0b0f17;font-size:13px">📏 ¿Cuánto mide esa línea? <input id="pdtrefm" type="number" inputmode="decimal" step="0.01" style="width:90px;margin:0"> m <button class="btn sm" id="pdtrefok" onclick="pdcCalcoRefOk()">OK</button></div>
    <div id="pdtz" style="flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;background:#1b2230"><canvas id="pdtc" style="max-width:100%;max-height:100%;touch-action:none;background:#fff"></canvas></div>
    <div class="row" style="padding:10px 12px 16px;gap:6px;justify-content:center;flex-wrap:wrap;background:#0b0f17">
@@ -7955,14 +7955,14 @@ function pdcCalcoCerrar(P){const a=P[P.length-1],b=P[0],tol=pdcCalcoTol()*1.6,pr
   if(Math.abs(a[0]-b[0])>1&&Math.abs(a[1]-b[1])>1){if(prevH&&Math.abs(a[0]-b[0])<tol)a[0]=b[0];else if(!prevH&&Math.abs(a[1]-b[1])<tol)a[1]=b[1];else P.push(prevH?[a[0],b[1]]:[b[0],a[1]])}return P}
 function pdcCalcoPunto(x,y){if(!PDT)return;if(PDT.ref&&PDT.ref.on){PDT.ref.P.push([x,y]);if(PDT.ref.P.length===2){PDT.ref.on=false;$('#pdtrefbox').style.display='flex';setTimeout(()=>{try{$('#pdtrefm').focus()}catch(e){}},50)}return pdcCalcoPintar()}const cur=PDT.T[PDT.T.length-1],P=cur.P,q=P[P.length-1],tol=pdcCalcoTol();
   /* punto verde: cerrar el área */
-  if(PDT.modo!=='muros'&&!PDT.T.some(t=>t.c)&&P.length>=3&&Math.hypot(x-P[0][0],y-P[0][1])<tol){if(P.length<4)return toast('Para cerrar el área toca al menos 4 esquinas. Para terminar esta pared toca el punto mamey');pdcCalcoCerrar(P);cur.c=true;PDT.T.push({P:[],c:false});toast('✔ Área cerrada. Puedes dibujar paredes adentro o tocar «Listo»');return pdcCalcoPintar()}
+  if(PDT.modo!=='muros'&&!PDT.T.some(t=>t.c)&&P.length>=3&&Math.hypot(x-P[0][0],y-P[0][1])<tol){if(P.length<(pdcModoAng()==='90'?4:3))return toast('Para cerrar el área toca al menos '+(pdcModoAng()==='90'?4:3)+' esquinas. Para terminar esta pared toca el punto mamey');pdcCalcoCerrar(P);cur.c=true;PDT.T.push({P:[],c:false});toast('✔ Área cerrada. Puedes dibujar paredes adentro o tocar «Listo»');return pdcCalcoPintar()}
   /* punto mamey: terminar este trazo y empezar otro */
   if(P.length>=2&&Math.hypot(x-q[0],y-q[1])<tol)return pdcCalcoTerminar();
-  if(q){if(Math.abs(x-q[0])>=Math.abs(y-q[1]))y=q[1];else x=q[0]}
+  if(q){const sn=pdcSnapAng(q,x,y);x=sn[0];y=sn[1]}
   /* pegar a las paredes que ya están */
   const S=pdcCalcoSegs();
   if(!q){let best=null;S.forEach(([a,b])=>{const dx=b[0]-a[0],dy=b[1]-a[1],L2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L2)),px=a[0]+t*dx,py=a[1]+t*dy,d=Math.hypot(x-px,y-py);if(d<tol&&(!best||d<best.d))best={d,px,py}});if(best){x=best.px;y=best.py}}
-  else{const hz=y===q[1];S.forEach(([a,b])=>{if(hz&&Math.abs(a[0]-b[0])<1&&y>=Math.min(a[1],b[1])-1&&y<=Math.max(a[1],b[1])+1&&Math.abs(x-a[0])<tol)x=a[0];if(!hz&&Math.abs(a[1]-b[1])<1&&x>=Math.min(a[0],b[0])-1&&x<=Math.max(a[0],b[0])+1&&Math.abs(y-a[1])<tol)y=a[1]})}
+  else{const hz=y===q[1],vt=x===q[0];S.forEach(([a,b])=>{if(hz&&Math.abs(a[0]-b[0])<1&&y>=Math.min(a[1],b[1])-1&&y<=Math.max(a[1],b[1])+1&&Math.abs(x-a[0])<tol)x=a[0];if(vt&&!hz&&Math.abs(a[1]-b[1])<1&&x>=Math.min(a[0],b[0])-1&&x<=Math.max(a[0],b[0])+1&&Math.abs(y-a[1])<tol)y=a[1]})}
   P.push([x,y]);pdcCalcoPintar()}
 function pdcCalcoRef(){if(!PDT)return;PDT.ref={on:true,P:[]};PDT.esc=0;$('#pdtrefbox').style.display='none';toast('📏 Toca los dos extremos de algo que sepas cuánto mide (una pared, una puerta…)');pdcCalcoPintar()}
 function pdcCalcoRefOk(){if(!PDT||!PDT.ref||PDT.ref.P.length<2)return;const m=pdcNum($('#pdtrefm').value),R=PDT.ref.P,d=Math.hypot(R[1][0]-R[0][0],R[1][1]-R[0][1]);if(!(m>0)||d<2)return toast('Escribe cuántos metros mide');PDT.esc=m/d;$('#pdtrefbox').style.display='none';toast('📏 Escala lista: las paredes saldrán con su medida');pdcCalcoPintar()}
@@ -7987,7 +7987,7 @@ function pdcCalcoListo(){if(!PDT)return;if(PDT.modo==='muros'){const x=pdcG(PDT.
   /* si no: tus trazos quedan tal cual y el área es el rectángulo que los encierra */
   if(!per){const A=[].concat(...T.map(t=>t.P));if(!A.length)return toast('Dibuja el área o las paredes primero');const xs=A.map(p=>p[0]),ys=A.map(p=>p[1]),mg=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys))*0.06,x0=Math.min(...xs)-mg,y0=Math.min(...ys)-mg,x1=Math.max(...xs)+mg,y1=Math.max(...ys)+mg;
     if(x1-x0<10+2*mg||y1-y0<10+2*mg)return toast('Dibuja un poco más: hace falta largo y ancho para el área');per={P:[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],c:true};caja=true}
-  const W=pdcParedesDeVertices(per.P);if(W.length<4){toast('Faltan esquinas: el área necesita al menos 4 paredes');return}if(PDT.esc>0)W.forEach(w=>w.m=String(Math.round(w.sk*PDT.esc*100)/100));
+  const W=pdcParedesDeVertices(per.P);if(W.length<3){toast('Faltan esquinas: el área necesita al menos 3 paredes');return}if(PDT.esc>0)W.forEach(w=>w.m=String(Math.round(w.sk*PDT.esc*100)/100));
   const xs=per.P.map(p=>p[0]),ys=per.P.map(p=>p[1]),x0=Math.min(...xs),y0=Math.min(...ys),r1=v=>Math.round(v*10)/10;
   const muros=T.filter(t=>t!==per).map(t=>({px:(t.c?t.P.concat([t.P[0]]):t.P).map(p=>[r1(p[0]),r1(p[1])])}));
   const x={id:uid(),creado:Date.now(),editado:Date.now(),planoId:'',archivo:PDT.nombre,foto:PDT.url,clienteId:'',cliente:'',nombre:PDT.nombre,walls:W,obst:[],muros,muBox:{x0,y0,w:Math.max(1,Math.max(...xs)-x0),h:Math.max(1,Math.max(...ys)-y0)},sis:Object.assign({},PDC_SIS_DEF),enderezado:true};
@@ -8189,7 +8189,7 @@ function pdcMurosSvg(pd,G,u,m,fs,lw,C,mw,cotas){let s='';pdcMurosM(pd,G).forEach
 /* los racks no se ponen sobre las paredes interiores (se respeta la separación a la pared) */
 const _pdcAc2=pdcAcomodar;pdcAcomodar=function(pd){if(!(pd.muros||[]).length)return _pdcAc2(pd);const G=pdcPoligono(pd);if(!G)return _pdcAc2(pd);
   const S=Object.assign({},PDC_SIS_DEF,pd.sis||{}),mg=Math.max(0.1,pdcN(S.margen)||0)+0.1,ex=[];
-  pdcMurosM(pd,G).forEach(L=>{for(let i=0;i<L.length-1;i++){const a=L[i],b=L[i+1];ex.push({x:Math.min(a[0],b[0])-mg,y:Math.min(a[1],b[1])-mg,w:Math.abs(a[0]-b[0])+2*mg,h:Math.abs(a[1]-b[1])+2*mg})}});
+  pdcMurosM(pd,G).forEach(L=>{for(let i=0;i<L.length-1;i++){const a=L[i],b=L[i+1];pdcObstSeg(a,b,mg).forEach(r=>ex.push(r))}});
   return _pdcAc2(Object.assign({},pd,{obst:(pd.obst||[]).concat(ex)}))};
 /* en el editor: lista de paredes interiores con su largo */
 const _pdcEd2=pdcEditar;pdcEditar=function(id){_pdcEd2.apply(this,arguments);try{const x=pdcG(id),w=document.querySelector('.pdw');if(!x||!w||!(x.muros||[]).length||$('#pdcmu'))return;const G=pdcPoligono(x),M=pdcMurosM(x,G),EFx=pdcEfectivas(x);
@@ -8228,7 +8228,7 @@ function pdcFilaMal(pd,G,f){const e=0.02,inn=[[f.x+e,f.y+e],[f.x+f.w-e,f.y+e],[f
   const cr=(a)=>f.x<a.x+a.w&&f.x+f.w>a.x&&f.y<a.y+a.h&&f.y+f.h>a.y;
   for(const o of pd.obst||[]){const r={x:pdcN(o.x),y:pdcN(o.y),w:pdcN(o.w),h:pdcN(o.h)};if(r.w>0&&cr(r))return 'pisa '+(o.t||'una zona')}
   for(const e2 of pd.aber||[]){const g=pdcAberGeo(G,e2);if(!(g.libre>0))continue;const a=g.pt(g.d,0),b=g.pt(g.d+g.w,g.libre);if(cr({x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),w:Math.abs(a[0]-b[0]),h:Math.abs(a[1]-b[1])}))return 'tapa '+(e2.t||'una puerta')}
-  for(const L of pdcMurosM(pd,G))for(let i=0;i<L.length-1;i++){const a=L[i],b=L[i+1];if(cr({x:Math.min(a[0],b[0])-0.1,y:Math.min(a[1],b[1])-0.1,w:Math.abs(a[0]-b[0])+0.2,h:Math.abs(a[1]-b[1])+0.2}))return 'pisa una pared interior'}
+  for(const L of pdcMurosM(pd,G))for(let i=0;i<L.length-1;i++){const a=L[i],b=L[i+1];if(pdcObstSeg(a,b,0.1).some(cr))return 'pisa una pared interior'}
   return ''}
 /* entrepiso como elemento (plataforma con columnas cada 3 m) */
 PDC_EL.entrepiso={n:'Entrepiso',w:8,h:6};PDC_EL_ORD.push('entrepiso');
@@ -8690,6 +8690,901 @@ const _pintarInstForm1=pintarInstForm;pintarInstForm=function(id){_pintarInstFor
 function pdcQRRacks(id){const x=pdcG(id);if(!x)return;const e=instalaciones().find(i=>i.pdcId===id);if(e){toast('Ya hay una instalación con este plano: '+e.codigo);return instForm(e.id)}const A=pdcAcomodar(x),S=A.S;
   instForm(null,{clienteId:x.clienteId||'',pdcId:id,fila:'',niveles:String(Math.round(pdcN(S.niv)||0)+(S.piso?1:0)),capacidad:pdcN(S.cap)>0?String(pdcN(S.cap)):'',sistema:String(S.tipo||'RACK SELECTIVO').toUpperCase()})}
 const _pdcRes5=pdcResultado;pdcResultado=function(id){_pdcRes5.apply(this,arguments);try{const f=$('#pdcfir');if(f&&!$('#pdcqrr')){const d=document.createElement('div');d.className='btns';d.style.marginTop='8px';d.innerHTML=`<button class="btn sec" id="pdcqrr" onclick="pdcQRRacks('${id}')">🏷 QR para los racks (con este plano)</button>`;f.parentNode.after(d)}}catch(e){}};
+/* ================= v12.7: líneas en diagonal (45° o libre) en todas las formas de dibujar el plano ================= */
+const pdcModoAng=()=>(typeof PDT!=='undefined'&&PDT&&PDT.ang)||kvGet('pdc_ang')||'90';
+const pdcAngW=w=>w.ang!=null&&w.ang!==''?+w.ang:{E:0,S:90,W:180,N:270}[w.dir]||0;
+function pdcAngDe(dx,dy){let t=Math.atan2(dy,dx)*180/Math.PI;if(t<0)t+=360;const k=Math.round(t/90)%4;return{dir:['E','S','W','N'][k],ang:Math.abs(t-Math.round(t/90)*90)>0.5?Math.round(t*10)/10:null}}
+/* paredes a partir de las esquinas: rectas como antes; las diagonales guardan su ángulo */
+pdcParedesDeVertices=function(V){return V.map((v,i)=>{const n=V[(i+1)%V.length],dx=n[0]-v[0],dy=n[1]-v[1],a=pdcAngDe(dx,dy),w={dir:a.dir,sk:Math.round(Math.max(1,Math.hypot(dx,dy))*10)/10,m:''};if(a.ang!=null)w.ang=a.ang;return w}).filter(w=>w.sk>2)};
+/* al dibujar: 90° (como antes), 45° o libre */
+function pdcSnapAng(q,x,y){const md=pdcModoAng(),dx=x-q[0],dy=y-q[1];if(md==='libre')return[x,y];if(md!=='45'){return Math.abs(dx)>=Math.abs(dy)?[x,q[1]]:[q[0],y]}
+  const t=Math.round(Math.atan2(dy,dx)/(Math.PI/4))*(Math.PI/4),u=[Math.cos(t),Math.sin(t)],L=dx*u[0]+dy*u[1];return[q[0]+u[0]*L,q[1]+u[1]*L].map(v=>Math.round(v*10)/10)}
+const _pdcCC=pdcCalcoCerrar;pdcCalcoCerrar=function(P){if(pdcModoAng()!=='90')return P;return _pdcCC(P)};
+const _pdcCalcar3=pdcCalcar;pdcCalcar=function(){_pdcCalcar3.apply(this,arguments);if(PDT)PDT.ang=kvGet('pdc_ang')||'90';setTimeout(()=>{const rb=$('#pdtrefbox');if(!rb||$('#pdtang'))return;const d=document.createElement('div');d.id='pdtang';d.className='row';d.style.cssText='gap:6px;padding:6px 12px;background:#0b0f17;font-size:12.5px;color:#fff;flex-wrap:wrap;align-items:center';
+  d.innerHTML='<span>Líneas:</span>'+[['90','⊾ 90°'],['45','↗ 45°'],['libre','✎ Libre']].map(([k,t])=>`<button data-a="${k}" onclick="pdcSetAng('${k}')" style="border:0;border-radius:14px;padding:5px 10px;font-size:12.5px;background:${PDT.ang===k?'#1a73e8':'#ffffff22'};color:#fff">${t}</button>`).join('')+'<span style="opacity:.75" id="pdtangt"></span>';rb.before(d);pdcSetAng(PDT.ang,true)},70)};
+function pdcSetAng(k,silencio){if(!PDT)return;PDT.ang=k;kvSet('pdc_ang',k);document.querySelectorAll('#pdtang button').forEach(b=>b.style.background=b.dataset.a===k?'#1a73e8':'#ffffff22');const t=$('#pdtangt');if(t)t.textContent=k==='90'?'rectas a 90°':k==='45'?'rectas y diagonales exactas':'cualquier ángulo';if(!silencio)toast(k==='90'?'Líneas a 90° (como antes)':k==='45'?'Líneas a 90° y en diagonal a 45°':'Líneas en cualquier ángulo')}
+/* la pared: punto de inicio (izquierda o arriba), dirección y lado de adentro; sirve en diagonal */
+pdcPared=function(G,i){const P=G.P,n=P.length,a=P[((i%n)+n)%n],b=P[(i+1)%n],dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1e-9,hz=Math.abs(dy)<1e-6;let t=[dx/L,dy/L],o=a;if(t[0]<-1e-9||(Math.abs(t[0])<=1e-9&&t[1]<0)){t=[-t[0],-t[1]];o=b}
+  let nv=[-t[1],t[0]];const mx=o[0]+t[0]*L/2,my=o[1]+t[1]*L/2;if(!pdcDentro(P,mx+nv[0]*0.05,my+nv[1]*0.05))nv=[-nv[0],-nv[1]];return{o,t,n:nv,L,hz}};
+/* el área con paredes en diagonal: se cierra ajustando dos paredes sin medida */
+const _pdcPol1=pdcPoligono;pdcPoligono=function(pd){const W0=pd.walls||[];if(!W0.some(w=>w.ang!=null&&w.ang!==''))return _pdcPol1(pd);if(W0.length<3)return null;
+  const EFp=pdcEfectivas(pd),W=W0.map((w,i)=>Object.assign({},w,{m:EFp.val['w'+i]})),U=W.map(w=>{const a=pdcAngW(w)*Math.PI/180;return[Math.cos(a),Math.sin(a)]});
+  const dados=W.filter(w=>pdcN(w.m)>0),esc=dados.length?dados.map(w=>pdcN(w.m)/w.sk).sort((a,b)=>a-b)[Math.floor(dados.length/2)]:20/Math.max(...W.map(w=>w.sk)),L=W.map(w=>pdcN(w.m)>0?pdcN(w.m):w.sk*esc),aviso=[];
+  let ex=0,ey=0;W.forEach((w,i)=>{ex+=U[i][0]*L[i];ey+=U[i][1]*L[i]});
+  if(Math.hypot(ex,ey)>=0.005){const lib=W.map((w,i)=>i).filter(i=>!(pdcN(W[i].m)>0));let best=null;
+    for(const a of lib)for(const b of lib){if(b<=a)continue;const cr=U[a][0]*U[b][1]-U[a][1]*U[b][0];if(Math.abs(cr)<0.2)continue;const da=(-ex*U[b][1]+ey*U[b][0])/cr,db=(-U[a][0]*ey+U[a][1]*ex)/cr;if(L[a]+da<=0.2||L[b]+db<=0.2)continue;const sc=Math.abs(cr)*(L[a]+L[b]);if(!best||sc>best.sc)best={a,b,da,db,sc}}
+    if(best){L[best.a]+=best.da;L[best.b]+=best.db}else aviso.push('Las medidas no cierran por '+pdcF(Math.hypot(ex,ey))+' m: revísalas.')}
+  let x=0,y=0;const V=[[0,0]];W.forEach((w,i)=>{x+=U[i][0]*L[i];y+=U[i][1]*L[i];V.push([x,y])});V.pop();
+  const mx=Math.min(...V.map(v=>v[0])),my=Math.min(...V.map(v=>v[1])),P=V.map(v=>[Math.round((v[0]-mx)*1000)/1000,Math.round((v[1]-my)*1000)/1000]);let ar=0;for(let i=0;i<P.length;i++){const n=P[(i+1)%P.length];ar+=P[i][0]*n[1]-n[0]*P[i][1]}
+  return{P,L,area:Math.abs(ar)/2,ancho:Math.max(...P.map(v=>v[0])),largo:Math.max(...P.map(v=>v[1])),aviso}};
+/* letras: se emparejan las líneas paralelas (también diagonales) de frente y del mismo largo */
+pdcEfectivas=function(pd){const W=pd.walls||[],segs=[];let x=0,y=0;const V=[[0,0]];W.forEach(w=>{const a=pdcAngW(w)*Math.PI/180;x+=Math.cos(a)*(+w.sk||0);y+=Math.sin(a)*(+w.sk||0);V.push([x,y])});
+  const xs=V.map(v=>v[0]),ys=V.map(v=>v[1]),x0=Math.min(...xs),y0=Math.min(...ys),bw=Math.max(1e-9,Math.max(...xs)-x0),bh=Math.max(1e-9,Math.max(...ys)-y0),nP=q=>[(q[0]-x0)/bw,(q[1]-y0)/bh];
+  const add=(k,a,b,m,suelta)=>{const dx=b[0]-a[0],dy=b[1]-a[1];let th=Math.atan2(dy,dx);if(th<0)th+=Math.PI;if(th>=Math.PI-1e-9)th-=Math.PI;const t=[Math.cos(th),Math.sin(th)],nn=[-t[1],t[0]],pa=a[0]*t[0]+a[1]*t[1],pb=b[0]*t[0]+b[1]*t[1],mc=((a[0]+b[0])/2)*nn[0]+((a[1]+b[1])/2)*nn[1];
+    segs.push({k,cls:th*180/Math.PI,c:mc,s0:Math.min(pa,pb),s1:Math.max(pa,pb),m:String(m==null?'':m).trim(),suelta:!!suelta})};
+  W.forEach((w,i)=>add('w'+i,nP(V[i]),nP(V[i+1]),w.m,w.suelta));
+  const B=pd.muBox;if(B&&B.w&&B.h)(pd.muros||[]).forEach((mu,i)=>{const P=(mu.px||[]).map(([a,b])=>[(a-B.x0)/B.w,(b-B.y0)/B.h]);for(let j=0;j<P.length-1;j++)add('m'+i+'.'+j,P[j],P[j+1],(mu.m||[])[j],(mu.sueltas||[])[j])});
+  segs.forEach(z=>z.L=z.s1-z.s0);const par=(a,b)=>{const d=Math.abs(a.cls-b.cls);return d<2||d>178},sigue={},lider={};
+  segs.forEach((b,ib)=>{if(b.suelta||b.L<0.02)return;let best=null;
+    segs.forEach((a,ia)=>{if(ia>=ib||!par(a,b)||sigue[a.k]||lider[a.k]||a.L<0.02)return;const cb=Math.abs(a.cls-b.cls)>178?-b.c:b.c,s0=Math.abs(a.cls-b.cls)>178?-b.s1:b.s0,s1=Math.abs(a.cls-b.cls)>178?-b.s0:b.s1,gap=Math.abs(a.c-cb);
+      if(gap<0.02||Math.abs(a.L-b.L)>0.1*Math.max(a.L,b.L))return;const ov=Math.min(a.s1,s1)-Math.max(a.s0,s0);if(ov<0.6*Math.min(a.L,b.L))return;
+      const lo=Math.min(a.c,cb),hi=Math.max(a.c,cb);if(segs.some(o=>o!==a&&o!==b&&par(o,a)&&(a.k[0]==='m'||b.k[0]==='m'||o.k[0]==='w')&&o.c>lo+1e-6&&o.c<hi-1e-6&&Math.min(o.s1,a.s1)-Math.max(o.s0,a.s0)>0.3*a.L))return;if(!best||gap<best.gap)best={a,gap}});
+    if(best){sigue[b.k]=best.a.k;lider[best.a.k]=b.k}});
+  const letra={};let n=0;segs.forEach(z=>{if(!sigue[z.k])letra[z.k]=pdcLetraN(n++)});
+  const val={};segs.forEach(z=>{val[z.k]=z.m!==''?z.m:(sigue[z.k]?((segs.find(o=>o.k===sigue[z.k])||{}).m||''):'')});
+  return{segs,sigue,lider,letra,val,et:k=>letra[k]||('='+(letra[sigue[k]]||''))}};
+/* flecha de cada pared en la lista (diagonales con su flecha o su ángulo) */
+function pdcFlecha(w){const a=pdcAngW(w);if(w.ang==null||w.ang==='')return PDC_DN[w.dir];const k=Math.round(a/45)%8;return Math.abs(a-Math.round(a/45)*45)<0.6?['→','↘','↓','↙','←','↖','↑','↗'][k]:'∠'+Math.round(a)+'°'}
+/* paredes dibujadas a mano: se enderezan a 90° o a 45° según como se trazaron */
+const pdcSnapTrazo=t=>{let d=t*180/Math.PI;const a90=Math.round(d/90)*90;return(Math.abs(d-a90)<=20?a90:Math.round(d/45)*45)*Math.PI/180};
+pdcMuroOrto=function(c,eps){const R=pdcRdp(c,eps),Q=[R[0].slice()];let ult=null;for(const p of R.slice(1)){const pv=Q[Q.length-1],dx=p[0]-pv[0],dy=p[1]-pv[1];if(Math.hypot(dx,dy)<eps)continue;const t=pdcSnapTrazo(Math.atan2(dy,dx)),u=[Math.cos(t),Math.sin(t)],L=dx*u[0]+dy*u[1],np=[pv[0]+u[0]*L,pv[1]+u[1]*L];
+  if(ult!=null&&Math.abs(Math.cos(t-ult))>0.999&&Q.length>=2){const a=Q[Q.length-2],dx2=p[0]-a[0],dy2=p[1]-a[1],L2=dx2*u[0]+dy2*u[1];Q[Q.length-1]=[a[0]+u[0]*L2,a[1]+u[1]*L2];continue}Q.push(np);ult=t}
+  return Q.length>=2?Q.map(q=>[Math.round(q[0]*10)/10,Math.round(q[1]*10)/10]):null};
+/* contorno con diagonales (plano a mano): cada lado se endereza a 90° o 45° y las esquinas salen del cruce de los lados */
+function pdcVerticesDiag(S,per){const segs=[];for(let i=0;i<S.length-1;i++){const a=S[i],b=S[i+1],dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy);if(L<per*0.03)continue;segs.push({p:[(a[0]+b[0])/2,(a[1]+b[1])/2],t:pdcSnapTrazo(Math.atan2(dy,dx)),L})}
+  if(!segs.some(s=>{const d=((s.t*180/Math.PI)%90+90)%90;return d>10&&d<80}))return null;
+  const M=[];segs.forEach(s=>{const u=M[M.length-1];if(u&&Math.abs(u.t-s.t)<1e-6){const w=u.L+s.L;u.p=[(u.p[0]*u.L+s.p[0]*s.L)/w,(u.p[1]*u.L+s.p[1]*s.L)/w];u.L=w}else M.push(Object.assign({},s))});
+  if(M.length>1&&Math.abs(M[0].t-M[M.length-1].t)<1e-6){const a=M.pop(),u=M[0],w=u.L+a.L;u.p=[(u.p[0]*u.L+a.p[0]*a.L)/w,(u.p[1]*u.L+a.p[1]*a.L)/w];u.L=w}if(M.length<3)return null;
+  const V=[];for(let i=0;i<M.length;i++){const A=M[(i-1+M.length)%M.length],Bq=M[i],da=[Math.cos(A.t),Math.sin(A.t)],db=[Math.cos(Bq.t),Math.sin(Bq.t)],cr=da[0]*db[1]-da[1]*db[0];if(Math.abs(cr)<1e-6)continue;const rx=Bq.p[0]-A.p[0],ry=Bq.p[1]-A.p[1],s=(rx*db[1]-ry*db[0])/cr;V.push([A.p[0]+da[0]*s,A.p[1]+da[1]*s])}return V.length>=3?V:null}
+/* paredes interiores en diagonal: los racks no se ponen encima (franja a lo largo de la pared) */
+function pdcObstSeg(a,b,mg){const dx=b[0]-a[0],dy=b[1]-a[1];if(Math.abs(dx)<0.01||Math.abs(dy)<0.01)return[{x:Math.min(a[0],b[0])-mg,y:Math.min(a[1],b[1])-mg,w:Math.abs(dx)+2*mg,h:Math.abs(dy)+2*mg}];
+  const L=Math.hypot(dx,dy),n=Math.max(2,Math.ceil(L/0.2)),R=[];for(let i=0;i<=n;i++){const x=a[0]+dx*i/n,y=a[1]+dy*i/n;R.push({x:x-mg-0.1,y:y-mg-0.1,w:2*mg+0.2,h:2*mg+0.2})}return R}
+/* ================= v12.8: plano con la cámara (realidad aumentada, ARCore) ================= */
+const PDC_CUADROS=[0.25,0.5,1,2,5,10];
+/* las esquinas medidas (metros sobre el piso) se acomodan: la primera pared acostada, cada pared al ángulo del modo (90°, 45° o libre) sin cambiarle el largo */
+function pdcARAcomodar(pts,modo){let P=(pts||[]).filter(p=>p&&isFinite(p[0])&&isFinite(p[1])).map(p=>[+p[0],+p[1]]);
+  if(P.length>=4&&Math.hypot(P[0][0]-P[P.length-1][0],P[0][1]-P[P.length-1][1])<0.15)P.pop();
+  P=P.filter((p,i)=>!i||Math.hypot(p[0]-P[i-1][0],p[1]-P[i-1][1])>=0.05);if(P.length<2)return [];
+  const a0=Math.atan2(P[1][1]-P[0][1],P[1][0]-P[0][0]),paso=modo==='libre'?0:modo==='45'?Math.PI/4:Math.PI/2;
+  const S=[];for(let i=1;i<P.length;i++){const dx=P[i][0]-P[i-1][0],dy=P[i][1]-P[i-1][1];let an=Math.atan2(dy,dx)-a0;if(paso)an=Math.round(an/paso)*paso;S.push({an,L:Math.hypot(dx,dy)})}
+  /* paredes seguidas en la misma dirección se juntan */
+  const J=[];S.forEach(s=>{const u=J[J.length-1];if(u&&paso&&Math.abs(Math.cos(u.an-s.an)-1)<1e-6)u.L+=s.L;else J.push({an:s.an,L:s.L})});
+  const R=[[0,0]];J.forEach(s=>{const q=R[R.length-1];let x=q[0]+Math.cos(s.an)*s.L,y=q[1]+Math.sin(s.an)*s.L;if(Math.abs(x)<1e-9)x=0;if(Math.abs(y)<1e-9)y=0;R.push([x,y])});return R}
+/* el cuadro más chico en el que cabe el área en la hoja (35 × 25 cuadros, con margen) */
+function pdcARCuadro(R){const xs=R.map(p=>p[0]),ys=R.map(p=>p[1]),w=Math.max(...xs)-Math.min(...xs),h=Math.max(...ys)-Math.min(...ys);return PDC_CUADROS.find(c=>w/c<=31&&h/c<=21)||10}
+function pdcDesdeAR(pts){const md=pdcModoAng(),R=pdcARAcomodar(pts,md);if(R.length<3)return toast('Hacen falta al menos 3 esquinas para el área');
+  const c=pdcARCuadro(R);kvSet('pdc_cuadro',String(c));pdcPlanoLimpio();if(!PDT)return;PDT.cuadro=c;PDT.esc=c/PDC_CUAD;PDT.ar=true;PDT.nombre='Plano con la cámara '+fFecha(hoy());
+  const xs=R.map(p=>p[0]),ys=R.map(p=>p[1]),px=PDC_CUAD/c,ox=(1400-(Math.max(...xs)-Math.min(...xs))*px)/2-Math.min(...xs)*px,oy=(1000-(Math.max(...ys)-Math.min(...ys))*px)/2-Math.min(...ys)*px;
+  const P=R.map(p=>[Math.round((ox+p[0]*px)*10)/10,Math.round((oy+p[1]*px)*10)/10]);
+  pdcCalcoCerrar(P);PDT.T=[{P,c:true},{P:[],c:false}];pdcCalcoPintar();
+  const per=R.reduce((s,p,i)=>i?s+Math.hypot(p[0]-R[i-1][0],p[1]-R[i-1][1]):s,0);
+  toast('📷 '+(P.length)+' esquinas · '+pdcF(per)+' m medidos. Revisa, dibuja las paredes de adentro si hace falta y toca «✔ Listo»; luego corriges cualquier medida tocando la línea');return P}
+window.__planoAR=function(pts,err){if(!pts){if(err)toast(err);return}try{pdcDesdeAR(pts)}catch(e){console.log('planoAR',e);toast('No se pudo armar el plano con lo medido')}};
+let PDC_ARN=0;
+function pdcCamaraAR(){if(!AND||!AND.abrirPlanoAR)return toast('📷 El plano con la cámara está en la app de Android');let st='no';try{st=AND.arDisponible()}catch(e){}
+  if(st==='revisando'&&PDC_ARN<6){PDC_ARN++;return setTimeout(pdcCamaraAR,500)}PDC_ARN=0;
+  if(st==='no'||st==='revisando')return toast('Este teléfono no tiene la cámara de realidad aumentada (ARCore). Usa «📝 Plano en limpio» o «✏️ Desde un plano a mano»');
+  if(st==='instalar')toast('Hace falta «Servicios de Google Play para RA»: el teléfono te pedirá instalarlo (es gratis)');
+  else toast('Apunta el círculo a cada esquina del piso, en orden, y toca «＋ Esquina»');AND.abrirPlanoAR()}
+const _abrirPdc3=abrirPdc;abrirPdc=function(){_abrirPdc3.apply(this,arguments);try{const l=$('#pdclimpio');if(l&&!$('#pdccam')&&AND&&AND.abrirPlanoAR){const b=document.createElement('button');b.className='btn sec';b.id='pdccam';b.innerHTML='📷 Con la cámara (RA)';b.onclick=()=>pdcCamaraAR();l.after(b)}}catch(e){console.log('abrirPdc3',e)}};
+
+/* ================= v12.9: guardar el «Plano en limpio» tal como está (sin racks) y seguirlo después ================= */
+const pdcLimpios=()=>db.planosLimpios||(db.planosLimpios=[]);
+const pdcLimpioTrazos=()=>PDT?PDT.T.filter(t=>t.P.length).map(t=>({P:t.P.map(p=>[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10]),c:!!t.c})):[];
+const pdcLimpioFirma=()=>JSON.stringify([pdcLimpioTrazos(),PDT&&PDT.cuadro]);
+function pdcLimpioGuardar(callado){if(!PDT||PDT.modo!=='limpio')return false;const T=pdcLimpioTrazos();if(!T.some(t=>t.P.length>=2)){if(!callado)toast('Dibuja algo primero (al menos una pared)');return false}
+  let x=PDT.borr&&pdcLimpios().find(b=>b.id===PDT.borr);
+  if(!x){let n=PDT.nombre||('Plano en limpio '+fFecha(hoy()));if(!callado){const r=prompt('Nombre del plano:',n);if(r===null)return false;n=r.trim()||n}x={id:uid(),creado:Date.now(),nombre:n};pdcLimpios().push(x);PDT.borr=x.id;PDT.nombre=n}
+  Object.assign(x,{T,cuadro:PDT.cuadro||1,ang:pdcModoAng(),editado:Date.now()});save();PDT.firma=pdcLimpioFirma();pdcLimpioEstado();
+  if(!callado)toast('💾 Plano guardado: lo encuentras en Proyecto desde cero → «Planos en limpio guardados»');return true}
+function pdcLimpioEstado(){const e=$('#pdtgst');if(!e||!PDT)return;const ok=PDT.borr&&PDT.firma===pdcLimpioFirma();e.textContent=ok?'✓ Guardado':PDT.borr?'● Cambios sin guardar':'';e.style.color=ok?'#5fd38a':'#ffb36b'}
+function pdcLimpioSalir(){if(PDT&&PDT.modo==='limpio'&&pdcLimpioTrazos().some(t=>t.P.length>=2)&&PDT.firma!==pdcLimpioFirma()){if(confirm('¿Guardar el plano antes de salir?\n\nAceptar = guardar · Cancelar = salir sin guardar')){if(!pdcLimpioGuardar())return}}cerrarCapa();PDT=null}
+/* abrir uno guardado para seguir dibujándolo */
+function pdcAbrirLimpio(id){const x=pdcLimpios().find(b=>b.id===id);if(!x)return;kvSet('pdc_cuadro',String(x.cuadro||1));if(x.ang)kvSet('pdc_ang',x.ang);pdcPlanoLimpio();if(!PDT)return;
+  PDT.T=JSON.parse(JSON.stringify(x.T||[])).concat([{P:[],c:false}]);PDT.borr=x.id;PDT.nombre=x.nombre;PDT.cuadro=x.cuadro||1;PDT.esc=PDT.cuadro/PDC_CUAD;PDT.firma=pdcLimpioFirma();pdcCalcoPintar();toast('📝 '+x.nombre+': sigue dibujando o toca «✔ Listo» para hacer el proyecto')}
+function pdcBorrarLimpio(id){const x=pdcLimpios().find(b=>b.id===id);if(!x||!confirm('¿Borrar el plano «'+x.nombre+'»?'))return;db.planosLimpios=pdcLimpios().filter(b=>b.id!==id);save();toast('Plano borrado');abrirPdc()}
+function pdcRenombrarLimpio(id){const x=pdcLimpios().find(b=>b.id===id);if(!x)return;const r=prompt('Nombre del plano:',x.nombre);if(r===null||!r.trim())return;x.nombre=r.trim();x.editado=Date.now();save();abrirPdc()}
+/* miniatura del dibujo */
+function pdcLimpioMini(x){const A=[].concat(...(x.T||[]).map(t=>t.P));if(!A.length)return '';const xs=A.map(p=>p[0]),ys=A.map(p=>p[1]),x0=Math.min(...xs),y0=Math.min(...ys),w=Math.max(1,Math.max(...xs)-x0),h=Math.max(1,Math.max(...ys)-y0),m=Math.max(w,h)*0.08;
+  return `<svg viewBox="${x0-m} ${y0-m} ${w+2*m} ${h+2*m}" style="width:54px;height:44px;flex:none;background:#fff;border:1px solid var(--line,#dde3ec);border-radius:8px">${(x.T||[]).filter(t=>t.P.length>=2).map(t=>`<path d="M${t.P.map(p=>p[0]+' '+p[1]).join('L')}${t.c?'Z':''}" fill="${t.c?'rgba(232,137,47,.15)':'none'}" stroke="#e8892f" stroke-width="${Math.max(w,h)/40}" stroke-linejoin="round"/>`).join('')}</svg>`}
+/* botón «Guardar» en la hoja y el ✕ pregunta si hay cambios */
+const _pdcLimpio9=pdcPlanoLimpio;pdcPlanoLimpio=function(){_pdcLimpio9.apply(this,arguments);if(PDT)PDT.firma=pdcLimpioFirma();
+  setTimeout(()=>{if(!PDT||PDT.modo!=='limpio')return;const ok=$('#pdtok');if(ok&&!$('#pdtgua')){const b=document.createElement('button');b.className='btn sec';b.id='pdtgua';b.style.cssText='background:#ffffff22;color:#fff;border:0';b.innerHTML='💾 Guardar';b.onclick=()=>pdcLimpioGuardar();ok.before(b)}
+    const x=document.querySelector('#pdtn');if(x&&!$('#pdtgst')){const s=document.createElement('span');s.id='pdtgst';s.style.cssText='font-size:12px;font-weight:700;margin-left:6px';x.after(s)}
+    const cerrar=[...document.querySelectorAll('button')].find(b=>(b.getAttribute('onclick')||'').indexOf('cerrarCapa();PDT=null')===0);if(cerrar)cerrar.setAttribute('onclick','pdcLimpioSalir()');pdcLimpioEstado()},90)};
+const _pdcCPint9=pdcCalcoPintar;pdcCalcoPintar=function(){_pdcCPint9.apply(this,arguments);try{pdcLimpioEstado()}catch(e){}};
+/* al tocar «Listo» también queda guardado el dibujo (si ya lo habías guardado) */
+const _pdcCL9=pdcCalcoListo;pdcCalcoListo=function(){if(PDT&&PDT.modo==='limpio'&&PDT.borr)pdcLimpioGuardar(true);return _pdcCL9.apply(this,arguments)};
+/* la lista en Proyecto desde cero */
+const _abrirPdc9=abrirPdc;abrirPdc=function(){_abrirPdc9.apply(this,arguments);try{const L=pdcLimpios().slice().sort((a,b)=>(b.editado||b.creado)-(a.editado||a.creado)),l=$('#pdclimpio');if(!L.length||!l||$('#pdclimL'))return;
+  const d=document.createElement('div');d.id='pdclimL';d.innerHTML='<h3>📝 Planos en limpio guardados</h3>'+L.map(x=>`<div class="card row" style="gap:10px"><div class="row grow tap" style="gap:10px;min-width:0;cursor:pointer" onclick="pdcAbrirLimpio('${x.id}')">${pdcLimpioMini(x)}<div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(x.nombre)}</b><div class="mut ell" style="font-size:12px">${fFecha(new Date(x.editado||x.creado).toISOString().slice(0,10))} · ${(x.T||[]).filter(t=>t.P.length>=2).length} trazo(s) · cuadro ${x.cuadro||1} m</div></div></div><button class="btn sm sec" title="Cambiar nombre" onclick="pdcRenombrarLimpio('${x.id}')">✏️</button><button class="btn sm sec" title="Borrar" style="color:var(--bad)" onclick="pdcBorrarLimpio('${x.id}')">🗑</button></div>`).join('');
+  const card=l.closest('.card');(card||l.parentNode).after(d)}catch(e){console.log('abrirPdc9',e)}};
+
+/* ================= v13.0: apariencia de los íconos (forma, sombra y tamaño) en Ajustes ================= */
+const ICO_FORMAS=[['redondeado','Redondeados'],['super','Súper redondeados'],['redondo','Redondos'],['cuadrado','Cuadrados'],['gota','Gota'],['hoja','Hoja']];
+const ICO_TAM=[['peq','Pequeños'],['normal','Normales'],['grande','Grandes']];
+(function(){const S='.mpi,.pi,.ai,.si,.di,.appi',R={super:'34%',redondo:'50%',cuadrado:'5px',gota:'50% 50% 50% 14%',hoja:'50% 10% 50% 10%'};
+  let css=Object.keys(R).map(k=>S.split(',').map(x=>'html.icf-'+k+' '+x).join(',')+'{border-radius:'+R[k]+'!important}').join('\n');
+  css+='\nhtml.ics-no .mpi,html.ics-no .ai,html.ics-no .pi,html.ics-no .appi{box-shadow:none!important}';
+  css+='\nhtml.ics-si .pi,html.ics-si .ai,html.ics-si .si,html.ics-si .di{box-shadow:0 3px 8px rgba(0,0,0,.14)}';
+  css+='\nhtml.ict-peq .mpi{zoom:.86}html.ict-grande .mpi{zoom:1.16}html.ict-peq .pi,html.ict-peq .ai{zoom:.9}html.ict-grande .pi,html.ict-grande .ai{zoom:1.12}';
+  const st=document.createElement('style');st.id='icfcss';st.textContent=css;document.head.appendChild(st)})();
+const _menuCfg13=menuCfg;menuCfg=function(){const r=_menuCfg13.apply(this,arguments),c=kvJ('menu_cfg')||{};
+  r.forma=ICO_FORMAS.some(f=>f[0]===c.forma)?c.forma:'redondeado';r.sombra=['si','no','normal'].includes(c.sombra)?c.sombra:'normal';r.tamIco=ICO_TAM.some(t=>t[0]===c.tamIco)?c.tamIco:'normal';return r};
+function aplicarFormaIco(){const C=menuCfg(),h=document.documentElement;[...h.classList].filter(c=>/^ic[fst]-/.test(c)).forEach(c=>h.classList.remove(c));
+  if(C.forma!=='redondeado')h.classList.add('icf-'+C.forma);if(C.sombra!=='normal')h.classList.add('ics-'+C.sombra);if(C.tamIco!=='normal')h.classList.add('ict-'+C.tamIco)}
+const _guardarMenuCfg13=guardarMenuCfg;guardarMenuCfg=function(){const r=_guardarMenuCfg13.apply(this,arguments);aplicarFormaIco();return r};
+/* muestra de cada forma (con el color del menú) */
+function muestraForma(k){const R={redondeado:'13px',super:'34%',redondo:'50%',cuadrado:'5px',gota:'50% 50% 50% 14%',hoja:'50% 10% 50% 10%'};return `<i style="display:inline-block;width:16px;height:16px;background:currentColor;opacity:.75;border-radius:${R[k]};vertical-align:-3px;margin-right:6px"></i>`}
+const _bloqueMenuAjustes13=bloqueMenuAjustes;bloqueMenuAjustes=function(){const h=_bloqueMenuAjustes13.apply(this,arguments),C=menuCfg(),
+  ch=(arr,act,campo,pre)=>arr.map(([k,t])=>`<button class="chip ${act===k?'on':''}" data-icf="${campo}:${k}" onclick="guardarMenuCfg({${campo}:'${k}'})">${pre?pre(k):''}${t}</button>`).join('');
+  const add=`<b style="display:block;margin-top:10px">Forma de los íconos</b><div class="mut" style="font-size:12px">Se aplica a los íconos de toda la app (menú, listas y avisos).</div><div class="chips" id="icformas" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${ch(ICO_FORMAS,C.forma,'forma',muestraForma)}</div>
+    <b style="display:block;margin-top:10px">Sombra</b><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${ch([['normal','Como viene'],['si','Con sombra'],['no','Sin sombra']],C.sombra,'sombra')}</div>
+    <b style="display:block;margin-top:10px">Tamaño de los íconos</b><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${ch(ICO_TAM,C.tamIco,'tamIco')}</div>`;
+  const m='<b style="display:block;margin-top:10px">Vista previa</b>';return h.indexOf(m)>=0?h.replace(m,add+m):h};
+Object.assign(I18N_EXTRA,{"Forma de los íconos":["Icon shape","Форма значков"],"Se aplica a los íconos de toda la app (menú, listas y avisos).":["Applies to icons across the app (menu, lists and alerts).","Применяется ко всем значкам приложения (меню, списки и уведомления)."],
+  "Redondeados":["Rounded","Скруглённые"],"Súper redondeados":["Squircle","Сверхскруглённые"],"Redondos":["Round","Круглые"],"Cuadrados":["Square","Квадратные"],"Gota":["Drop","Капля"],"Hoja":["Leaf","Лист"],
+  "Sombra":["Shadow","Тень"],"Como viene":["Default","По умолчанию"],"Con sombra":["With shadow","С тенью"],"Sin sombra":["No shadow","Без тени"],"Tamaño de los íconos":["Icon size","Размер значков"],"Pequeños":["Small","Маленькие"],"Normales":["Normal","Обычные"],"Grandes":["Large","Крупные"]});
+aplicarFormaIco();
+const _render13=render;render=function(){try{aplicarFormaIco()}catch(e){}return _render13.apply(this,arguments)};
+
+/* ================= v13.1: levantamiento: datos por sistema, llenar en la app, proyecto y enviar a cotizar ================= */
+const LEV_SIS=[['selectivo','Rack selectivo'],['drivein','Drive-in'],['cantilever','Cantilever'],['manual','Rack manual / estantería'],['entrepiso','Entrepiso / mezzanine'],['otro','Otro']];
+const LEV_PREG=[
+ {g:'Área',k:'largo',l:'Largo del área',u:'m',t:'n',s:'*',req:1},{g:'Área',k:'ancho',l:'Ancho del área',u:'m',t:'n',s:'*',req:1},
+ {g:'Área',k:'alto',l:'Altura libre (hasta la viga o los rociadores)',u:'m',t:'n',s:'*',req:1},
+ {g:'Área',k:'columnas',l:'Columnas (cuántas y separación)',t:'t',s:'*'},{g:'Área',k:'puertas',l:'Puertas y andenes (dónde y medida)',t:'t',s:'*'},
+ {g:'Piso',k:'piso',l:'Tipo de piso',t:'o',op:['Concreto','Concreto pulido','Asfalto','Tierra / sin piso','Otro'],s:'*',req:1},
+ {g:'Piso',k:'losa',l:'Espesor de la losa',u:'cm',t:'n',s:'selectivo,drivein,cantilever,entrepiso'},
+ {g:'Carga',k:'producto',l:'Qué se almacena',t:'t',s:'*',req:1},
+ {g:'Carga',k:'palL',l:'Pallet: largo',u:'m',t:'n',s:'selectivo,drivein',req:1},{g:'Carga',k:'palA',l:'Pallet: ancho',u:'m',t:'n',s:'selectivo,drivein',req:1},
+ {g:'Carga',k:'palH',l:'Pallet: alto con la carga',u:'m',t:'n',s:'selectivo,drivein',req:1},{g:'Carga',k:'peso',l:'Peso por pallet',u:'kg',t:'n',s:'selectivo,drivein',req:1},
+ {g:'Carga',k:'matL',l:'Largo del material (tubos, perfiles…)',u:'m',t:'n',s:'cantilever',req:1},{g:'Carga',k:'pesoBrazo',l:'Peso por brazo',u:'kg',t:'n',s:'cantilever',req:1},
+ {g:'Carga',k:'caras',l:'Una o dos caras',t:'o',op:['Una cara','Dos caras'],s:'cantilever'},
+ {g:'Carga',k:'caja',l:'Medidas de las cajas / producto',t:'t',s:'manual'},{g:'Carga',k:'pesoNivel',l:'Peso por nivel',u:'kg',t:'n',s:'manual',req:1},
+ {g:'Carga',k:'areaEnt',l:'Área del entrepiso',u:'m²',t:'n',s:'entrepiso',req:1},{g:'Carga',k:'cargaM2',l:'Carga por m²',u:'kg/m²',t:'n',s:'entrepiso',req:1},
+ {g:'Carga',k:'escalera',l:'Escalera / acceso',t:'t',s:'entrepiso'},
+ {g:'Equipo',k:'monta',l:'Montacargas (tipo / modelo)',t:'t',s:'selectivo,drivein,cantilever',req:1},
+ {g:'Equipo',k:'horquilla',l:'Altura máxima de la horquilla',u:'m',t:'n',s:'selectivo,drivein,cantilever',req:1},
+ {g:'Equipo',k:'pasillo',l:'Pasillo que necesita el montacargas',u:'m',t:'n',s:'selectivo,drivein,cantilever'},
+ {g:'Condiciones',k:'frio',l:'Cámara fría',t:'s',s:'selectivo,drivein,manual',req:1},{g:'Condiciones',k:'sismo',l:'Protección contra sismo',t:'s',s:'selectivo,drivein,cantilever,entrepiso',req:1},
+ {g:'Proyecto',k:'posiciones',l:'Posiciones / cantidad que necesita',t:'t',s:'*',req:1},{g:'Proyecto',k:'niveles',l:'Niveles deseados',t:'n',s:'selectivo,drivein,cantilever,manual'},
+ {g:'Proyecto',k:'fechaReq',l:'¿Para cuándo lo necesita?',t:'t',s:'*'},{g:'Proyecto',k:'notas',l:'Notas',t:'a',s:'*'}];
+const levSisN=k=>(LEV_SIS.find(s=>s[0]===k)||[,''])[1];
+const levPregs=sis=>LEV_PREG.filter(q=>q.s==='*'||(sis&&q.s.split(',').includes(sis)));
+const levDat=p=>p.datos||(p.datos={});
+function levFaltan(p){const D=levDat(p);if(!D.sis)return['Sistema'];return levPregs(D.sis).filter(q=>q.req&&!String(D[q.k]==null?'':D[q.k]).trim()).map(q=>q.l)}
+const levValor=(q,v)=>{v=String(v==null?'':v).trim();return v?v+(q.u&&q.t==='n'?' '+q.u:''):''};
+/* archivos: leer / escribir / tamaño (Android o web) */
+function levLeer(fid){try{if(AND&&AND.leerLevB64){const b=AND.leerLevB64(fid);if(b)return b}if(AND&&AND.leerArchivoPlanoB64){const b=AND.leerArchivoPlanoB64(fid);if(b)return b}if(typeof _memArch!=='undefined'&&_memArch[fid])return String(_memArch[fid]).split(',')[1]}catch(e){}return null}
+function levEscribir(fid,b64){try{if(AND&&AND.escribirLevB64)return AND.escribirLevB64(fid,b64)==='OK';if(AND&&AND.guardarDocConId)return !!AND.guardarDocConId(fid,b64);if(typeof _memArch!=='undefined'){_memArch[fid]='data:application/pdf;base64,'+b64;return true}}catch(e){}return false}
+function levTam(fid){try{if(AND&&AND.tamArchivoPlano){const n=+AND.tamArchivoPlano(fid);if(n>=0)return n}}catch(e){}const b=levLeer(fid);return b?Math.floor(b.length*3/4):-1}
+function levDocNuevo(b64){if(AND&&AND.guardarDocB64)return AND.guardarDocB64(b64)||'';const fid='pl'+uid();_memArch[fid]='data:application/pdf;base64,'+b64;return fid}
+/* el PDF del levantamiento como imágenes (una por hoja) */
+async function levImagenes(b64,px){const L=await lectorPdf(),doc=await L.getDocument({data:b64aU8(b64),isEvalSupported:false}).promise,out=[];
+  for(let n=1;n<=doc.numPages;n++){const pg=await doc.getPage(n),v0=pg.getViewport({scale:1}),sc=(px||1600)/v0.width,v=pg.getViewport({scale:sc}),cv=document.createElement('canvas');cv.width=Math.round(v.width);cv.height=Math.round(v.height);
+    const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);await pg.render({canvasContext:g,viewport:v}).promise;out.push({cv,w:v0.width,h:v0.height})}return out}
+
+/* ---------- 3. datos del levantamiento según el sistema ---------- */
+let LEVDT=null;
+function levDatosForm(pid){const p=plano(pid);if(!p)return;const D=levDat(p),F=levFaltan(p);
+  const campo=q=>{const v=D[q.k]==null?'':String(D[q.k]),falta=q.req&&!v.trim(),st=falta?'border-color:var(--bad);':'';
+    const inp=q.t==='a'?`<textarea id="ld-${q.k}" data-k="${q.k}" style="${st}">${esc(v)}</textarea>`:q.t==='o'||q.t==='s'?`<select id="ld-${q.k}" data-k="${q.k}" style="${st}"><option value="">—</option>${(q.t==='s'?['Sí','No']:q.op).map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`
+      :`<input id="ld-${q.k}" data-k="${q.k}" ${q.t==='n'?'type="number" inputmode="decimal" step="any"':''} value="${esc(v)}" style="${st}">`;
+    return `<label>${esc(q.l)}${q.u?' ('+q.u+')':''}${q.req?` <span class="ldf" data-f="${q.k}" style="color:var(--bad);font-size:11.5px;${falta?'':'display:none'}">· falta</span>`:''}</label>${inp}`};
+  const G=[];levPregs(D.sis).forEach(q=>{let g=G.find(x=>x.g===q.g);if(!g)G.push(g={g:q.g,l:[]});g.l.push(q)});
+  abrirSheet('levdat','Datos del levantamiento',`<div class="card"><b>${esc(p.cliente||'Sin cliente')}</b><div class="mut" style="font-size:12px">${fFecha(p.fecha)}</div>
+     <label>Sistema</label><div class="chips" id="ldsis" style="flex-wrap:wrap;overflow:visible">${LEV_SIS.map(([k,t])=>`<button class="chip ${D.sis===k?'on':''}" data-s="${k}">${t}</button>`).join('')}</div>
+     <div id="ldfal" style="margin-top:8px;font-size:13px;font-weight:700;color:${F.length?'var(--bad)':'var(--ok,#1e8e3e)'}">${F.length?'⚠ Faltan '+F.length+' dato(s)':'✔ Datos completos'}</div></div>
+   ${D.sis?G.map(g=>`<h3>${esc(g.g)}</h3><div class="card">${g.l.map(campo).join('')}</div>`).join(''):'<div class="card mut">Escoge el sistema para ver las preguntas que tocan.</div>'}
+   <div class="btns" style="margin-top:6px"><button class="btn sec" onclick="levProyecto('${pid}')">📐 Hacer el proyecto</button><button class="btn" onclick="levCotizar('${pid}')">📧 Enviar a cotizar</button></div>
+   <button class="btn sec full" style="margin-top:8px" onclick="levVerResumen('${pid}')">📄 Ver el resumen en PDF</button>`,()=>levDatosForm(pid));
+  document.querySelectorAll('#ldsis [data-s]').forEach(b=>b.onclick=()=>{D.sis=b.dataset.s;p.editado=Date.now();save();pila.pop();levDatosForm(pid)});
+  document.querySelectorAll('#sbody [data-k]').forEach(e=>{const h=()=>{const k=e.dataset.k,v=e.value;if(v==='')delete D[k];else D[k]=v;p.editado=Date.now();clearTimeout(LEVDT);LEVDT=setTimeout(save,400);
+      const q=LEV_PREG.find(x=>x.k===k);if(q&&q.req){const f=!String(v).trim();e.style.borderColor=f?'var(--bad)':'';const s=document.querySelector(`[data-f="${k}"]`);if(s)s.style.display=f?'':'none'}
+      const F2=levFaltan(p),el=$('#ldfal');if(el){el.textContent=F2.length?'⚠ Faltan '+F2.length+' dato(s)':'✔ Datos completos';el.style.color=F2.length?'var(--bad)':'var(--ok,#1e8e3e)'}};
+    e.oninput=h;e.onchange=h})}
+
+/* ---------- resumen / paquete en PDF ---------- */
+async function levPaquete(pid,o){o=o||{};const p=plano(pid),D=levDat(p),F=levFaltan(p);if(!window.jspdf)await cargarScript('jspdf.umd.min.js');if(!window.LOGO_PDF)try{await cargarScript('logo_pdf.js')}catch(e){}
+  const B=pdfBase('LEVANTAMIENTO / SITE SURVEY',[['Cliente:',p.cliente||''],['Fecha:',fLarga(p.fecha)],['Sistema:',levSisN(D.sis)||'—']]),C=B.C,c=cli(p.clienteId)||{};
+  B.cliente({nombre:p.cliente||c.nombre||'',dir:p.ubic||c.dir||'',contacto:p.contacto||c.contacto||'',tel:p.tel||c.tel||'',rnc:c.rnc||''});
+  const G=[];levPregs(D.sis).forEach(q=>{let g=G.find(x=>x.g===q.g);if(!g)G.push(g={g:q.g,l:[]});g.l.push(q)});
+  G.forEach(g=>{B.tit(g.g.toUpperCase(),B.y);B.y+=6;B.tabla([{t:'DATO',x:B.L+6,w:300},{t:'VALOR',x:330,w:255}],g.l.map(q=>{const v=levValor(q,D[q.k]);const r=[q.l,v||(q.req?'FALTA':'—')];if(!v&&q.req)r.c=[null,C.RED];return r}))});
+  if(F.length)B.seccion('FALTA POR CONFIRMAR',F);
+  if(o.hojas!==false){const a=levAdj(p),b=a&&levLeer(a.fid);if(b){try{const I=await levImagenes(b,1500);I.forEach((im,i)=>{B.nuevaPagina();B.tit('HOJA '+(i+1)+' DEL LEVANTAMIENTO',B.y);const mw=B.R-B.L,mh=720-B.y;let w=mw,h=w*im.h/im.w;if(h>mh){h=mh;w=h*im.w/im.h}
+      B.doc.addImage(im.cv.toDataURL('image/jpeg',0.82),'JPEG',B.L+(mw-w)/2,B.y+8,w,h)})}catch(e){console.log('levhojas',e)}}}
+  if(o.plano!==false&&p.pdcId&&pdcG(p.pdcId)){try{const x=pdcG(p.pdcId),A=pdcAcomodar(x);if(A){const im=await pdcPng(pdcSvg(x,A,{leyenda:true,px:2000}),2000);B.nuevaPagina();B.tit('PLANO DEL PROYECTO',B.y);const mw=B.R-B.L;let w=mw,h=w*im.r;if(h>660){h=660;w=h/im.r}B.doc.addImage(im.url,'PNG',B.L+(mw-w)/2,B.y+8,w,h)}}catch(e){console.log('levplano',e)}}
+  B.pie('Levantamiento '+(p.cliente||''));return{doc:B.doc,nombre:spLimpio('Levantamiento '+(p.cliente||'sin cliente')+' '+fFecha(p.fecha).replace(/\//g,'-')+' - datos')+'.pdf'}}
+async function levVerResumen(pid){toast('⏳ Preparando el PDF…');try{const r=await levPaquete(pid,{});const p=plano(pid);enviarPdfDoc({doc:r.doc,nombre:r.nombre,clienteId:p.clienteId,asunto:r.nombre,cuerpo:''},'abrir')}catch(e){alert('No se pudo hacer el PDF: '+e.message)}}
+
+/* ---------- 1. enviar a cotizar ---------- */
+function levCotEstado(p){const c=p.cotizar;if(!c)return null;const q=p.clienteId&&db.cotizaciones.some(x=>x.clienteId===p.clienteId&&(x.fecha||'')>=c.fecha);if(q)return{t:'✔ Ya cotizado',cls:'b-ent'};
+  const d=diasEntre(c.fecha,hoy());return d>=3?{t:'⏰ Enviado hace '+d+' días: pide la cotización',cls:'b-pend'}:{t:'📧 Enviado a cotizar'+(d?' hace '+d+' día'+(d>1?'s':''):' hoy'),cls:'b-ent'}}
+function levCotizar(pid){const p=plano(pid);if(!p)return;const D=levDat(p),F=levFaltan(p);
+  abrirSheet('levcot','Enviar a cotizar',`<div class="card"><b>${esc(p.cliente||'Sin cliente')}</b><div class="mut" style="font-size:12px">${fFecha(p.fecha)} · ${esc(levSisN(D.sis)||'sin sistema')}</div>
+     ${F.length?`<div style="color:var(--bad);font-size:13px;margin-top:8px"><b>⚠ Faltan ${F.length} dato(s):</b> ${esc(F.slice(0,6).join(', '))}${F.length>6?'…':''}</div><button class="btn sec full" style="margin-top:6px" onclick="levDatosForm('${pid}')">📋 Completar los datos</button>`:'<div style="color:var(--ok,#1e8e3e);font-size:13px;margin-top:8px">✔ Datos completos</div>'}</div>
+   <div class="card"><label style="margin-top:0">Para (quien cotiza)</label><input id="lcp" type="email" inputmode="email" value="${esc(kvGet('lev_cotiza')||'')}" placeholder="proyectista@bendertrading.com.do">
+     <label>CC (opcional)</label><input id="lcc" type="email" inputmode="email" value="${esc(kvGet('lev_cotiza_cc')||'')}" placeholder="Para varios, sepáralos con coma">
+     <label>Nota (opcional)</label><textarea id="lcn" placeholder="Ej. el cliente lo necesita para el 15 de diciembre"></textarea>
+     <label class="row" style="gap:8px;color:var(--tx)"><input type="checkbox" id="lch" checked style="width:20px;height:20px"> Incluir las hojas del levantamiento</label>
+     ${p.pdcId&&pdcG(p.pdcId)?'<label class="row" style="gap:8px;color:var(--tx)"><input type="checkbox" id="lcl" checked style="width:20px;height:20px"> Incluir el plano del proyecto</label>':''}
+     <button class="btn full" id="lcok" style="margin-top:10px">📧 Preparar el correo</button>
+     <div class="mut" style="font-size:12px;margin-top:6px">Va un solo PDF con los datos, lo que falta, las hojas y el plano. Revisa y toca Enviar.</div></div>
+   ${p.cotizar?`<div class="mut" style="font-size:12px;margin:4px">Ya se envió el ${fFecha(p.cotizar.fecha)} a ${esc(p.cotizar.para||'')}.</div>`:''}`,()=>levCotizar(pid));
+  $('#lcok').onclick=async()=>{const para=$('#lcp').value.trim(),cc=$('#lcc').value.trim(),L=s=>s.split(/\s*[,;]\s*/).filter(Boolean);
+    if(!L(para).length||!L(para).every(esCorreo))return toast('Escribe el correo de quien cotiza');if(cc&&!L(cc).every(esCorreo))return toast('Revisa el correo de CC');
+    kvSet('lev_cotiza',para);kvSet('lev_cotiza_cc',cc);toast('⏳ Preparando el PDF…');let r;
+    try{r=await levPaquete(pid,{hojas:$('#lch').checked,plano:!!($('#lcl')&&$('#lcl').checked)})}catch(e){return alert('No se pudo hacer el PDF: '+e.message)}
+    const P=LEV_PREG,v=k=>levValor(P.find(q=>q.k===k),D[k]),med=[v('largo'),v('ancho'),v('alto')].some(Boolean)?`${v('largo')||'?'} × ${v('ancho')||'?'} · altura libre ${v('alto')||'?'}`:'';
+    const asunto='Cotizar: '+(levSisN(D.sis)||'levantamiento')+' – '+(p.cliente||'cliente')+' (levantamiento '+fFecha(p.fecha)+')';
+    const cuerpo=['Hola,','','Favor cotizar según el levantamiento adjunto.','','Cliente: '+(p.cliente||''),p.contacto?'Contacto: '+p.contacto+(p.tel?' · '+p.tel:''):'',p.ubic?'Ubicación: '+p.ubic:'','Sistema: '+(levSisN(D.sis)||'—'),
+      med?'Área: '+med:'',v('posiciones')?'Necesita: '+v('posiciones'):'',v('producto')?'Almacena: '+v('producto'):'',v('peso')?'Peso por pallet: '+v('peso'):'',
+      F.length?'\nFalta por confirmar: '+F.join(', '):'',$('#lcn').value.trim()?'\nNota: '+$('#lcn').value.trim():'','','Gracias.'].filter(x=>x!=='').join('\n');
+    p.cotizar={fecha:hoy(),ts:Date.now(),para};p.editado=Date.now();save();cerrarSheet();
+    const b64=r.doc.output('datauristring').split(',')[1];
+    if(AND&&(AND.redactarCorreo||AND.enviarPdfCorreo))mandarCorreo({redactar:1,para:L(para).join(','),cc:L(cc).join(','),asunto,cuerpo,nombre:r.nombre,b64});
+    else{r.doc.save(r.nombre);abrirEnlace('mailto:'+L(para).join(',')+'?'+(cc?'cc='+encodeURIComponent(cc)+'&':'')+'subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(cuerpo));toast('PDF descargado: adjúntalo en el correo')}}}
+
+/* ---------- 2. del levantamiento al Proyecto desde cero ---------- */
+function levSisPdc(p){const D=levDat(p),k=PDC_TIPOS[D.sis]?D.sis:'selectivo',T=PDC_TIPOS[k],S=Object.assign({},PDC_SIS_DEF,T,{tipo:T.n});delete S.n;
+  const n=x=>{const v=pdcN(D[x]);return isFinite(v)&&v>0?v:0};
+  if(n('alto')){S.techo=String(n('alto'));S.alto=Math.max(1.5,Math.round(Math.min(T.alto+2,n('alto')-0.3)*10)/10)}
+  if(n('palH'))S.carga=String(n('palH'));if(n('pasillo'))S.pas=n('pasillo');if(n('niveles'))S.niv=Math.round(n('niveles'));
+  if(n('peso'))S.cap=String(Math.round(n('peso')*(pdcN(S.ppn)||1)));if(k==='manual'&&n('pesoNivel'))S.cap=String(n('pesoNivel'));if(k==='cantilever'&&n('pesoBrazo'))S.cap=String(n('pesoBrazo'));
+  if(D.sismo==='Sí')S.sismo=true;if(D.frio==='Sí')S.frio=true;return S}
+function levPdcAplicar(x,p){const c=cli(p.clienteId);x.clienteId=p.clienteId||'';x.cliente=c?c.nombre:(p.cliente||'');x.nombre='Levantamiento '+(p.cliente||'')+' '+fFecha(p.fecha);x.sis=levSisPdc(p);x.levId=p.id;x.editado=Date.now();p.pdcId=x.id;p.editado=Date.now()}
+let LEV_PDC=null;
+function levProyecto(pid){const p=plano(pid);if(!p)return;const D=levDat(p),L=pdcN(D.largo),A=pdcN(D.ancho),x=p.pdcId&&pdcG(p.pdcId),nh=levPaginas(p);
+  abrirSheet('levpdc','Hacer el proyecto',`<div class="card"><b>${esc(p.cliente||'Sin cliente')}</b><div class="mut" style="font-size:12px">${esc(levSisN(D.sis)||'Sin sistema: se usa rack selectivo')}${L>0&&A>0?' · '+pdcF(L)+' × '+pdcF(A)+' m':''}</div>
+     <div class="mut" style="font-size:12px;margin-top:6px">El proyecto sale con el cliente, el sistema y los datos del levantamiento (altura, pallet, peso, pasillo, niveles). Después lo ajustas como siempre.</div></div>
+   ${x?`<button class="btn full" onclick="pdcResultado('${x.id}')">📐 Abrir el proyecto ya hecho</button><div class="mut" style="font-size:12px;margin:8px 4px">O haz uno nuevo:</div>`:''}
+   <button class="btn ${x?'sec ':''}full" id="lprect" ${L>0&&A>0?'':'disabled'}>▭ Área rectangular de ${L>0&&A>0?pdcF(L)+' × '+pdcF(A)+' m':'largo × ancho'}</button>
+   ${L>0&&A>0?'':`<div class="mut" style="font-size:12px;margin:4px">Para usarla pon el largo y el ancho en <a href="#" onclick="levDatosForm('${pid}');return false">los datos</a>.</div>`}
+   <div class="card" style="margin-top:10px"><b>✏️ Calcar el dibujo de la hoja</b><div class="mut" style="font-size:12px">Abre la hoja del levantamiento para pasar las paredes con el dedo.</div>
+     <div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${Array.from({length:nh},(_,i)=>`<button class="chip" data-hj="${i}">Hoja ${i+1}</button>`).join('')}</div></div>`,()=>levProyecto(pid));
+  const r=$('#lprect');if(r)r.onclick=()=>{if(!(L>0&&A>0))return;const y={id:uid(),creado:Date.now(),editado:Date.now(),planoId:'',walls:[{dir:'E',sk:L,m:String(L)},{dir:'S',sk:A,m:String(A)},{dir:'W',sk:L,m:String(L)},{dir:'N',sk:A,m:String(A)}],obst:[]};
+    levPdcAplicar(y,p);pdcs().push(y);save();pila.length=0;cerrarTodo();toast('📐 Proyecto hecho con los datos del levantamiento');pdcEditar(y.id)};
+  document.querySelectorAll('#sbody [data-hj]').forEach(b=>b.onclick=async()=>{const a=levAdj(p),b64=a&&levLeer(a.fid);if(!b64)return alert('No se pudo leer el levantamiento');toast('⏳ Abriendo la hoja…');
+    try{const I=await levImagenes(b64,1800),im=I[+b.dataset.hj]||I[0];LEV_PDC={pid};pila.length=0;cerrarTodo();pdcCalcar(im.cv.toDataURL('image/jpeg',0.88),'Levantamiento '+(p.cliente||''))}catch(e){alert('No se pudo abrir la hoja: '+e.message)}})}
+const _pdcCL131=pdcCalcoListo;pdcCalcoListo=function(){const n0=pdcs().length,lp=LEV_PDC;const r=_pdcCL131.apply(this,arguments);
+  try{if(lp&&pdcs().length>n0){const x=pdcs()[pdcs().length-1],p=plano(lp.pid);LEV_PDC=null;if(p){levPdcAplicar(x,p);save();pdcEditar(x.id)}}}catch(e){console.log('levpdc',e)}return r};
+
+/* ---------- 6. llenar el levantamiento aquí en la app (la otra app sigue disponible) ---------- */
+let LEVE=null;
+const LEVE_COL=['#1a3fa0','#111111','#c0392b','#1e8e3e'],LEVE_GR=[[0.0022,'─'],[0.0038,'━'],[0.007,'▬']];
+async function levEditar(pid){const p=plano(pid),a=levAdj(p);if(!a)return toast('No se encontró el levantamiento');
+  let T=p.tinta;const tam=levTam(a.fid);
+  if(!T||!T.base||levTam(T.base)<=0||(T.tam&&tam>0&&tam!==T.tam)){const b=levLeer(a.fid);if(!b)return alert('No se pudo leer el levantamiento');const nf=levDocNuevo(b);if(!nf)return alert('No se pudo preparar la copia');T=p.tinta={base:nf,tam,pags:{}};save()}
+  LEVE={pid,tool:'lapiz',col:LEVE_COL[0],gr:LEVE_GR[1][0],hist:[],cambios:false,pags:JSON.parse(JSON.stringify(T.pags||{})),img:[]};
+  const bt=(id,t,on)=>`<button id="${id}" style="border:0;background:${on?'#2f6fd6':'#ffffff22'};color:#fff;border-radius:10px;min-width:40px;height:38px;padding:0 9px;font:inherit;font-size:14px">${t}</button>`;
+  capaCompleta('leve',`<div class="row" style="padding:10px 12px;gap:8px;background:#0b0f17"><button id="lvex" style="border:0;background:#ffffff22;color:#fff;border-radius:50%;width:38px;height:38px;font-size:18px">✕</button>
+      <div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(p.cliente||'Levantamiento')}</b><span id="lvest" style="font-size:12px;opacity:.8">Cargando…</span></div><button class="btn" id="lvesv" style="width:auto">💾 Guardar</button></div>
+    <div class="row" id="lvetb" style="gap:6px;padding:6px 10px;background:#0b0f17;flex-wrap:wrap">${bt('lvt-mover','✋',0)}${bt('lvt-lapiz','✏️',1)}${bt('lvt-texto','T',0)}${bt('lvt-borrar','🧽',0)}
+      <span style="width:6px"></span>${LEVE_COL.map((c,i)=>`<button data-col="${c}" style="width:30px;height:30px;border-radius:50%;border:3px solid ${i?'transparent':'#fff'};background:${c}"></button>`).join('')}
+      <span style="width:6px"></span>${LEVE_GR.map(([g,t],i)=>`<button data-gr="${g}" style="border:0;background:${i===1?'#2f6fd6':'#ffffff22'};color:#fff;border-radius:8px;width:34px;height:32px">${t}</button>`).join('')}${bt('lvundo','↶',0)}${bt('lvzm','－',0)}${bt('lvzp','＋',0)}</div>
+    <div id="lvepg" style="flex:1;min-height:0;overflow:auto;background:#1b2230;padding:10px;touch-action:pan-x pan-y"></div>`);
+  $('#lvex').onclick=()=>{if(LEVE&&LEVE.cambios){if(confirm('¿Guardar lo que escribiste antes de salir?\n\nAceptar = guardar · Cancelar = salir sin guardar'))return levEditarGuardar(true)}cerrarCapa();LEVE=null;if(pila.some(e=>e.key==='lev'))pintarLev()};
+  $('#lvesv').onclick=()=>levEditarGuardar(false);
+  const zoom=f=>{LEVE.zoom=Math.max(1,Math.min(3,(LEVE.zoom||1)*f));document.querySelectorAll('#lvepg > div').forEach(d=>{d.style.width=(LEVE.zoom*100)+'%';d.style.maxWidth=LEVE.zoom>1?'none':'900px'});toast('Zoom '+Math.round(LEVE.zoom*100)+'% · ✋ para moverte')};$('#lvzp').onclick=()=>zoom(1.5);$('#lvzm').onclick=()=>zoom(1/1.5);
+  ['mover','lapiz','texto','borrar'].forEach(t=>$('#lvt-'+t).onclick=()=>{LEVE.tool=t;['mover','lapiz','texto','borrar'].forEach(u=>$('#lvt-'+u).style.background=u===t?'#2f6fd6':'#ffffff22');document.querySelectorAll('.lveov').forEach(c=>c.style.pointerEvents=t==='mover'?'none':'auto')});
+  document.querySelectorAll('#lvetb [data-col]').forEach(b=>b.onclick=()=>{LEVE.col=b.dataset.col;document.querySelectorAll('#lvetb [data-col]').forEach(x=>x.style.borderColor=x===b?'#fff':'transparent');if(LEVE.tool==='borrar'||LEVE.tool==='mover')$('#lvt-lapiz').click()});
+  document.querySelectorAll('#lvetb [data-gr]').forEach(b=>b.onclick=()=>{LEVE.gr=+b.dataset.gr;document.querySelectorAll('#lvetb [data-gr]').forEach(x=>x.style.background=x===b?'#2f6fd6':'#ffffff22')});
+  $('#lvundo').onclick=()=>{const h=LEVE.hist.pop();if(!h)return toast('No hay nada que deshacer');const L=LEVE.pags[h.pg]||(LEVE.pags[h.pg]=[]);if(h.op==='add')L.pop();else L.splice(h.i,0,h.it);LEVE.cambios=true;levEPintar(h.pg)};
+  try{const b=levLeer(T.base);const W=Math.min(1700,Math.round(($('#lvepg').clientWidth||360)*(window.devicePixelRatio||1)*1.4));LEVE.img=await levImagenes(b,Math.max(900,W))}catch(e){cerrarCapa();return alert('No se pudo mostrar el levantamiento: '+e.message)}
+  const box=$('#lvepg');if(!box||!LEVE)return;LEVE.img.forEach((im,i)=>{const d=document.createElement('div');d.style.cssText='position:relative;margin:0 auto 12px;max-width:900px;background:#fff;box-shadow:0 2px 8px #0006';
+    im.cv.style.cssText='display:block;width:100%;height:auto';const ov=document.createElement('canvas');ov.className='lveov';ov.dataset.pg=i;ov.width=im.cv.width;ov.height=im.cv.height;ov.style.cssText='position:absolute;inset:0;width:100%;height:100%;touch-action:none';
+    d.appendChild(im.cv);d.appendChild(ov);box.appendChild(d);levEPintar(i);levEEventos(ov,i)});
+  $('#lvest').textContent=LEVE.img.length+' hoja(s) · ✏️ escribe o dibuja con el dedo · ✋ para moverte';}
+function levEPintar(pg){const ov=document.querySelector(`.lveov[data-pg="${pg}"]`);if(!ov||!LEVE)return;const g=ov.getContext('2d'),W=ov.width,H=ov.height;g.clearRect(0,0,W,H);
+  (LEVE.pags[pg]||[]).concat(LEVE.act&&LEVE.act.pg===pg?[LEVE.act.it]:[]).forEach(s=>{g.strokeStyle=g.fillStyle=s.c;
+    if(s.k==='t'){g.font=Math.round(s.s*W)+'px Helvetica, Arial, sans-serif';g.textBaseline='alphabetic';g.fillText(s.txt,s.x*W,s.y*H);return}
+    g.lineWidth=Math.max(1,s.w*W);g.lineCap=g.lineJoin='round';g.beginPath();s.p.forEach((q,i)=>i?g.lineTo(q[0]*W,q[1]*H):g.moveTo(q[0]*W,q[1]*H));if(s.p.length===1)g.lineTo(s.p[0][0]*W+0.5,s.p[0][1]*H);g.stroke()})}
+function levEDist(s,x,y,ar){if(s.k==='t'){const w=s.s*s.txt.length*0.55;return x>=s.x-0.01&&x<=s.x+w+0.01&&y<=s.y+0.01&&y>=s.y-s.s/ar-0.01?0:1}
+  let m=1;for(let i=0;i<s.p.length;i++){const a=s.p[i],b=s.p[i+1]||a,dx=b[0]-a[0],dy=(b[1]-a[1])/ar,l=dx*dx+dy*dy;let u=l?((x-a[0])*dx+(y-a[1])/ar*dy)/l:0;u=Math.max(0,Math.min(1,u));m=Math.min(m,Math.hypot(x-a[0]-u*dx,(y-a[1])/ar-u*dy))}return m}
+function levEEventos(ov,pg){const pt=ev=>{const r=ov.getBoundingClientRect();return[(ev.clientX-r.left)/r.width,(ev.clientY-r.top)/r.height]},ar=ov.width/ov.height;
+  const borrar=([x,y])=>{const L=LEVE.pags[pg]||[];for(let i=L.length-1;i>=0;i--)if(levEDist(L[i],x,y,ar)<0.012){const it=L.splice(i,1)[0];LEVE.hist.push({pg,op:'del',i,it});LEVE.cambios=true;levEPintar(pg);return}};
+  ov.onpointerdown=ev=>{if(!LEVE||LEVE.tool==='mover')return;ev.preventDefault();const q=pt(ev);
+    if(LEVE.tool==='texto'){const t=prompt('Texto (puedes dictarlo con el micrófono del teclado):');if(t&&t.trim()){const it={k:'t',c:LEVE.col,s:LEVE.gr*9,x:q[0],y:q[1],txt:t.trim()};(LEVE.pags[pg]=LEVE.pags[pg]||[]).push(it);LEVE.hist.push({pg,op:'add'});LEVE.cambios=true;levEPintar(pg)}return}
+    try{ov.setPointerCapture(ev.pointerId)}catch(e){}if(LEVE.tool==='borrar'){LEVE.bor=true;borrar(q);return}LEVE.act={pg,it:{k:'l',c:LEVE.col,w:LEVE.gr,p:[q]}};levEPintar(pg)};
+  ov.onpointermove=ev=>{if(!LEVE)return;if(LEVE.bor){borrar(pt(ev));return}if(!LEVE.act||LEVE.act.pg!==pg)return;ev.preventDefault();const q=pt(ev),P=LEVE.act.it.p,u=P[P.length-1];if(Math.hypot(q[0]-u[0],(q[1]-u[1])/ar)>0.002){P.push(q);levEPintar(pg)}};
+  ov.onpointerup=ov.onpointercancel=()=>{if(!LEVE)return;LEVE.bor=false;if(!LEVE.act||LEVE.act.pg!==pg)return;const it=LEVE.act.it;LEVE.act=null;it.p=it.p.map(q=>[Math.round(q[0]*10000)/10000,Math.round(q[1]*10000)/10000]);(LEVE.pags[pg]=LEVE.pags[pg]||[]).push(it);LEVE.hist.push({pg,op:'add'});LEVE.cambios=true;levEPintar(pg)}}
+const levHex=c=>[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];
+/* guarda: la hoja original + lo escrito, en el mismo archivo (así la otra app también lo ve) */
+async function levEditarGuardar(salir){if(!LEVE)return;const p=plano(LEVE.pid),a=levAdj(p);if(!p||!a)return;$('#lvest').textContent='⏳ Guardando…';
+  try{if(!window.jspdf)await cargarScript('jspdf.umd.min.js');let doc=null;
+    LEVE.img.forEach((im,i)=>{const w=im.w,h=im.h,o=w>h?'l':'p';if(!doc)doc=new window.jspdf.jsPDF({unit:'pt',format:[w,h],orientation:o});else doc.addPage([w,h],o);
+      doc.addImage(im.cv.toDataURL('image/jpeg',0.86),'JPEG',0,0,w,h);
+      (LEVE.pags[i]||[]).forEach(s=>{const col=levHex(s.c);if(s.k==='t'){doc.setTextColor(...col);doc.setFont('helvetica','normal');doc.setFontSize(s.s*w);doc.text(s.txt,s.x*w,s.y*h);return}
+        doc.setDrawColor(...col);doc.setLineWidth(Math.max(0.4,s.w*w));doc.setLineCap('round');doc.setLineJoin('round');const P=s.p.map(q=>[q[0]*w,q[1]*h]);
+        if(P.length===1)P.push([P[0][0]+0.3,P[0][1]]);doc.lines(P.slice(1).map((q,j)=>[q[0]-P[j][0],q[1]-P[j][1]]),P[0][0],P[0][1],[1,1],'S',false)})});
+    const b64=doc.output('datauristring').split(',')[1];if(!levEscribir(a.fid,b64))throw new Error('no se pudo escribir el archivo');
+    a.tam=Math.floor(b64.length*3/4);a.paginas=LEVE.img.length;p.tinta.pags=JSON.parse(JSON.stringify(LEVE.pags));p.tinta.tam=levTam(a.fid);p.editado=Date.now();p.lleno=(p.lleno||0)+1;save();LEVE.cambios=false;
+    toast('💾 Levantamiento guardado');$('#lvest').textContent='✔ Guardado · también lo verás si lo abres con la otra app';if(salir){cerrarCapa();LEVE=null;if(pila.some(e=>e.key==='lev'))pintarLev()}}
+  catch(e){$('#lvest').textContent='No se pudo guardar';alert('No se pudo guardar: '+e.message)}}
+
+/* ---------- en la pantalla de Levantamiento ---------- */
+let LEVSIS='',LEVMODO=null;
+const levModo=()=>LEVMODO||kvGet('lev_modo')||(AND&&AND.abrirLev?'app':'aqui');
+const _pintarLev131=pintarLev;pintarLev=function(){_pintarLev131.apply(this,arguments);try{
+  const ok=$('#lvok');if(ok&&!$('#lvsis')){const d=document.createElement('div');d.className='card';d.id='lvsis';
+    d.innerHTML=`<b>Sistema</b><div class="mut" style="font-size:12px">Con esto salen las preguntas que no se pueden olvidar en la visita.</div><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${LEV_SIS.map(([k,t])=>`<button class="chip ${LEVSIS===k?'on':''}" data-ls="${k}">${t}</button>`).join('')}</div>
+      <b style="display:block;margin-top:10px">¿Dónde lo llenas?</b><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${AND&&AND.abrirLev?`<button class="chip ${levModo()==='app'?'on':''}" data-lm="app">✍️ En la otra app</button>`:''}<button class="chip ${levModo()==='aqui'?'on':''}" data-lm="aqui">📱 Aquí en la app</button></div>
+      <div class="mut" style="font-size:12px;margin-top:4px">${levModo()==='aqui'?'Escribes y dibujas con el dedo encima de la hoja, sin salir de Benderrack. Después también lo puedes abrir con la otra app.':'Se abre en tu app de notas, como siempre. Después también lo puedes llenar aquí.'}</div>`;
+    ok.before(d);d.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LEVSIS=LEVSIS===b.dataset.ls?'':b.dataset.ls;d.querySelectorAll('[data-ls]').forEach(x=>x.classList.toggle('on',x.dataset.ls===LEVSIS))});
+    d.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{LEVMODO=b.dataset.lm;kvSet('lev_modo',LEVMODO);d.remove();pintarLev()});
+    ok.innerHTML=ico('pen',16)+(levModo()==='aqui'?' Abrir y llenar aquí':' Abrir plantilla')}
+  /* en cada levantamiento reciente: datos, llenar aquí, proyecto y enviar a cotizar */
+  document.querySelectorAll('#sbody button[onclick^="levAbrir("]').forEach(b=>{const m=/levAbrir\('([^']+)'/.exec(b.getAttribute('onclick')),pid=m&&m[1],p=pid&&plano(pid);if(!p)return;const card=b.closest('.card');if(!card||card.querySelector('.levx'))return;
+    const F=levFaltan(p),E=levCotEstado(p),x=document.createElement('div');x.className='levx';
+    x.innerHTML=`<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">${p.datos&&p.datos.sis?`<span class="badge" style="background:#24559b1f;color:#24559b">${esc(levSisN(p.datos.sis))}</span>`:''}<span class="badge ${F.length?'b-pend':'b-ent'}">${F.length?'Faltan '+F.length+' datos':'✔ Datos completos'}</span>${E?`<span class="badge ${E.cls}">${E.t}</span>`:''}${p.pdcId&&pdcG(p.pdcId)?'<span class="badge b-ent">📐 Con proyecto</span>':''}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px">
+       <button class="btn sec" style="padding:8px 2px;font-size:12.5px" onclick="levDatosForm('${pid}')">📋 Datos</button><button class="btn sec" style="padding:8px 2px;font-size:12.5px" onclick="levEditar('${pid}')">📱 Llenar</button>
+       <button class="btn sec" style="padding:8px 2px;font-size:12.5px" onclick="levProyecto('${pid}')">📐 Proyecto</button><button class="btn" style="padding:8px 2px;font-size:12.5px" onclick="levCotizar('${pid}')">📧 Cotizar</button></div>`;
+    card.appendChild(x);if(!(AND&&AND.abrirLev))b.textContent='Descargar'})}catch(e){console.log('pintarLev131',e)}};
+/* crear: guarda el sistema y, si se llena aquí, abre el editor de la app */
+const _crearLev131=crearLevantamiento;crearLevantamiento=async function(D){const n0=(db.planos||[]).length,sis=LEVSIS,modo=levModo();
+  if(modo==='aqui'){if(!window.PLANTILLA_LEV){try{await cargarScript('plantilla_lev.js')}catch(e){}}let bytes;try{bytes=levPdf({cliente:D.cliente,contacto:D.contacto,cel:D.cel,ubic:D.ubic,fecha:fFecha(hoy())});if(LEVH>1)bytes=(await pdfAgregarHojas(bytes,LEVH-1)).bytes}catch(e){return alert('No se pudo preparar la plantilla: '+e.message)}
+    const b64=u8aB64(bytes),nombre=spLimpio('Levantamiento '+(D.cliente||'sin cliente')+' '+fFecha(hoy()).replace(/\//g,'-'))+'.pdf',fid=levDocNuevo(b64);if(!fid)return toast('No se pudo guardar el levantamiento');
+    const c=D.clienteId?cli(D.clienteId):null;const p={id:uid(),creado:Date.now(),editado:Date.now(),fecha:hoy(),tipo:'archivo',lev:true,titulo:'Levantamiento',clienteId:c?c.id:'',cliente:D.cliente||'',contacto:D.contacto||'',tel:D.cel||'',ubic:D.ubic||'',gps:'',escala:'',paginas:[],
+      adjuntos:[{fid,nombre,tam:bytes.length,mime:'application/pdf',fecha:hoy(),creado:Date.now(),paginas:LEVH}],datos:sis?{sis}:{}};
+    db.planos.push(p);const rv=LEVR&&p.clienteId?levRegistrar(p,{}):null;save();if(rv)toast('✔ Registrado como visita');LEVSIS='';pila.length=0;cerrarTodo();return levEditar(p.id)}
+  const r=await _crearLev131.apply(this,arguments);try{if(sis&&(db.planos||[]).length>n0){const p=db.planos[db.planos.length-1];if(p.lev){p.datos=Object.assign(p.datos||{},{sis});save()}}}catch(e){}LEVSIS='';return r};
+const _formLev131=formLevantamiento;formLevantamiento=function(){LEVSIS='';LEVMODO=null;return _formLev131.apply(this,arguments)};
+/* abrir con la otra app: si se llenó aquí, la app ve lo guardado (mismo archivo); si se escribió allá, el editor lo toma al volver */
+
+/* ================= v13.2: ITT – inspección técnica del almacén (registro de hallazgos, deflexiones, aplomes, repuestos e informe PDF) ================= */
+const ITT_ELEM=[['E','Escala'],['M','Montante'],['L','Larguero'],['PD','Diagonal'],['PH','Horizontal'],['PT','Protector'],['CL','Clavija'],['B','Base'],['TR','Tornillo / anclaje']];
+const ITT_CAUSA=[['IM','Impacto','6.1'],['SC','Sobrecarga','6.2'],['AU','Ausencia','6.3'],['CR','Corrosión','6.4'],['AP','Apriete','6.5'],['MD','Modificación','6.6'],['D','Desenganche','6.7'],['O','Otro','6.8']];
+const ITT_TRAT=[['C','Cambiar'],['R','Reparar'],['I','Instalar'],['A','Ajustar'],['RT','Retocar'],['M','Monitorear'],['BQ','Bloquear']];
+const ITT_RIESGO={BAJO:['Bajo','#1e8e3e'],MEDIO:['Medio','#e8892f'],ALTO:['Alto','#c0392b']};
+const ITT_ACC={BAJO:'MONITOREAR',MEDIO:'CARGAR AL 50%',ALTO:'DESCARGAR'};
+const ITT_CRIT={IM:['Impacto en elemento no estructural como protector o separamarcos.','Impacto en puntal o viga con deformación inferior a 5 mm, o en riostra inferior a 10 mm.','Impacto en puntal o viga con fisura o deformación superior a 5 mm, o en riostra superior a 10 mm.'],
+  SC:['Deflexión L/180 · carga del módulo al 105%.','Deflexión L/150 · carga del módulo hasta 110% · 2 módulos vecinos hasta 105%.','Deflexión L/120 · carga del módulo hasta 115% · 2 módulos vecinos sobre 105%.'],
+  AU:['Falta un elemento no estructural (separamarcos o protector).','Falta el pin de seguridad.','Falta un elemento estructural, perno de ensamble, anclaje o tuerca.'],
+  CR:['Rayón en la pintura donde se ve óxido.','Rayón con desprendimiento del recubrimiento.','Corrosión con descamación, adelgazamiento o perforación del metal.'],
+  AP:['Protector o separamarcos con la tornillería floja.','Perno de ensamble de riostra flojo (con tuerca de seguridad).','Tuerca que se mueve con la mano o separada en riostras, anclaje o viga atornillada.'],
+  MD:['Remodulación (consultar con el fabricante).','Soldadura, perforación o corte hecho después de la entrega.','Elementos no estándar o mezcla de referencias.'],
+  D:['Viga desenganchada, nivel descargado, con pin de seguridad.','Viga desenganchada, nivel descargado, sin pin de seguridad.','Viga desenganchada con el nivel cargado (con o sin pin) / componente no estándar.'],
+  O:['Contactar al fabricante o al ingeniero especialista en estanterías.','Contactar al fabricante o al ingeniero especialista en estanterías.','Contactar al fabricante o al ingeniero especialista en estanterías.']};
+const itts=()=>db.itts||(db.itts=[]);
+const ittImg=h=>{const v=h&&h.img;if(!v)return '';if(v[0]==='@'){const d=fotoLeer(v.slice(1));return d||''}return v};
+const _idsFotos132=idsFotos;idsFotos=function(){const S=_idsFotos132.apply(this,arguments);try{itts().forEach(x=>(x.hallazgos||[]).forEach(h=>{if(h.img&&h.img[0]==='@')S.add(h.img.slice(1))}))}catch(e){}return S};
+const ittG=id=>itts().find(x=>x.id===id);
+const ittN=v=>{const n=parseFloat(String(v==null?'':v).replace(',','.'));return isFinite(n)?n:NaN};
+const ittNom=(L,k)=>(L.find(x=>x[0]===k)||[,k])[1];
+const ittNum=x=>'ITT-'+String(x.num||0).padStart(4,'0');
+function ittTotales(x){const H=x.hallazgos||[],af=H.reduce((a,h)=>a+(ittN(h.pos)||0),0),tot=ittN(x.totalPos)||0,r={ALTO:0,MEDIO:0,BAJO:0};H.forEach(h=>{if(r[h.riesgo]!=null)r[h.riesgo]++});
+  return{n:H.length,af,tot,ind:tot>0?af/tot:null,r}}
+function ittDef(d){const L=ittN(d.long),hi=ittN(d.hi),hm=ittN(d.hm),hd=ittN(d.hd),adm=L/180,lec=Math.abs((hi+hd)/2-hm);return{adm:isFinite(adm)?adm:NaN,lec:isFinite(lec)?lec:NaN,ok:isFinite(adm)&&isFinite(lec)?lec<=adm:null}}
+function ittApl(a){const h=ittN(a.alt),adm=h*4/1000,l=Math.abs(ittN(a.lon)),t=Math.abs(ittN(a.tra));return{adm:isFinite(adm)?adm:NaN,okL:isFinite(adm)&&isFinite(l)?l<=adm:null,okT:isFinite(adm)&&isFinite(t)?t<=adm:null}}
+const ittEst=ok=>ok==null?'<span class="mut">—</span>':ok?'<b style="color:#1e8e3e">CUMPLE</b>':'<b style="color:#c0392b">NO CUMPLE</b>';
+let ITTQ='',ITTTAB='datos';
+/* lista */
+function abrirItt(){ITTQ='';pila.length=0;pintarIttLista()}
+function pintarIttLista(){const q=ITTQ.trim(),L=itts().slice().sort((a,b)=>(b.editado||b.creado)-(a.editado||a.creado)).filter(x=>!q||coincide(q,x.cliente,x.almacen,ittNum(x)));
+  abrirSheet('itt','ITT · Inspección técnica',`<div class="card row" style="gap:12px"><span class="pi" style="background:#b45309;color:#fff;width:44px;height:44px">${ico('checklist',22)}</span><div class="grow"><b>Inspección técnica del almacén</b>
+     <div class="mut" style="font-size:12px">Para cuando el cliente pide revisar el estado de sus racks: choques, piezas que cambiar o reparar, deflexiones y aplomes. Sale un informe en PDF.</div></div></div>
+   <button class="btn full" onclick="ittNueva()">＋ Nueva inspección (ITT)</button>
+   ${L.length||q?`<input class="search" type="search" id="ittq" placeholder="🔍 Buscar por cliente" value="${esc(q)}" style="margin-top:12px">`:''}
+   ${L.map(x=>{const T=ittTotales(x);return `<div class="card tap" style="cursor:pointer" onclick="ITTTAB='datos';ittEditar('${x.id}')"><div class="row" style="gap:10px"><div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(x.cliente||'Sin cliente')}</b>
+     <div class="mut" style="font-size:12px">${ittNum(x)} · ${fFecha(x.fecha)}${x.almacen?' · '+esc(x.almacen):''}</div></div>
+     <div style="text-align:right;font-size:12px">${T.n} hallazgo(s)${T.ind!=null?'<br><b>'+Math.round(T.ind*1000)/10+'% afectado</b>':''}</div></div>
+     <div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap">${['ALTO','MEDIO','BAJO'].filter(k=>T.r[k]).map(k=>`<span class="badge" style="background:${ITT_RIESGO[k][1]}1f;color:${ITT_RIESGO[k][1]}">${T.r[k]} ${ITT_RIESGO[k][0].toLowerCase()}</span>`).join('')}${x.pdf?'<span class="badge b-ent">📄 Informe hecho</span>':''}</div></div>`}).join('')||(q?'<div class="mut" style="padding:10px">No hay inspecciones de «'+esc(q)+'».</div>':'')}`,pintarIttLista);
+  const b=$('#ittq');if(b)b.oninput=()=>{ITTQ=b.value;const p=b.selectionStart;pintarIttLista();const c=$('#ittq');if(c){c.focus();try{c.setSelectionRange(p,p)}catch(e){}}}}
+function ittNueva(clienteId){const clis=db.clientes.slice().sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre)));
+  abrirSheet('ittnew','Nueva inspección (ITT)',`<div class="card"><label style="margin-top:0">Cliente</label><select id="itc"><option value="">— Escribir a mano —</option>${clis.map(c=>`<option value="${c.id}" ${c.id===clienteId?'selected':''}>${esc(c.nombre)}</option>`).join('')}</select>
+     <input id="itn" placeholder="Nombre del cliente" style="margin-top:6px" value="${esc(clienteId&&cli(clienteId)?cli(clienteId).nombre:'')}">
+     <label>Almacén / nave</label><input id="ita" placeholder="Ej. Almacén de producto terminado">
+     <label class="row" style="gap:10px;color:var(--tx);margin-top:10px"><input type="checkbox" id="itv" checked style="width:22px;height:22px"><span>Registrar como visita (agenda y reportes)</span></label>
+     <button class="btn full" id="itok" style="margin-top:10px">Empezar la inspección</button></div>`,()=>ittNueva(clienteId));
+  $('#itc').onchange=()=>{const c=cli($('#itc').value);if(c)$('#itn').value=c.nombre};
+  $('#itok').onclick=()=>{const c=cli($('#itc').value),nom=$('#itn').value.trim()||(c&&c.nombre)||'';if(!nom)return toast('Escribe o elige el cliente');const num=(+kvGet('itt_seq')||0)+1;kvSet('itt_seq',String(num));
+    const x={id:uid(),num,creado:Date.now(),editado:Date.now(),fecha:hoy(),clienteId:c?c.id:'',cliente:nom,contacto:c?c.contacto||'':'',tel:c?c.tel||'':'',ubic:c?c.dir||'':'',almacen:$('#ita').value.trim(),tipoRack:'Rack selectivo',marca:'',totalPos:'',hallazgos:[],deflex:[],aplomes:[],repuestos:[],realizo:(db.empresa&&db.empresa.facN)||'',reviso:''};
+    itts().push(x);
+    if($('#itv').checked&&x.clienteId){const v={id:uid(),creado:Date.now(),clienteId:x.clienteId,estado:'realizada',fecha:hoy(),hora:horaYa(),motivo:'Inspección técnica (ITT)',resultado:'Inspección realizada',notas:ittNum(x)+(x.almacen?' · '+x.almacen:''),plan:'',proxFecha:'',proxPlan:'',ittId:x.id};db.visitas.push(v);x.visitaId=v.id}
+    save();pila.length=0;ITTTAB='datos';ittEditar(x.id);toast('📋 '+ittNum(x)+' creada')}}
+/* editor con pestañas */
+const ITT_TABS=[['datos','Datos'],['hall','Hallazgos'],['def','Deflexiones'],['apl','Aplomes'],['rep','Repuestos'],['plano','Plano'],['cierre','Informe']];
+function ittEditar(id){const x=ittG(id);if(!x)return abrirItt();const T=ittTotales(x),inp=(k,l,t,ph)=>`<label>${l}</label><input data-f="${k}" ${t?'type="'+t+'"':''} ${t==='number'?'inputmode="decimal" step="any"':''} value="${esc(x[k]==null?'':x[k])}" placeholder="${esc(ph||'')}">`;
+  let body='';
+  if(ITTTAB==='datos')body=`<div class="card">${inp('cliente','Cliente')}<div class="row" style="gap:8px"><div class="grow">${inp('contacto','Contacto')}</div><div style="width:42%">${inp('tel','Teléfono','tel')}</div></div>${inp('ubic','Ubicación')}
+     ${inp('almacen','Almacén / nave','','Ej. Almacén de producto terminado')}<label>Tipo de rack</label><select data-f="tipoRack">${['Rack selectivo','Rack drive-in','Rack cantilever','Rack manual / estantería','Entrepiso / mezzanine','Otro'].map(t=>`<option ${t===x.tipoRack?'selected':''}>${t}</option>`).join('')}</select>
+     <div class="row" style="gap:8px"><div class="grow">${inp('marca','Marca','','Ej. Benderrack')}</div><div style="width:45%">${inp('totalPos','Total de posiciones','number')}</div></div>
+     <div class="row" style="gap:8px"><div class="grow"><label>Escala instalada (Kingmore)</label><select data-f="esc"><option value="">— No sé / otra marca —</option>${(typeof KM_KEYS!=='undefined'?KM_KEYS:[]).map(k=>`<option value="${k}" ${x.esc===k?'selected':''}>${k} mm</option>`).join('')}</select></div><div style="width:36%">${inp('n1','1er larguero (m)','number','1.50')}</div></div>
+     <div class="row" style="gap:8px"><div class="grow"><label>Larguero instalado (Kingmore caja)</label><select data-f="viga"><option value="">— No sé / otra marca —</option>${(typeof KB_KEYS!=='undefined'?KB_KEYS:[]).map(k=>`<option value="${k}" ${x.viga===k?'selected':''}>${k} mm</option>`).join('')}</select></div><div style="width:36%">${inp('lv','Largo (m)','number','2.70')}</div></div>${inp('fecha','Fecha','date')}</div>
+     <div class="card"><b>Resumen</b><div class="mut" style="font-size:13px;margin-top:4px">${T.n} hallazgo(s) · ${T.af} posición(es) afectada(s)${T.ind!=null?' · <b>indicador de riesgo '+Math.round(T.ind*1000)/10+'%</b>':' · pon el total de posiciones para el indicador'}</div></div>`;
+  else if(ITTTAB==='hall')body=`<button class="btn full" onclick="ittHallazgo('${id}',-1)">＋ Hallazgo</button>
+     ${(x.hallazgos||[]).map((h,i)=>{const R=ITT_RIESGO[h.riesgo]||['—','#888'];return `<div class="card tap" style="cursor:pointer;border-left:5px solid ${R[1]}" onclick="ittHallazgo('${id}',${i})"><div class="row" style="gap:8px"><b>#${i+1}</b><span class="badge" style="background:${R[1]}1f;color:${R[1]}">${R[0]}</span><span class="grow ell">${esc(h.ubic||'Sin ubicación')}</span>${h.img?'📷':''}</div>
+       <div class="mut" style="font-size:12px;margin-top:4px">${esc((h.elem||[]).map(k=>ittNom(ITT_ELEM,k)).join(', ')||'—')} · ${esc((h.causa||[]).map(k=>ittNom(ITT_CAUSA,k)).join(', ')||'—')} → ${esc((h.trat||[]).map(k=>ittNom(ITT_TRAT,k)).join(', ')||'—')}${ittN(h.pos)>0?' · '+h.pos+' pos.':''}</div></div>`}).join('')||'<div class="card mut">Todavía no hay hallazgos. Toca «＋ Hallazgo» por cada choque, pieza dañada o problema que encuentres.</div>'}`;
+  else if(ITTTAB==='def')body=`<div class="card mut" style="font-size:12.5px">Busca el nivel más cargado en cada sección de viga (se recomienda leer en el primer nivel). Deflexión = (HI + HD) / 2 − HM; admisible = L/180.</div>
+     ${(x.deflex||[]).map((d,i)=>{const r=ittDef(d);return `<div class="card"><div class="row"><b class="grow">Registro ${i+1}</b>${ittEst(r.ok)}<button class="btn sm sec" style="width:auto;margin-left:8px" onclick="ittQuitar('${id}','deflex',${i})">🗑</button></div>
+       <div class="row" style="gap:6px">${[['sec','Sección viga (mm)','100x60'],['long','Longitud (mm)','2440'],['carga','Carga x nivel (kg)','']].map(([k,l,p])=>`<div class="grow"><label>${l}</label><input data-l="deflex" data-i="${i}" data-k="${k}" ${k==='sec'?'':'type="number" inputmode="decimal" step="any"'} value="${esc(d[k]||'')}" placeholder="${p}"></div>`).join('')}</div>
+       <div class="row" style="gap:6px">${[['hi','HI'],['hm','HM'],['hd','HD']].map(([k,l])=>`<div class="grow"><label>${l} (mm)</label><input data-l="deflex" data-i="${i}" data-k="${k}" type="number" inputmode="decimal" step="any" value="${esc(d[k]||'')}"></div>`).join('')}</div>
+       <div class="mut" style="font-size:12px;margin-top:4px">Lectura: <b>${isFinite(r.lec)?pdcF(r.lec,1)+' mm':'—'}</b> · admisible: ${isFinite(r.adm)?pdcF(r.adm,1)+' mm':'—'}</div></div>`}).join('')}
+     <button class="btn sec full" onclick="ittAgregar('${id}','deflex')">＋ Registro de deflexión</button>`;
+  else if(ITTTAB==='apl')body=`<div class="card mut" style="font-size:12.5px">Desplome admisible = altura de lectura × 4 / 1000 (mm), en sentido longitudinal y transversal.</div>
+     ${(x.aplomes||[]).map((a,i)=>{const r=ittApl(a);return `<div class="card"><div class="row"><b class="grow">Marco ${i+1}</b><button class="btn sm sec" style="width:auto" onclick="ittQuitar('${id}','aplomes',${i})">🗑</button></div>
+       <div class="row" style="gap:6px">${[['lin','Línea','text'],['mar','Marco','text'],['alt','Altura lectura (mm)','number']].map(([k,l,t])=>`<div class="grow"><label>${l}</label><input data-l="aplomes" data-i="${i}" data-k="${k}" ${t==='number'?'type="number" inputmode="decimal" step="any"':''} value="${esc(a[k]||'')}"></div>`).join('')}</div>
+       <div class="row" style="gap:6px"><div class="grow"><label>Longitudinal (mm)</label><input data-l="aplomes" data-i="${i}" data-k="lon" type="number" inputmode="decimal" step="any" value="${esc(a.lon||'')}"></div><div class="grow"><label>Transversal (mm)</label><input data-l="aplomes" data-i="${i}" data-k="tra" type="number" inputmode="decimal" step="any" value="${esc(a.tra||'')}"></div></div>
+       <div class="mut" style="font-size:12px;margin-top:4px">Admisible: ${isFinite(r.adm)?pdcF(r.adm,1)+' mm':'—'} · longitudinal ${ittEst(r.okL)} · transversal ${ittEst(r.okT)}</div></div>`}).join('')}
+     <button class="btn sec full" onclick="ittAgregar('${id}','aplomes')">＋ Aplome de marco</button>`;
+  else if(ITTTAB==='rep'){const sug=ittSugerirRep(x);body=`${sug.length?`<div class="card"><b>Según los hallazgos</b><div class="mut" style="font-size:12px">Piezas con tratamiento «cambiar» o «instalar»:</div>${sug.map(s=>`<div class="row" style="gap:8px;margin-top:6px"><span class="grow">${esc(s.desc)}</span><b>${s.cant}</b></div>`).join('')}
+       <button class="btn sec full" style="margin-top:8px" onclick="ittPasarRep('${id}')">⬇ Pasar a la lista de repuestos</button></div>`:''}
+     ${(x.repuestos||[]).map((r,i)=>`<div class="card"><div class="row" style="gap:6px"><b class="grow">Ítem ${i+1}</b><button class="btn sm sec" style="width:auto" onclick="ittQuitar('${id}','repuestos',${i})">🗑</button></div>
+       <label>Descripción</label><input data-l="repuestos" data-i="${i}" data-k="desc" value="${esc(r.desc||'')}" placeholder="Ej. Larguero 2.70 m calibre 14">
+       <div class="row" style="gap:6px"><div class="grow"><label>Fabricante</label><input data-l="repuestos" data-i="${i}" data-k="fab" value="${esc(r.fab||'')}"></div><div style="width:32%"><label>Cantidad</label><input data-l="repuestos" data-i="${i}" data-k="cant" type="number" inputmode="decimal" value="${esc(r.cant||'')}"></div></div></div>`).join('')}
+     <button class="btn sec full" onclick="ittAgregar('${id}','repuestos')">＋ Repuesto</button>`}
+  else if(ITTTAB==='plano'){const p=x.levId&&plano(x.levId);body=`<div class="card"><b>Plano del almacén (hoja de levantamiento)</b><div class="mut" style="font-size:12px">Dibuja el almacén y marca dónde está cada hallazgo (#1, #2…). Sale en el informe.</div>
+       ${p?`<div class="row" style="gap:6px;margin-top:10px;flex-wrap:wrap"><button class="btn" style="width:auto" onclick="levEditar('${p.id}')">📱 Llenar aquí</button>${AND&&AND.abrirLev?`<button class="btn sec" style="width:auto" onclick="levAbrir('${p.id}')">✍️ Otra app</button>`:''}<button class="btn sec" style="width:auto" onclick="verPlanoArchivo('${p.id}')">Ver</button></div>`
+         :`<button class="btn full" style="margin-top:10px" onclick="ittCrearPlano('${id}')">✏️ Crear la hoja del plano</button>`}</div>`}
+  else if(ITTTAB==='carga')body=ittCargasHtml(x,id);
+  else{const T2=ittTotales(x);body=`<div class="card">${inp('realizo','Realizó','','Nombre de quien inspecciona')}${inp('reviso','Revisó','','Nombre de quien revisa')}<label>Observaciones generales</label><textarea data-f="obs" placeholder="Conclusión de la visita">${esc(x.obs||'')}</textarea></div>
+     <div class="card"><b>${ittNum(x)}</b><div class="mut" style="font-size:13px">${T2.n} hallazgo(s): ${T2.r.ALTO} alto, ${T2.r.MEDIO} medio, ${T2.r.BAJO} bajo · ${(x.deflex||[]).length} deflexión(es) · ${(x.aplomes||[]).length} aplome(s) · ${(x.repuestos||[]).length} repuesto(s)</div></div>
+     <button class="btn full" onclick="ittInforme('${id}','abrir')">📄 Hacer el informe PDF</button>
+     <div class="btns" style="margin-top:8px"><button class="btn grn" onclick="ittInforme('${id}','whatsapp')">WhatsApp</button><button class="btn sec" onclick="ittInforme('${id}','correo')">✉️ Correo</button></div>
+     <button class="btn sec full" style="margin-top:14px;color:var(--bad);border-color:var(--bad)" onclick="ittBorrar('${id}')">🗑 Eliminar esta inspección</button>`}
+  abrirSheet('itted:'+id,ittNum(x)+' · '+(x.cliente||''),`<div class="chips" id="itttab" style="flex-wrap:wrap;overflow:visible;margin-bottom:8px">${ITT_TABS.map(([k,t])=>`<button class="chip ${ITTTAB===k?'on':''}" data-t="${k}">${t}${k==='hall'&&T.n?' ('+T.n+')':''}</button>`).join('')}</div>${body}`,()=>ittEditar(id));
+  document.querySelectorAll('#itttab [data-t]').forEach(b=>b.onclick=()=>{ITTTAB=b.dataset.t;pila.pop();ittEditar(id)});
+  document.querySelectorAll('#sbody [data-f]').forEach(e=>{const h=()=>{x[e.dataset.f]=e.value;x.editado=Date.now();clearTimeout(window.__ittT);window.__ittT=setTimeout(save,400)};e.oninput=h;e.onchange=h});
+  document.querySelectorAll('#sbody [data-l]').forEach(e=>{e.onchange=()=>{const L=x[e.dataset.l],o=L&&L[+e.dataset.i];if(!o)return;o[e.dataset.k]=e.value;x.editado=Date.now();save();if(e.dataset.l!=='repuestos'){const y=window.scrollY;pila.pop();ittEditar(id)}};
+    e.oninput=()=>{const L=x[e.dataset.l],o=L&&L[+e.dataset.i];if(o){o[e.dataset.k]=e.value;x.editado=Date.now();clearTimeout(window.__ittT);window.__ittT=setTimeout(save,400)}}})}
+function ittAgregar(id,lista){const x=ittG(id);(x[lista]=x[lista]||[]).push({});x.editado=Date.now();save();pila.pop();ittEditar(id)}
+function ittQuitar(id,lista,i){const x=ittG(id);if(!confirm('¿Quitar este registro?'))return;x[lista].splice(i,1);x.editado=Date.now();save();pila.pop();ittEditar(id)}
+function ittBorrar(id){const x=ittG(id);if(!x||!confirm('¿Eliminar la inspección '+ittNum(x)+' de '+(x.cliente||'')+'?'))return;db.itts=itts().filter(y=>y.id!==id);save();toast('Inspección eliminada');abrirItt()}
+/* un hallazgo */
+let ITTH=null;
+function ittHallazgo(id,i){const x=ittG(id);if(!x)return;ITTH={id,i,h:i>=0?JSON.parse(JSON.stringify(x.hallazgos[i])):{riesgo:'',elem:[],causa:[],trat:[],ubic:'',pos:'',obs:'',img:''}};pintarIttH()}
+function pintarIttH(){const{id,i,h}=ITTH,x=ittG(id),chips=(L,campo,multi)=>L.map(([k,t,c])=>`<button class="chip ${(multi?h[campo].includes(k):h[campo]===k)?'on':''}" data-c="${campo}" data-k="${k}" data-m="${multi?1:''}">${c?'<span class="mut" style="font-size:11px">'+c+'</span> ':''}${t}</button>`).join('');
+  const ri=['BAJO','MEDIO','ALTO'].indexOf(h.riesgo),crit=ri>=0?(h.causa||[]).filter(k=>ITT_CRIT[k]).map(k=>`<div style="margin-top:4px"><b>${ittNom(ITT_CAUSA,k)}:</b> ${esc(ITT_CRIT[k][ri])}</div>`).join(''):'';
+  abrirSheet('itth',(i>=0?'Hallazgo #'+(i+1):'Nuevo hallazgo')+' · '+ittNum(x),`<div class="card"><b>Nivel de riesgo</b><div class="row" style="gap:6px;margin-top:6px">${['BAJO','MEDIO','ALTO'].map(k=>`<button class="btn ${h.riesgo===k?'':'sec'}" data-r="${k}" style="flex:1;${h.riesgo===k?'background:'+ITT_RIESGO[k][1]+';border-color:'+ITT_RIESGO[k][1]:'color:'+ITT_RIESGO[k][1]}">${ITT_RIESGO[k][0]}</button>`).join('')}</div>
+     ${h.riesgo?`<div class="mut" style="font-size:12.5px;margin-top:6px">Acción: <b style="color:${ITT_RIESGO[h.riesgo][1]}">${ITT_ACC[h.riesgo]}</b></div>`:''}${crit?`<div style="font-size:12.5px;margin-top:6px;background:#f5f7fa;border-radius:10px;padding:8px">${crit}</div>`:''}
+     <label>Ubicación</label><input id="ihu" value="${esc(h.ubic)}" placeholder="Ej. Línea 3, módulo 5, nivel 2"></div>
+   <div class="card"><b>Elemento afectado</b><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${chips(ITT_ELEM,'elem',1)}</div>
+     <b style="display:block;margin-top:10px">Causa del hallazgo</b><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${chips(ITT_CAUSA,'causa',1)}</div>
+     <b style="display:block;margin-top:10px">Tratamiento</b><div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${chips(ITT_TRAT,'trat',1)}</div></div>
+   <div class="card"><div class="row" style="gap:8px"><div style="width:45%"><label style="margin-top:0">Posiciones afectadas</label><input id="ihp" type="number" inputmode="numeric" value="${esc(h.pos||'')}"></div><div class="grow"></div></div>
+     <label>Referencia / observaciones</label><textarea id="iho" placeholder="Ej. montante doblado 12 mm a 40 cm del piso">${esc(h.obs||'')}</textarea>
+     <label>Foto</label>${ittImg(h)?`<img src="${ittImg(h)}" style="width:100%;border-radius:10px;margin:4px 0"><button class="btn sm sec" onclick="ITTH.h.img='';pila.pop();pintarIttH()">Quitar foto</button>`:''}
+     <label class="btn sec full" style="margin-top:6px;cursor:pointer">📷 ${h.img?'Cambiar la foto':'Tomar o elegir foto'}<input type="file" accept="image/*" capture="environment" id="ihf" style="display:none"></label></div>
+   <div class="btns">${i>=0?`<button class="btn sec" style="color:var(--bad)" id="ihdel">🗑 Quitar</button>`:''}<button class="btn" id="ihok">${ico('ok',16)} Guardar hallazgo</button></div>`,pintarIttH);
+  const lee=()=>{h.ubic=$('#ihu').value;h.pos=$('#ihp').value;h.obs=$('#iho').value};
+  document.querySelectorAll('#sbody [data-r]').forEach(b=>b.onclick=()=>{lee();h.riesgo=b.dataset.r;const a={BAJO:'M',ALTO:'BQ'}[h.riesgo];if(a&&!h.trat.length)h.trat=[a];pila.pop();pintarIttH()});
+  document.querySelectorAll('#sbody [data-c]').forEach(b=>b.onclick=()=>{lee();const c=b.dataset.c,k=b.dataset.k,L=h[c];const j=L.indexOf(k);if(j>=0)L.splice(j,1);else L.push(k);pila.pop();pintarIttH()});
+  $('#ihf').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;lee();const r=new FileReader();r.onload=async()=>{let d=r.result;try{d=await reducirUrl(r.result,1280,0.8)}catch(er){}const fid='f'+hashFoto(d);if(!fotoGuardar(fid,d))return toast('No se pudo guardar la foto');h.img='@'+fid;pila.pop();pintarIttH()};r.readAsDataURL(f)};
+  $('#ihok').onclick=()=>{lee();if(!h.riesgo)return toast('Escoge el nivel de riesgo');if(!h.elem.length&&!h.causa.length)return toast('Marca el elemento o la causa');
+    const x=ittG(id);if(i>=0)x.hallazgos[i]=h;else x.hallazgos.push(h);x.editado=Date.now();save();pila.pop();ITTTAB='hall';const e=pila[pila.length-1];if(e&&e.key==='itted:'+id)pila.pop();ittEditar(id);toast('✔ Hallazgo guardado')};
+  const d=$('#ihdel');if(d)d.onclick=()=>{if(!confirm('¿Quitar este hallazgo?'))return;const x=ittG(id);x.hallazgos.splice(i,1);x.editado=Date.now();save();pila.pop();const e=pila[pila.length-1];if(e&&e.key==='itted:'+id)pila.pop();ittEditar(id)}}
+/* repuestos sugeridos: hallazgos con cambiar / instalar */
+function ittSugerirRep(x){const m=new Map();(x.hallazgos||[]).forEach(h=>{if(!(h.trat||[]).some(t=>t==='C'||t==='I'))return;(h.elem||[]).forEach(k=>{const d=ittNom(ITT_ELEM,k);m.set(d,(m.get(d)||0)+Math.max(1,ittN(h.pos)>0&&k==='CL'?ittN(h.pos):1))})});
+  return[...m].map(([desc,cant])=>({desc,cant}))}
+function ittPasarRep(id){const x=ittG(id),S=ittSugerirRep(x);x.repuestos=x.repuestos||[];S.forEach(s=>{const r=x.repuestos.find(r=>norm0(r.desc)===norm0(s.desc));if(r)r.cant=s.cant;else x.repuestos.push({desc:s.desc,fab:x.marca||'',cant:String(s.cant)})});x.editado=Date.now();save();pila.pop();ittEditar(id);toast('Lista de repuestos actualizada: revisa medidas y cantidades')}
+const norm0=s=>String(s||'').toLowerCase().trim();
+/* hoja del plano: la misma plantilla de levantamiento */
+async function ittCrearPlano(id){const x=ittG(id);if(!window.PLANTILLA_LEV){try{await cargarScript('plantilla_lev.js')}catch(e){}}let bytes;
+  try{bytes=levPdf({cliente:x.cliente,contacto:x.contacto,cel:x.tel,ubic:x.ubic,fecha:fFecha(hoy())})}catch(e){return alert('No se pudo preparar la hoja: '+e.message)}
+  const b64=u8aB64(bytes),fid=levDocNuevo(b64);if(!fid)return toast('No se pudo guardar la hoja');const nombre=spLimpio('ITT plano '+(x.cliente||'')+' '+fFecha(hoy()).replace(/\//g,'-'))+'.pdf';
+  const p={id:uid(),creado:Date.now(),editado:Date.now(),fecha:hoy(),tipo:'archivo',lev:true,itt:x.id,titulo:'Plano ITT',clienteId:x.clienteId||'',cliente:x.cliente||'',contacto:x.contacto||'',tel:x.tel||'',ubic:x.ubic||'',gps:'',escala:'',paginas:[],
+    adjuntos:[{fid,nombre,tam:bytes.length,mime:'application/pdf',fecha:hoy(),creado:Date.now(),paginas:1}],datos:{}};
+  db.planos.push(p);x.levId=p.id;x.editado=Date.now();save();if(levModo()==='app'&&AND&&AND.abrirLev)return levAbrir(p.id);levEditar(p.id)}
+/* informe PDF */
+async function ittPdf(id){const x=ittG(id),T=ittTotales(x);if(!window.jspdf)await cargarScript('jspdf.umd.min.js');if(!window.LOGO_PDF)try{await cargarScript('logo_pdf.js')}catch(e){}
+  const B=pdfBase('INFORME DE INSPECCIÓN TÉCNICA (ITT)',[[ittNum(x),''],['Fecha:',fLarga(x.fecha)],['Riesgo:',T.ind!=null?Math.round(T.ind*1000)/10+'% de posiciones afectadas':T.n+' hallazgo(s)']]),C=B.C,c=cli(x.clienteId)||{},RC={BAJO:C.GREEN,MEDIO:[232,137,47],ALTO:C.RED};
+  B.lado(String(x.tipoRack||'').toUpperCase());B.cliente({nombre:x.cliente,dir:x.ubic||c.dir,contacto:x.contacto||c.contacto,tel:x.tel||c.tel,rnc:c.rnc});
+  B.tit('RESUMEN',B.y);B.y+=6;B.tabla([{t:'DATO',x:B.L+6},{t:'VALOR',x:B.R-6,a:'right'}],[['Almacén',x.almacen||'—'],['Marca',x.marca||'—'],['Total de posiciones del almacén',ittN(x.totalPos)>0?String(x.totalPos):'—'],['Posiciones afectadas',String(T.af)],
+    Object.assign(['Indicador de riesgo',T.ind!=null?Math.round(T.ind*1000)/10+' %':'—'],{b:1}),Object.assign(['Hallazgos de riesgo alto (descargar)',String(T.r.ALTO)],{c:[null,RC.ALTO]}),Object.assign(['Hallazgos de riesgo medio (cargar al 50%)',String(T.r.MEDIO)],{c:[null,RC.MEDIO]}),Object.assign(['Hallazgos de riesgo bajo (monitorear)',String(T.r.BAJO)],{c:[null,RC.BAJO]})]);
+  if((x.hallazgos||[]).length){B.tit('REGISTRO DE HALLAZGOS',B.y);B.y+=6;
+    B.tabla([{t:'#',x:B.L+6},{t:'RIESGO',x:42},{t:'UBICACIÓN',x:92,w:110},{t:'ELEMENTO',x:206,w:100},{t:'CAUSA',x:310,w:95},{t:'TRATAMIENTO',x:409,w:120},{t:'POS.',x:B.R-6,a:'right'}],
+      x.hallazgos.map((h,i)=>{const r=[String(i+1),ITT_RIESGO[h.riesgo]?ITT_RIESGO[h.riesgo][0].toUpperCase():'—',h.ubic||'—',(h.elem||[]).map(k=>ittNom(ITT_ELEM,k)).join(', ')||'—',(h.causa||[]).map(k=>ittNom(ITT_CAUSA,k)).join(', ')||'—',(h.trat||[]).map(k=>ittNom(ITT_TRAT,k)).join(', ')||'—',ittN(h.pos)>0?String(h.pos):''];r.c=[null,RC[h.riesgo]||null];return r}));
+    const obs=x.hallazgos.map((h,i)=>h.obs?'#'+(i+1)+': '+h.obs:'').filter(Boolean);if(obs.length)B.seccion('REFERENCIAS / OBSERVACIONES DE LOS HALLAZGOS',obs);
+    const F=[];for(let i=0;i<x.hallazgos.length;i++){const src=ittImg(x.hallazgos[i]);if(src&&/^data:image/.test(src))F.push([i,src])}
+    if(F.length){B.nuevaPagina();B.tit('FOTOS DE LOS HALLAZGOS',B.y);B.y+=14;const W=(B.R-B.L-12)/2;let col=0;
+      for(const[i,src] of F){let r=0.75;try{const im=await new Promise((ok,mal)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=mal;m.src=src});r=im.height/im.width}catch(e){}let w=W,h=w*r;if(h>230){h=230;w=h/r}
+        if(B.y+h+24>760){B.nuevaPagina();B.y=40;col=0}const x0=B.L+col*(W+12);B.doc.addImage(src,'JPEG',x0,B.y,w,h);const H=x.hallazgos[i];B.T('#'+(i+1)+' · '+(ITT_RIESGO[H.riesgo]?ITT_RIESGO[H.riesgo][0]:'')+' · '+B.fit(H.ubic||'',W-60),x0,B.y+h+11,{b:1,s:8.5,c:RC[H.riesgo]||C.TXT});
+        col++;if(col===2){col=0;B.y+=Math.max(h,0)+26}}if(col)B.y+=250}}
+  {const L=(x.cargas||[]).map(c=>[c,typeof ittSobre==='function'?ittSobre(x,c):{}]).filter(([c,R])=>R.pct!=null);if(L.length){if(B.y>600)B.nuevaPagina();B.tit('CARGAS POR MÓDULO (CAPACIDAD KINGMORE DE ESCALA Y LARGUERO)',B.y);B.y+=6;
+    B.tabla([{t:'UBICACIÓN',x:B.L+6,w:105},{t:'ESCALA',x:130,w:75},{t:'USO',x:240,a:'right'},{t:'LARGUERO',x:252,w:110},{t:'USO',x:400,a:'right'},{t:'KG/NIVEL',x:455,a:'right'},{t:'RIESGO',x:B.R-6,a:'right'}],
+      L.map(([c,R],i)=>{const r=[c.ubic||'Módulo '+(i+1),R.k||'—',R.pctE!=null?Math.round(R.pctE*100)+'%':'—',R.kv?R.kv+(R.Lv?' · '+pdcF(R.Lv/1000)+' m':''):'—',R.pctV!=null?Math.round(R.pctV*100)+'%':'—',pdcF(pdcN(c.kg)||0,0),R.riesgo?ITT_RIESGO[R.riesgo][0].toUpperCase():'OK'];r.c=[,,R.pctE>1?C.RED:null,,R.pctV>1?C.RED:null,,R.riesgo?RC[R.riesgo]:C.GREEN];return r}))}}
+  if((x.deflex||[]).length){if(B.y>600)B.nuevaPagina();B.tit('REGISTRO DE DEFLEXIONES EN VIGAS (L/180)',B.y);B.y+=6;
+    B.tabla([{t:'#',x:B.L+6},{t:'SECCIÓN',x:44},{t:'LONG. (mm)',x:130,a:'right'},{t:'ADMIS. (mm)',x:200,a:'right'},{t:'HI',x:240,a:'right'},{t:'HM',x:280,a:'right'},{t:'HD',x:320,a:'right'},{t:'LECTURA (mm)',x:400,a:'right'},{t:'CARGA (kg)',x:470,a:'right'},{t:'ESTADO',x:B.R-6,a:'right'}],
+      x.deflex.map((d,i)=>{const r=ittDef(d),row=[String(i+1),d.sec||'',d.long||'',isFinite(r.adm)?pdcF(r.adm,1):'',d.hi||'',d.hm||'',d.hd||'',isFinite(r.lec)?pdcF(r.lec,1):'',d.carga||'',r.ok==null?'—':r.ok?'CUMPLE':'NO CUMPLE'];row.c=[,,,,,,,,,r.ok===false?C.RED:r.ok?C.GREEN:null];return row}))}
+  if((x.aplomes||[]).length){if(B.y>600)B.nuevaPagina();B.tit('REGISTRO DE APLOMES EN MARCOS (altura × 4/1000)',B.y);B.y+=6;
+    B.tabla([{t:'LÍNEA',x:B.L+6},{t:'MARCO',x:70},{t:'ALTURA (mm)',x:180,a:'right'},{t:'ADMIS. (mm)',x:250,a:'right'},{t:'LONGIT. (mm)',x:330,a:'right'},{t:'ESTADO',x:400},{t:'TRANSV. (mm)',x:490,a:'right'},{t:'ESTADO',x:B.R-6,a:'right'}],
+      x.aplomes.map(a=>{const r=ittApl(a),row=[a.lin||'',a.mar||'',a.alt||'',isFinite(r.adm)?pdcF(r.adm,1):'',a.lon||'',r.okL==null?'—':r.okL?'CUMPLE':'NO CUMPLE',a.tra||'',r.okT==null?'—':r.okT?'CUMPLE':'NO CUMPLE'];row.c=[,,,,,r.okL===false?C.RED:r.okL?C.GREEN:null,,r.okT===false?C.RED:r.okT?C.GREEN:null];return row}))}
+  if((x.repuestos||[]).length){if(B.y>620)B.nuevaPagina();B.tit('LISTADO DE REPUESTOS',B.y);B.y+=6;B.tabla([{t:'ÍTEM',x:B.L+6},{t:'DESCRIPCIÓN',x:60,w:330},{t:'FABRICANTE',x:400,w:120},{t:'CANTIDAD',x:B.R-6,a:'right'}],x.repuestos.map((r,i)=>[String(i+1),r.desc||'',r.fab||'',r.cant||'']))}
+  B.seccion('CRITERIOS DE ACCIÓN',['Riesgo BAJO: monitorear.','Riesgo MEDIO: cargar al 50% hasta reparar.','Riesgo ALTO: descargar el módulo hasta reparar o cambiar la pieza.']);
+  if(x.obs)B.seccion('OBSERVACIONES GENERALES',[x.obs]);
+  const p=x.levId&&plano(x.levId),a=p&&levAdj(p),b=a&&levLeer(a.fid);if(b){try{const I=await levImagenes(b,1500);I.forEach((im,i)=>{B.nuevaPagina();B.tit('PLANO DEL ALMACÉN'+(I.length>1?' · HOJA '+(i+1):''),B.y);const mw=B.R-B.L,mh=700-B.y;let w=mw,h=w*im.h/im.w;if(h>mh){h=mh;w=h*im.w/im.h}B.doc.addImage(im.cv.toDataURL('image/jpeg',0.82),'JPEG',B.L+(mw-w)/2,B.y+8,w,h);B.y+=h+20})}catch(e){console.log('ittplano',e)}}
+  B.firmas(['Realizó',x.realizo||'',(db.empresa&&db.empresa.facC)||''],['Revisó',x.reviso||'']);B.pie(ittNum(x)+' · '+(x.cliente||''));
+  return{doc:B.doc,nombre:spLimpio(ittNum(x)+' '+(x.cliente||'')+' '+fFecha(x.fecha).replace(/\//g,'-'))+'.pdf'}}
+async function ittInforme(id,modo){const x=ittG(id);toast('⏳ Preparando el informe…');let r;try{r=await ittPdf(id)}catch(e){return alert('No se pudo hacer el informe: '+e.message)}
+  x.pdf=Date.now();save();const T=ittTotales(x);
+  enviarPdfDoc({doc:r.doc,nombre:r.nombre,clienteId:x.clienteId,asunto:'Informe de inspección técnica '+ittNum(x)+' – '+(x.cliente||''),
+    cuerpo:'Saludos,\n\nAdjunto el informe de la inspección técnica de sus racks ('+ittNum(x)+', '+fFecha(x.fecha)+').\nHallazgos: '+T.n+' ('+T.r.ALTO+' de riesgo alto, '+T.r.MEDIO+' medio, '+T.r.BAJO+' bajo).'+(T.ind!=null?'\nIndicador de riesgo: '+Math.round(T.ind*1000)/10+'% de las posiciones.':'')+'\n\nQuedamos atentos para coordinar las reparaciones.\n\nSaludos,',
+    msg:'Le comparto el informe de la inspección técnica de sus racks ('+ittNum(x)+').'},modo==='abrir'?'compartir':modo)}
+/* en el menú principal y en la ficha del cliente */
+if(typeof MENU_ITEMS!=='undefined'&&!MENU_ITEMS.some(it=>it.k==='itt')){const j=MENU_ITEMS.findIndex(it=>it.k==='lev');MENU_ITEMS.splice(j>=0?j+1:MENU_ITEMS.length,0,{k:'itt',g:'c',i:'checklist',l:'ITT',c:'#b45309',f:"abrirItt()",id:'bitt',sub:()=>{const n=itts().length;return n?n+' inspección(es)':'Inspección técnica'}})}
+
+/* ================= v13.3: escalas Kingmore: capacidad por bahía (proyecto) y sobrecarga en el ITT ================= */
+/* tabla Kingmore 23/10/2025: capacidad de la escala en kg por bahía según la altura del primer larguero (factor de seguridad 1.98) */
+const KM_H=[900,1100,1300,1500,1700,1900,2100,2300,2700];
+const KM_TAB={'80×60×1.5':[7301,6953,6622,6307,5991,5692,5407,5137,4620],'80×60×1.8':[8672,8259,7866,7492,7117,6761,6423,6102,5490],'80×60×2.0':[9736,9272,8831,8410,7990,7590,7211,6850,6165],
+ '85×67×1.8':[10303,9812,9345,8900,8455,8032,7631,7249,6520],'85×67×2.0':[11448,10903,10383,9889,9395,8925,8479,8055,7250],'85×67×2.3':[13165,12538,11941,11372,10803,10263,9750,9263,8300],
+ '90×70×1.8':[10919,10399,9904,9432,8960,8512,8087,7682,6900],'90×70×2.0':[12083,11508,10960,10438,9916,9420,8949,8502,7650],'90×70×2.3':[13892,13230,12600,12000,11400,10830,10289,9774,8750],'90×70×2.5':[15099,14380,13696,13043,12391,11772,11183,10624,9500],
+ '100×67×1.8':[11492,10945,10423,9927,9431,8959,8511,8086,7250],'100×67×2.0':[12769,12161,11582,11030,10479,9955,9457,8984,8050],'100×67×2.3':[14684,13985,13319,12685,12050,11448,10875,10332,9250],'100×67×2.5':[15961,15201,14477,13788,13098,12443,11821,11230,10100],
+ '100×95×2.0':[15362,14630,13934,13270,12607,11976,11377,10808,9270],'100×95×2.3':[17666,16825,16024,15261,14497,13773,13084,12430,11030],'100×95×2.5':[19202,18288,17417,16588,15758,14970,14222,13511,12050],'100×95×2.75':[21122,20116,19159,18246,17334,16467,15644,14862,13350],
+ '120×95×2.5':[20485,19510,18581,17696,16811,15971,15172,14414,13025],'120×95×2.75':[22534,21461,20439,19466,18492,17568,16689,15855,14250],'120×95×3.0':[24582,23412,22297,21235,20173,19165,18207,17296,15550],
+ '150×95×2.5':[23494,22376,21310,20295,19280,19280,19280,19280,17400],'150×95×2.75':[25846,24616,23443,22327,21210,21210,21210,21210,19141],'150×95×3.0':[27794,26852,25573,24355,23137,23137,23137,23137,20862],
+ '76.2×76.2×1.5':[9136,8701,8287,7892,7497,7123,6766,6428,5750],'76.2×76.2×1.7':[10354,9861,9391,8944,8497,8072,7669,7285,6550],'76.2×76.2×1.9':[11572,11021,10496,9997,9497,9022,8571,8142,7300],
+ '76.2×76.2×2.3':[14008,13341,12706,12101,11496,10921,10375,9856,8880],'76.2×76.2×2.5':[15227,14502,13811,13153,12496,11871,11277,10713,9540]};
+const KM_KEYS=Object.keys(KM_TAB);
+/* largueros de caja Kingmore: capacidad en kg (por par de largueros, por nivel) según el largo; deflexión L/200 */
+const KB_L=[1800,2000,2300,2700,3000,3300,3600,3900];
+const KB_TAB={'80×40×1.5':[2500,2000,1500,1000,800,0,0,0],'100×40×1.5':[4100,3400,2560,1800,1300,1000,800,0],'120×40×1.5':[0,5000,4000,2800,2000,1500,1200,1000],
+ '80×50×1.5':[3000,2400,1800,1300,900,0,0,0],'100×50×1.5':[5000,4000,3000,2200,1600,1300,1000,0],'110×50×1.5':[0,5000,3800,2800,2000,1500,1200,1000],
+ '120×50×1.5':[0,0,4500,3400,2500,2000,1700,1400],'140×50×1.5':[0,0,0,4800,3800,3000,2500,2000],'160×50×1.5':[0,0,0,0,4500,4000,3500,3000]};
+const KB_KEYS=Object.keys(KB_TAB);
+/* capacidad al largo dado (mm): interpola; donde la tabla no trae valor a la izquierda se usa el primero que hay (más corto = más fuerte); a la derecha = no se usa */
+function kbCap(k,L){const T=KB_TAB[k];if(!T||!(L>0))return null;if(L>KB_L[KB_L.length-1])return null;const f=T.findIndex(v=>v>0);
+  for(let i=0;i<KB_L.length;i++){if(L<=KB_L[i]){if(i===0||!T[i-1])return T[i]?Math.round(i<f?T[f]:T[i]):(i<f?T[f]:null);if(!T[i])return null;const t=(L-KB_L[i-1])/(KB_L[i]-KB_L[i-1]);return Math.round(T[i-1]+(T[i]-T[i-1])*t)}}return null}
+function kbRecomendar(kg,L){const o=KB_KEYS.map(k=>({k,c:kbCap(k,L),p:kmPeso(k)})).filter(x=>x.c&&x.c>=kg).sort((a,b)=>a.p-b.p||a.c-b.c);return o[0]||null}
+const kbTxt=k=>'Kingmore caja '+k+' mm';
+const kmPeso=k=>{const[a,b,t]=k.split('×').map(Number);return(a+b)*t};/* aproximación del acero usado: para escoger la más económica */
+/* capacidad a la altura del primer larguero (mm); interpola; fuera de la tabla se queda en el extremo y avisa */
+function kmCap(k,h){const T=KM_TAB[k];if(!T)return null;h=+h||1500;let fuera=h<KM_H[0]?'bajo':h>KM_H[KM_H.length-1]?'alto':'';const x=Math.max(KM_H[0],Math.min(KM_H[KM_H.length-1],h));
+  for(let i=0;i<KM_H.length-1;i++)if(x<=KM_H[i+1]){const f=(x-KM_H[i])/(KM_H[i+1]-KM_H[i]);return{kg:Math.round(T[i]+(T[i+1]-T[i])*f),fuera}}return{kg:T[T.length-1],fuera}}
+function kmRecomendar(carga,h){const L=KM_KEYS.map(k=>({k,c:kmCap(k,h).kg,p:kmPeso(k)})).filter(o=>o.c>=carga).sort((a,b)=>a.p-b.p||a.c-b.c);return L[0]||null}
+const kmTxt=k=>'Kingmore '+k+' mm';
+/* carga por bahía del proyecto: niveles de vigas × capacidad por nivel */
+function kmCargaS(S){const n=Math.max(1,Math.round(pdcN(S.niv)||0)),c=pdcN(S.cap);return c>0?n*c:0}
+function kbEvaluar(S){const t=pdcTipoDe(S.tipo);if(t!=='selectivo')return null;const kg=pdcN(S.cap)>0?pdcN(S.cap):0,L=Math.round((pdcN(S.viga)||0)*1000),rec=kg&&L?kbRecomendar(kg,L):null,k=S.vigaKm&&KB_TAB[S.vigaKm]?S.vigaKm:(rec&&rec.k)||'';
+  const cap=k?kbCap(k,L):null,uso=cap&&kg?kg/cap:null;return{kg,L,rec,k,auto:!(S.vigaKm&&KB_TAB[S.vigaKm]),cap,uso,ok:uso!=null?uso<=1:k&&!cap?false:null}}
+function kmEvaluar(S){const t=pdcTipoDe(S.tipo);if(t!=='selectivo'&&t!=='drivein')return null;const carga=kmCargaS(S),h=(pdcN(S.n1)||1.5)*1000,rec=carga>0?kmRecomendar(carga,h):null,k=S.esc&&KM_TAB[S.esc]?S.esc:(rec&&rec.k)||'';
+  const cap=k?kmCap(k,h):null,uso=cap&&carga?carga/cap.kg:null;return{carga,h,rec,k,auto:!(S.esc&&KM_TAB[S.esc]),cap,uso,ok:uso!=null?uso<=1:null}}
+/* ---------- 1. en el editor del proyecto ---------- */
+function kmLeerForm(id){const x=pdcG(id),S=Object.assign({},PDC_SIS_DEF,x&&x.sis||{}),v=k=>$(k)?$(k).value:null;if(v('#pds')!=null)S.tipo=v('#pds');if(v('#pdnv')!=null)S.niv=pdcN(v('#pdnv'));if(v('#pdcp')!=null)S.cap=v('#pdcp');if(v('#pdvg')!=null)S.viga=pdcN(v('#pdvg'));return S}
+function kmPintar(id){const d=$('#kmcard');if(!d)return;const x=pdcG(id);if(!x)return;const S=kmLeerForm(id),E=kmEvaluar(S);
+  if(!E){d.style.display='none';return}d.style.display='';const col=E.ok==null?'var(--mut)':E.ok?'#1e8e3e':'#c0392b';
+  d.innerHTML=`<b>Escala Kingmore (capacidad por bahía)</b><div class="mut" style="font-size:12px">Tabla Kingmore del 23/10/2025 (factor de seguridad 1.98). Escoge la escala o deja «Automática» y la app pone la más económica que aguanta.</div>
+    <div class="row" style="gap:8px"><div class="grow"><label>Escala</label><select id="kmsel"><option value="">Automática${E.rec?' ('+E.rec.k+')':''}</option>${KM_KEYS.map(k=>`<option value="${k}" ${S.esc===k?'selected':''}>${k} mm · ${kmCap(k,E.h).kg.toLocaleString('en-US')} kg</option>`).join('')}</select></div>
+    <div style="width:38%"><label>1er larguero (m)</label><input id="kmn1" type="number" inputmode="decimal" step="any" value="${esc(S.n1||'')}" placeholder="1.50"></div></div>
+    <div style="margin-top:8px;font-size:13.5px">${E.carga?`Carga por bahía: <b>${E.carga.toLocaleString('en-US')} kg</b> (${Math.round(pdcN(S.niv)||0)} niveles × ${pdcF(pdcN(S.cap),0)} kg)<br>`:'<span style="color:#e8892f">Pon la «capacidad por nivel» para revisar la escala.</span><br>'}
+      ${E.k&&E.cap?`${E.auto?'Recomendada':'Escogida'}: <b>${kmTxt(E.k)}</b> → aguanta <b>${E.cap.kg.toLocaleString('en-US')} kg</b> con el 1er larguero a ${pdcF(E.h/1000)} m`:''}
+      ${E.uso!=null?`<div style="margin-top:4px;font-weight:700;color:${col}">${E.ok?'✔ Aguanta':'⚠ NO aguanta'}: usa el ${Math.round(E.uso*100)}% de su capacidad${!E.ok&&E.rec?' · usa '+E.rec.k+' o más fuerte':!E.ok?' · ninguna escala de la tabla aguanta: baja la carga o los niveles':''}</div>`:''}
+      ${E.carga&&!E.rec?'<div style="color:#c0392b;font-weight:700;margin-top:4px">⚠ Ninguna escala de la tabla aguanta esa carga.</div>':''}
+      ${E.cap&&E.cap.fuera?`<div style="color:#e8892f;font-size:12px;margin-top:4px">El 1er larguero está ${E.cap.fuera==='alto'?'por encima de 2.70 m: la capacidad real es menor que la de la tabla, consulta con Kingmore':'por debajo de 0.90 m: se usa el valor de 0.90 m'}.</div>`:''}</div>`;
+  const V=kbEvaluar(S);if(V){const cv=V.ok==null?'var(--mut)':V.ok?'#1e8e3e':'#c0392b',dv=document.createElement('div');dv.style.cssText='border-top:1px solid var(--line);margin-top:10px;padding-top:8px';
+    dv.innerHTML=`<b>Larguero Kingmore (caja)</b><div class="mut" style="font-size:12px">Capacidad del par de largueros por nivel, con deflexión L/200.</div>
+      <label>Larguero</label><select id="kbsel"><option value="">Automático${V.rec?' ('+V.rec.k+')':''}</option>${KB_KEYS.map(k=>{const c=kbCap(k,V.L);return `<option value="${k}" ${S.vigaKm===k?'selected':''}>${k} mm · ${c?c.toLocaleString('en-US')+' kg':'no se usa a '+pdcF(V.L/1000)+' m'}</option>`}).join('')}</select>
+      <div style="margin-top:6px;font-size:13.5px">${V.kg?`Carga por nivel: <b>${V.kg.toLocaleString('en-US')} kg</b> con largueros de ${pdcF(V.L/1000)} m<br>`:''}${V.k?`${V.auto?'Recomendado':'Escogido'}: <b>${kbTxt(V.k)}</b>${V.cap?' → aguanta <b>'+V.cap.toLocaleString('en-US')+' kg</b>':' → <b style="color:#c0392b">no se usa a ese largo</b>'}`:V.kg?'<b style="color:#c0392b">⚠ Ningún larguero de la tabla aguanta esa carga a ese largo.</b>':'<span style="color:#e8892f">Pon la capacidad por nivel.</span>'}
+      ${V.uso!=null?`<div style="margin-top:4px;font-weight:700;color:${cv}">${V.ok?'✔ Aguanta':'⚠ NO aguanta'}: usa el ${Math.round(V.uso*100)}%${!V.ok&&V.rec?' · usa '+V.rec.k:''}</div>`:''}</div>`;
+    d.appendChild(dv);$('#kbsel').onchange=e=>{x.sis=Object.assign({},PDC_SIS_DEF,x.sis,{vigaKm:e.target.value});x.editado=Date.now();save();kmPintar(id)}}
+  $('#kmsel').onchange=e=>{x.sis=Object.assign({},PDC_SIS_DEF,x.sis,{esc:e.target.value});x.editado=Date.now();save();kmPintar(id)};
+  $('#kmn1').onchange=e=>{x.sis=Object.assign({},PDC_SIS_DEF,x.sis,{n1:e.target.value});x.editado=Date.now();save();kmPintar(id)}}
+const _pdcEditar133=pdcEditar;pdcEditar=function(id){const r=_pdcEditar133.apply(this,arguments);try{const go=$('#pdcgo');if(go&&!$('#kmcard')){const d=document.createElement('div');d.className='card';d.id='kmcard';go.before(d);kmPintar(id);
+    ['#pds','#pdnv','#pdcp','#pdvg'].forEach(s=>{const e=$(s);if(e){e.addEventListener('input',()=>kmPintar(id));e.addEventListener('change',()=>kmPintar(id))}})}}catch(e){console.log('km',e)}return r};
+/* en la lista de materiales: la escala lleva su referencia Kingmore (el precio se busca con o sin ella) */
+const _pdcMat133=pdcMateriales;pdcMateriales=function(x,A){const M=_pdcMat133.apply(this,arguments);try{const E=kmEvaluar(A.S);if(E&&E.k)M.forEach(m=>{if(m.k==='marco'&&!/Kingmore/.test(m.desc))m.desc+=' · '+kmTxt(E.k)});const V=kbEvaluar(A.S);if(V&&V.k)M.forEach(m=>{if(m.k==='viga'&&!/Kingmore/.test(m.desc))m.desc+=' · '+kbTxt(V.k)})}catch(e){}return M};
+const _pdcPrecio133=pdcPrecio;pdcPrecio=function(desc){const p=_pdcPrecio133.apply(this,arguments);if(p>0)return p;const d=String(desc||'');return / · Kingmore /.test(d)?_pdcPrecio133(d.replace(/ · Kingmore .*$/,'')):p};
+/* en el resultado: aviso si la escala no aguanta */
+const _pdcRes133=pdcResultado;pdcResultado=function(id){const r=_pdcRes133.apply(this,arguments);try{const x=pdcG(id),E=x&&kmEvaluar(Object.assign({},PDC_SIS_DEF,x.sis||{}));const f=$('#pdcpdf');
+  if(E&&E.k&&E.cap&&f&&!$('#kmres')){const d=document.createElement('div');d.id='kmres';d.className='card';const V0=kbEvaluar(Object.assign({},PDC_SIS_DEF,x.sis||{}));d.style.borderLeft='5px solid '+(E.ok===false||(V0&&V0.ok===false)?'#c0392b':'#1e8e3e');
+    d.innerHTML=`<b>Escala: ${kmTxt(E.k)}</b><div class="mut" style="font-size:12.5px">${E.carga?'Carga por bahía '+E.carga.toLocaleString('en-US')+' kg · aguanta '+E.cap.kg.toLocaleString('en-US')+' kg ('+Math.round(E.uso*100)+'%)':'Pon la capacidad por nivel para revisarla'}${E.ok===false?' · <b style="color:#c0392b">NO aguanta</b>'+(E.rec?': usa '+E.rec.k:''):''}</div>${(()=>{const V=kbEvaluar(Object.assign({},PDC_SIS_DEF,x.sis||{}));return V&&V.k?`<div style="margin-top:6px"><b>Larguero: ${kbTxt(V.k)}</b><div class="mut" style="font-size:12.5px">${V.kg&&V.cap?V.kg.toLocaleString('en-US')+' kg por nivel · aguanta '+V.cap.toLocaleString('en-US')+' kg ('+Math.round(V.uso*100)+'%)':'—'}${V.ok===false?' · <b style="color:#c0392b">NO aguanta</b>'+(V.rec?': usa '+V.rec.k:''):''}</div></div>`:''})()}<button class="btn sm sec" style="margin-top:6px" onclick="pdcEditar('${id}')">Cambiar</button>`;
+    (f.closest('.btns')||f).before(d)}}catch(e){}return r};
+
+/* ---------- 2. ITT: cargas por módulo → sobrecarga automática ---------- */
+function ittSobre(x,c){const k=c.esc||x.esc,h=(pdcN(c.n1)||pdcN(x.n1)||1.5)*1000,cap=k&&KM_TAB[k]?kmCap(k,h):null,carga=Math.round((pdcN(c.niv)||0)*(pdcN(c.kg)||0));
+  const kv=c.viga||x.viga,Lv=Math.round((pdcN(c.lv)||pdcN(x.lv)||0)*1000),capV=kv&&KB_TAB[kv]&&Lv?kbCap(kv,Lv):null,kg=pdcN(c.kg)||0,pctV=capV&&kg?kg/capV:null;
+  const pctE=cap&&carga?carga/cap.kg:null,pct=pctE==null&&pctV==null?null:Math.max(pctE||0,pctV||0),riesgo=pct==null||pct<=1?'':pct<=1.05?'BAJO':pct<=1.10?'MEDIO':'ALTO';
+  return{k,cap,carga,pct,pctE,kv,Lv,capV,pctV,riesgo,por:pctV!=null&&(pctE==null||pctV>pctE)?'larguero':'escala'}}
+
+function ittCargasHtml(x,id){x.cargas=x.cargas||[];const fila=(c,i)=>{const R=ittSobre(x,c),col=R.riesgo?ITT_RIESGO[R.riesgo][1]:R.pct!=null?'#1e8e3e':'var(--mut)';
+    return `<div class="card" style="border-left:5px solid ${col}"><div class="row" style="gap:6px"><b class="grow">Módulo ${i+1}</b>${c.hid!=null?'<span class="badge b-ent">En hallazgos</span>':''}<button class="btn sm sec" style="width:auto" onclick="ittQuitar('${id}','cargas',${i})">🗑</button></div>
+      <label>Ubicación</label><input data-l="cargas" data-i="${i}" data-k="ubic" value="${esc(c.ubic||'')}" placeholder="Ej. Línea 2, módulo 7">
+      <div class="row" style="gap:6px"><div class="grow"><label>Niveles cargados</label><input data-l="cargas" data-i="${i}" data-k="niv" type="number" inputmode="numeric" value="${esc(c.niv||'')}"></div><div class="grow"><label>Kg por nivel</label><input data-l="cargas" data-i="${i}" data-k="kg" type="number" inputmode="decimal" value="${esc(c.kg||'')}"></div></div>
+      <div class="row" style="gap:6px"><div class="grow"><label>Escala</label><select data-l="cargas" data-i="${i}" data-k="esc"><option value="">La del almacén${x.esc?' ('+x.esc+')':''}</option>${KM_KEYS.map(k=>`<option ${c.esc===k?'selected':''}>${k}</option>`).join('')}</select></div><div style="width:34%"><label>1er larguero (m)</label><input data-l="cargas" data-i="${i}" data-k="n1" type="number" inputmode="decimal" step="any" value="${esc(c.n1||'')}" placeholder="${esc(x.n1||'1.50')}"></div></div>
+      <div class="row" style="gap:6px"><div class="grow"><label>Larguero</label><select data-l="cargas" data-i="${i}" data-k="viga"><option value="">El del almacén${x.viga?' ('+x.viga+')':''}</option>${KB_KEYS.map(k=>`<option ${c.viga===k?'selected':''}>${k}</option>`).join('')}</select></div><div style="width:34%"><label>Largo (m)</label><input data-l="cargas" data-i="${i}" data-k="lv" type="number" inputmode="decimal" step="any" value="${esc(c.lv||'')}" placeholder="${esc(x.lv||'2.70')}"></div></div>
+      <div style="font-size:13px;margin-top:6px">${!R.k&&!R.kv?'<span style="color:#e8892f">Escoge la escala o el larguero (aquí o en Datos).</span>':R.pct==null?'Pon los niveles y el peso por nivel.':`${R.pctE!=null?'Escala: <b>'+R.carga.toLocaleString('en-US')+' kg</b> de '+R.cap.kg.toLocaleString('en-US')+' kg ('+Math.round(R.pctE*100)+'%)<br>':''}${R.pctV!=null?'Larguero: <b>'+pdcF(pdcN(c.kg),0)+' kg</b> de '+R.capV.toLocaleString('en-US')+' kg ('+Math.round(R.pctV*100)+'%)<br>':R.kv&&!R.capV&&R.Lv?'<span style="color:#c0392b">Ese larguero no se usa a '+pdcF(R.Lv/1000)+' m</span><br>':''}<b style="color:${col}">${R.riesgo?'Sobrecarga en '+R.por+' ('+Math.round(R.pct*100)+'%): riesgo '+ITT_RIESGO[R.riesgo][0].toLowerCase()+' · '+ITT_ACC[R.riesgo].toLowerCase():'✔ Dentro de la capacidad'}</b>`}</div>
+      ${R.riesgo&&c.hid==null?`<button class="btn sm" style="margin-top:8px" onclick="ittCargaHallazgo('${id}',${i})">＋ Registrar como hallazgo</button>`:''}</div>`};
+  return `<div class="card mut" style="font-size:12.5px">Carga del módulo = niveles cargados × kg por nivel, contra la capacidad de la escala Kingmore a la altura del 1er larguero. Sobre 100%: hasta 105% riesgo bajo (monitorear), hasta 110% medio (cargar al 50%) y más de 110% alto (descargar).</div>
+    ${x.cargas.map(fila).join('')}<button class="btn sec full" onclick="ittAgregar('${id}','cargas')">＋ Módulo</button>`}
+ITT_TABS.splice(ITT_TABS.findIndex(t=>t[0]==='def'),0,['carga','Cargas']);
+function ittCargaHallazgo(id,i){const x=ittG(id),c=x.cargas[i],R=ittSobre(x,c);if(!R.riesgo)return;
+  const h={riesgo:R.riesgo,elem:[R.por==='larguero'?'L':'E'],causa:['SC'],trat:R.riesgo==='ALTO'?['BQ']:R.riesgo==='BAJO'?['M']:['A'],ubic:c.ubic||'Módulo '+(i+1),pos:'',img:'',
+    obs:(R.por==='larguero'?'Sobrecarga en el larguero: '+pdcF(pdcN(c.kg),0)+' kg por nivel contra '+R.capV.toLocaleString('en-US')+' kg del larguero '+R.kv+' de '+pdcF(R.Lv/1000)+' m':'Sobrecarga en la escala: '+R.carga.toLocaleString('en-US')+' kg contra '+R.cap.kg.toLocaleString('en-US')+' kg de la escala '+R.k)+' ('+Math.round(R.pct*100)+'%). Acción: '+ITT_ACC[R.riesgo].toLowerCase()+'.'};
+  x.hallazgos.push(h);c.hid=x.hallazgos.length-1;x.editado=Date.now();save();pila.pop();ittEditar(id);toast('✔ Hallazgo de sobrecarga agregado (#'+x.hallazgos.length+')')}
+
+/* ================= v13.4: calculadora de tramería (escala y larguero Kingmore según el peso, con su imagen) ================= */
+Object.assign(ICO,{rack:'M5 3v18M19 3v18M5 7h14M5 12h14M5 17h14'});
+let CT={peso:'',ppn:2,niv:4,viga:'2.70',n1:'1.50'};
+async function kmImgs(){if(!window.KM_IMG){try{await cargarScript('km_img.js')}catch(e){}}return window.KM_IMG||{up:[],bm:{}}}
+function ctCalc(o){const peso=pdcN(o.peso)||0,ppn=Math.max(1,Math.round(pdcN(o.ppn)||1)),niv=Math.max(1,Math.round(pdcN(o.niv)||1)),L=Math.round((pdcN(o.viga)||0)*1000),h=Math.round((pdcN(o.n1)||1.5)*1000);
+  const kgN=peso*ppn,bah=kgN*niv;
+  const vigas=KB_KEYS.map(k=>({k,c:kbCap(k,L),p:kmPeso(k)})).filter(x=>x.c).map(x=>Object.assign(x,{uso:kgN/x.c})).sort((a,b)=>(a.uso>1)-(b.uso>1)||a.p-b.p||a.c-b.c);
+  const escs=KM_KEYS.map(k=>({k,c:kmCap(k,h).kg,p:kmPeso(k)})).map(x=>Object.assign(x,{uso:bah/x.c})).sort((a,b)=>(a.uso>1)-(b.uso>1)||a.p-b.p||a.c-b.c);
+  return{peso,ppn,niv,L,h,kgN,bah,vigas,escs,viga:vigas.find(x=>x.uso<=1)||null,esc:escs.find(x=>x.uso<=1)||null,fuera:h>KM_H[KM_H.length-1]?'alto':h<KM_H[0]?'bajo':''}}
+const ctBarra=u=>{const p=Math.min(100,Math.round(u*100)),c=u>1?'#c0392b':u>0.9?'#e8892f':'#1e8e3e';return `<div style="height:7px;background:#e9eef5;border-radius:9px;overflow:hidden;margin-top:4px"><div style="width:${p}%;height:100%;background:${c}"></div></div>`};
+async function abrirCalcTram(pre){if(pre)CT=Object.assign({},CT,pre);await kmImgs();pintarCalcTram()}
+function pintarCalcTram(){const R=ctCalc(CT),I=window.KM_IMG||{up:[],bm:{}},vigasStd=pdcMedidas().viga;
+  const img=(src,w)=>src?`<img src="${src}" style="width:${w}px;height:auto;flex:none;border-radius:10px;background:#f3f6fa">`:`<span style="width:${w}px;height:${w}px;flex:none;border-radius:10px;background:#f3f6fa;display:flex;align-items:center;justify-content:center" class="mut">sin foto</span>`;
+  const varEsc=k=>(I.up||[]).filter(u=>u.s===k.split('×').slice(0,2).join('×'));
+  const opcion=(x,tipo,top)=>{const V=tipo==='esc'?varEsc(x.k):[],src=tipo==='esc'?(V[0]&&V[0].img):I.bm[x.k.split('×').slice(0,2).join('×')];
+    return `<div class="row" style="gap:12px;align-items:center;${top?'':'margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'}">${img(src,top?84:54)}<div class="grow" style="min-width:0">
+      <b style="${top?'font-size:16px':''}">${tipo==='esc'?'Escala':'Larguero de caja'} ${x.k} mm</b><div class="mut" style="font-size:12.5px">Aguanta ${x.c.toLocaleString('en-US')} kg${tipo==='esc'?' por bahía':' por nivel'} · usa el <b style="color:${x.uso>1?'#c0392b':x.uso>0.9?'#e8892f':'#1e8e3e'}">${Math.round(x.uso*100)}%</b>${x.uso>1?' · NO aguanta':''}</div>${ctBarra(x.uso)}
+      ${top&&tipo==='esc'&&V.length?`<div class="mut" style="font-size:11.5px;margin-top:4px">Modelos: ${V.map(v=>'paso '+v.p+' mm, agujero '+v.h).join(' · ')}</div>`:''}</div></div>`};
+  const res=!R.peso?'<div class="card mut">Escribe el peso por paleta para ver la recomendación.</div>':`
+   <div class="card"><div class="row" style="gap:10px;flex-wrap:wrap"><div class="grow"><div class="mut" style="font-size:12px">Carga por nivel</div><b style="font-size:20px">${R.kgN.toLocaleString('en-US')} kg</b><div class="mut" style="font-size:11.5px">${R.ppn} paleta(s) × ${pdcF(R.peso,0)} kg</div></div>
+     <div class="grow"><div class="mut" style="font-size:12px">Carga por bahía</div><b style="font-size:20px">${R.bah.toLocaleString('en-US')} kg</b><div class="mut" style="font-size:11.5px">${R.niv} nivel(es) de largueros</div></div></div></div>
+   <h3>Larguero recomendado</h3><div class="card">${R.viga?opcion(R.viga,'viga',1)+R.vigas.filter(x=>x!==R.viga&&x.uso<=1).slice(0,2).map(x=>opcion(x,'viga')).join('')
+     :`<b style="color:#c0392b">⚠ Ningún larguero de la tabla aguanta ${R.kgN.toLocaleString('en-US')} kg a ${pdcF(R.L/1000)} m.</b><div class="mut" style="font-size:12.5px">Prueba con largueros más cortos o menos paletas por nivel.${R.vigas[0]?' El más fuerte a ese largo es '+R.vigas.slice().sort((a,b)=>b.c-a.c)[0].k+' ('+R.vigas.slice().sort((a,b)=>b.c-a.c)[0].c.toLocaleString('en-US')+' kg).':''}</div>`}</div>
+   <h3>Escala recomendada</h3><div class="card">${R.esc?opcion(R.esc,'esc',1)+R.escs.filter(x=>x!==R.esc&&x.uso<=1).slice(0,2).map(x=>opcion(x,'esc')).join('')
+     :`<b style="color:#c0392b">⚠ Ninguna escala de la tabla aguanta ${R.bah.toLocaleString('en-US')} kg por bahía.</b><div class="mut" style="font-size:12.5px">Baja los niveles o el peso por nivel.</div>`}
+     ${R.fuera?`<div style="color:#e8892f;font-size:12px;margin-top:8px">El 1er larguero está ${R.fuera==='alto'?'por encima de 2.70 m: la capacidad real es menor, consulta con Kingmore':'por debajo de 0.90 m: se usa el valor de 0.90 m'}.</div>`:''}</div>
+   <div class="mut" style="font-size:11.5px;margin:4px 4px 10px">Tablas Kingmore: escalas por altura del 1er larguero (23/10/2025, factor de seguridad 1.98) y largueros de caja por largo (deflexión L/200). Sale primero la opción más económica que aguanta.</div>
+   <div class="btns"><button class="btn" onclick="ctProyecto()">📐 Usar en un proyecto</button><button class="btn sec" onclick="ctCompartir()">${ico('share',16)} Compartir</button></div>`;
+  abrirSheet('calctram','Calculadora de tramería',`<div class="card"><div class="row" style="gap:8px"><div class="grow"><label style="margin-top:0">Peso por paleta (kg)</label><input id="ctp" type="number" inputmode="decimal" value="${esc(CT.peso)}" placeholder="Ej. 1000"></div>
+      <div style="width:40%"><label style="margin-top:0">Paletas por nivel</label><select id="ctn">${[1,2,3,4].map(n=>`<option ${+CT.ppn===n?'selected':''}>${n}</option>`).join('')}</select></div></div>
+     <div class="row" style="gap:8px"><div class="grow"><label>Niveles de largueros</label><input id="ctv" type="number" inputmode="numeric" value="${esc(CT.niv)}"></div><div class="grow"><label>Largo del larguero (m)</label><input id="ctl" list="ctll" type="number" inputmode="decimal" step="any" value="${esc(CT.viga)}"><datalist id="ctll">${vigasStd.map(v=>`<option value="${v}">`).join('')}</datalist></div></div>
+     <label>Altura del 1er larguero (m)</label><input id="cth" type="number" inputmode="decimal" step="any" value="${esc(CT.n1)}">
+     <div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${vigasStd.map(v=>`<button class="chip ${pdcN(v)===pdcN(CT.viga)?'on':''}" data-v="${v}">${v} m</button>`).join('')}</div></div><div id="ctres">${res}</div>`,pintarCalcTram);
+  const lee=()=>{CT.peso=$('#ctp').value;CT.ppn=$('#ctn').value;CT.niv=$('#ctv').value;CT.viga=$('#ctl').value;CT.n1=$('#cth').value};
+  ['#ctp','#ctv','#ctl','#cth'].forEach(s=>$(s).onchange=()=>{lee();ctRefrescar()});['#ctp','#ctv','#ctl','#cth'].forEach(s=>$(s).oninput=()=>{lee();clearTimeout(window.__ctT);window.__ctT=setTimeout(ctRefrescar,350)});
+  $('#ctn').onchange=()=>{lee();ctRefrescar()};document.querySelectorAll('#sbody [data-v]').forEach(b=>b.onclick=()=>{lee();CT.viga=b.dataset.v;$('#ctl').value=CT.viga;document.querySelectorAll('#sbody [data-v]').forEach(x=>x.classList.toggle('on',x===b));ctRefrescar()})}
+/* refresca solo los resultados (el teclado no se cierra) */
+function ctRefrescar(){const a=document.activeElement&&document.activeElement.id,pos=a&&$('#'+a)&&$('#'+a).selectionStart;const y=$('#sheet')?$('#sheet').scrollTop:0;pila.pop();pintarCalcTram();if($('#sheet'))$('#sheet').scrollTop=y;if(a&&$('#'+a)){const e=$('#'+a);e.focus();try{if(pos!=null)e.setSelectionRange(pos,pos)}catch(er){}}}
+function ctTexto(){const R=ctCalc(CT);return ['*Tramería recomendada – '+(db.empresa&&db.empresa.nombre||'Benderrack')+'*','Paleta: '+pdcF(R.peso,0)+' kg · '+R.ppn+' por nivel · '+R.niv+' niveles · largueros de '+pdcF(R.L/1000)+' m · 1er larguero a '+pdcF(R.h/1000)+' m',
+  'Carga por nivel: '+R.kgN.toLocaleString('en-US')+' kg · por bahía: '+R.bah.toLocaleString('en-US')+' kg',R.viga?'Larguero: caja '+R.viga.k+' mm (aguanta '+R.viga.c.toLocaleString('en-US')+' kg, '+Math.round(R.viga.uso*100)+'%)':'Larguero: ninguno de la tabla aguanta',
+  R.esc?'Escala: '+R.esc.k+' mm (aguanta '+R.esc.c.toLocaleString('en-US')+' kg, '+Math.round(R.esc.uso*100)+'%)':'Escala: ninguna de la tabla aguanta'].join('\n')}
+function ctCompartir(){const t=ctTexto();if(navigator.share){navigator.share({text:t}).catch(()=>{});return}abrirWa('',t)}
+function ctProyecto(){const R=ctCalc(CT);if(!R.peso)return toast('Escribe el peso por paleta');const sis=Object.assign({},PDC_SIS_DEF,{niv:R.niv,ppn:R.ppn,viga:pdcN(CT.viga)||PDC_SIS_DEF.viga,cap:String(R.kgN),n1:CT.n1,esc:R.esc?R.esc.k:'',vigaKm:R.viga?R.viga.k:''});
+  pila.length=0;cerrarTodo();pdcNuevo({nombre:'Proyecto '+fFecha(hoy()),sis});toast('📐 Proyecto con la escala y el larguero recomendados: ahora pon las medidas del área')}
+/* en el menú (Oficina) y en la tarjeta del proyecto */
+if(typeof MENU_ITEMS!=='undefined'&&!MENU_ITEMS.some(it=>it.k==='tram'))MENU_ITEMS.push({k:'tram',g:'o',i:'rack',l:'Tramería',c:'#0e7490',f:"abrirCalcTram()",id:'btram',sub:()=>'Escala y larguero según el peso'});
+const _kmPintar134=kmPintar;kmPintar=function(id){_kmPintar134.apply(this,arguments);try{const d=$('#kmcard');if(!d||d.style.display==='none'||$('#kmcalc'))return;const S=kmLeerForm(id),b=document.createElement('button');b.id='kmcalc';b.className='btn sec full';b.style.marginTop='10px';
+  b.innerHTML='🧮 Ver en la calculadora (con fotos)';b.onclick=()=>{const c=pdcN(S.cap)||0,p=Math.max(1,Math.round(pdcN(S.ppn)||1));abrirCalcTram({peso:c?String(Math.round(c/p)):'',ppn:p,niv:Math.round(pdcN(S.niv)||4),viga:String(pdcN($('#pdvg')?$('#pdvg').value:S.viga)||S.viga),n1:S.n1||'1.50'})};d.appendChild(b)}catch(e){}};
+
+
+/* ================= v13.5: calculadora de tramería completa: 120×75 del catálogo, medidas de la paleta (largo de viga, fondo, alturas) y guía de sistemas ================= */
+/* 120×75 no está en la tabla 2025: se usa el catálogo (1er larguero a 1.50 m) y para otras alturas la curva promedio de la tabla 2025 (queda marcada como estimada) */
+(function(){const base=KM_KEYS.filter(k=>KM_TAB[k][3]>0),rel=KM_H.map((h,i)=>base.reduce((a,k)=>a+KM_TAB[k][i]/KM_TAB[k][3],0)/base.length);
+  window.KM_EST={};[['120×75×2.0',12500],['120×75×2.3',14000],['120×75×2.5',16000]].forEach(([k,v])=>{KM_TAB[k]=rel.map(r=>Math.round(v*r));KM_EST[k]=1;if(!KM_KEYS.includes(k))KM_KEYS.push(k)})})();
+const kmEst=k=>!!(window.KM_EST&&KM_EST[k]);
+/* holguras (guías de la industria para rack selectivo) */
+const CT_H={lado:0.076,entre:0.152,arriba:0.152,techo:0.254,rociador:0.457,vuelo:0.076};
+const CT_SIS=[
+ {k:'selectivo',n:'Rack selectivo',acc:'Directo a cada paleta',rot:'Cualquiera (FIFO o LIFO)',uso:'Muchos productos con pocas paletas cada uno; picking en los niveles bajos',den:'Baja (más pasillos)',pas:'Contrabalanceado 3.20–3.50 m · retráctil 2.60–2.90 m · trilateral 1.50–1.80 m',calc:1},
+ {k:'doble',n:'Doble profundidad',acc:'Directo a la paleta del frente; la de atrás con montacargas de horquillas extensibles',rot:'LIFO por posición',uso:'Productos con 2 o más paletas iguales',den:'Media (menos pasillos que el selectivo)',pas:'Retráctil de doble profundidad, 2.80–3.10 m',calc:1},
+ {k:'drivein',n:'Drive-in / drive-through',acc:'No: el montacargas entra a la calle',rot:'Drive-in LIFO · drive-through FIFO',uso:'Pocos productos con muchas paletas cada uno; alta rotación o cámaras frías',den:'Muy alta',pas:'Contrabalanceado o retráctil; una sola referencia por calle'},
+ {k:'pushback',n:'Push-back',acc:'No: la paleta de adelante empuja a las de atrás',rot:'LIFO por nivel',uso:'Rotación media; cada nivel puede tener un producto distinto',den:'Alta (2 a 4 paletas con carros, hasta 6–8 con rodillos)',pas:'Pasillo normal del selectivo, solo por el frente'},
+ {k:'dinamico',n:'Dinámico (por gravedad)',acc:'Se carga por un lado y se saca por el otro',rot:'FIFO',uso:'Perecederos, producción continua, alta rotación',den:'Muy alta (calles de más de 20 m)',pas:'Dos pasillos: uno de carga y otro de descarga'},
+ {k:'shuttle',n:'Shuttle (radioshuttle)',acc:'A cada canal; el carro motorizado mueve las paletas',rot:'LIFO (un pasillo) o FIFO (dos pasillos)',uso:'Pocos productos, muchas paletas, alta rotación',den:'Muy alta (canales de más de 40 m)',pas:'El montacargas no entra al rack'},
+ {k:'movil',n:'Rack móvil (sobre bases con rieles)',acc:'Directo, abriendo el pasillo que se necesita',rot:'Cualquiera',uso:'Baja rotación, cuarentena, cámaras frías medianas o pequeñas',den:'80–120% más que el selectivo fijo',pas:'Un solo pasillo para todo el bloque'},
+ {k:'cantilever',n:'Cantilever',acc:'Directo, sin columnas al frente',rot:'Cualquiera',uso:'Cargas largas: tubos, perfiles, madera, varillas',den:'Media',pas:'Montacargas lateral o contrabalanceado'},
+ {k:'manual',n:'Estantería manual / picking',acc:'A mano',rot:'Cualquiera',uso:'Cajas y piezas sueltas, repuestos, archivos',den:'Media',pas:'0.80–1.20 m (personas)'},
+ {k:'entrepiso',n:'Entrepiso / mezzanine',acc:'Escalera o montacargas al piso de arriba',rot:'—',uso:'Duplicar el área útil en naves altas (oficinas, picking, almacén liviano)',den:'Duplica el área',pas:'Se calcula por carga por m²'},
+ {k:'autoportante',n:'Autoportante / automático',acc:'Con transelevador o shuttle',rot:'Cualquiera',uso:'Naves de gran altura (hasta 40 m), mucho movimiento',den:'La más alta',pas:'Transelevador 1.50–1.80 m'}];
+function ctSisRecomendar(o){const L=[];if(o.refs==='muchas')L.push('selectivo');if(o.refs==='muchas'&&o.pal==='muchas')L.push('doble');
+  if(o.refs==='pocas'&&o.pal==='muchas'){if(o.fifo==='si')L.push('dinamico','shuttle');else L.push('drivein','pushback','shuttle')}if(o.refs==='pocas'&&o.pal==='pocas')L.push('selectivo','pushback');
+  if(o.carga==='larga')return['cantilever'];if(o.carga==='cajas')return['manual','entrepiso'];if(o.rot==='baja')L.push('movil');return[...new Set(L)].slice(0,3)}
+/* cálculo con las medidas de la paleta */
+function ctMedidas(o,R){const W=pdcN(o.palA)||0,D=pdcN(o.palF)||0,H=pdcN(o.palH)||0,n=Math.max(1,Math.round(pdcN(o.ppn)||1)),M=pdcMedidas(),r={};
+  if(W>0){r.lmin=n*W+2*CT_H.lado+(n-1)*CT_H.entre;const std=M.viga.map(pdcN).filter(v=>v>0).sort((a,b)=>a-b);r.lstd=std.find(v=>v>=r.lmin-0.005)||null}
+  if(D>0){r.fondo=D-2*CT_H.vuelo;const sp=M.prof.map(pdcN).filter(v=>v>0);r.fstd=sp.sort((a,b)=>Math.abs(a-r.fondo)-Math.abs(b-r.fondo))[0]||null}
+  if(H>0&&R){const pv=R.viga?(+R.viga.k.split('×')[0])/1000:0.1;r.paso=H+CT_H.arriba+pv;const n1=pdcN(o.n1)||1.5;r.ult=n1+(R.niv-1)*r.paso;r.top=r.ult+pv+H;
+    r.escMin=r.ult+pv+0.15;const sa=M.alto.map(pdcN).filter(v=>v>0).sort((a,b)=>a-b);r.astd=sa.find(v=>v>=r.escMin-0.005)||null;
+    const T=pdcN(o.techo);if(T>0){r.libre=T-(o.roc?CT_H.rociador:CT_H.techo);r.cabe=r.top<=r.libre+0.001}}
+  return r}
+const _pintarCT135=pintarCalcTram;pintarCalcTram=function(){CT.tab=CT.tab||'calc';if(CT.tab==='sis')return ctPintarSistemas();_pintarCT135.apply(this,arguments);try{
+  const sb=$('#sbody');if(!sb)return;const t=document.createElement('div');t.className='chips';t.id='cttab';t.style.cssText='flex-wrap:wrap;overflow:visible;margin-bottom:8px';
+  t.innerHTML=`<button class="chip on" data-t="calc">🧮 Cálculo</button><button class="chip" data-t="sis">📚 Sistemas de racks</button>`;sb.prepend(t);t.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{CT.tab=b.dataset.t;pila.pop();pintarCalcTram()});
+  /* medidas de la paleta (opcional) */
+  const c1=sb.querySelector('.card');if(c1&&!$('#ctpal')){const d=document.createElement('details');d.id='ctpal';d.open=!!(CT.palA||CT.palF||CT.palH||CT.techo);d.style.marginTop='10px';
+    d.innerHTML=`<summary class="b" style="cursor:pointer">📦 Medidas de la paleta y del techo (opcional)</summary><div class="mut" style="font-size:12px;margin:4px 0">Con esto la app sugiere el largo del larguero, el fondo de la escala y las alturas de los niveles.</div>
+      <div class="row" style="gap:6px"><div class="grow"><label>Frente (m)</label><input id="ctpa" type="number" inputmode="decimal" step="any" value="${esc(CT.palA||'')}" placeholder="1.00"></div><div class="grow"><label>Fondo (m)</label><input id="ctpf" type="number" inputmode="decimal" step="any" value="${esc(CT.palF||'')}" placeholder="1.20"></div><div class="grow"><label>Alto con carga (m)</label><input id="ctph" type="number" inputmode="decimal" step="any" value="${esc(CT.palH||'')}" placeholder="1.40"></div></div>
+      <div class="row" style="gap:6px;align-items:flex-end"><div class="grow"><label>Altura libre del techo (m)</label><input id="ctte" type="number" inputmode="decimal" step="any" value="${esc(CT.techo||'')}" placeholder="opcional"></div><label class="row" style="gap:6px;color:var(--tx);margin:0 0 10px"><input type="checkbox" id="ctro" ${CT.roc?'checked':''} style="width:20px;height:20px"> Hay rociadores</label></div>`;
+    c1.appendChild(d);d.addEventListener('toggle',()=>{});
+    const lee=()=>{CT.palA=$('#ctpa').value;CT.palF=$('#ctpf').value;CT.palH=$('#ctph').value;CT.techo=$('#ctte').value;CT.roc=$('#ctro').checked};
+    ['#ctpa','#ctpf','#ctph','#ctte'].forEach(s=>{$(s).onchange=()=>{lee();ctRefrescar()};$(s).oninput=()=>{lee();clearTimeout(window.__ctT);window.__ctT=setTimeout(ctRefrescar,450)}});$('#ctro').onchange=()=>{lee();ctRefrescar()}}
+  const R=ctCalc(CT),Md=ctMedidas(CT,R.peso?R:null),res=$('#ctres');
+  if(res&&(Md.lmin||Md.fondo||Md.paso)){const d=document.createElement('div');d.innerHTML=`<h3>Medidas sugeridas</h3><div class="card" style="font-size:13.5px">
+     ${Md.lmin?`<div>Largo del larguero: mínimo <b>${pdcF(Md.lmin)} m</b> → estándar <b>${Md.lstd?pdcF(Md.lstd)+' m':'más largo que la lista'}</b>${Md.lstd&&Math.abs(Md.lstd-pdcN(CT.viga))>0.005?` <button class="btn sm sec" style="width:auto" onclick="CT.viga='${Md.lstd}';ctRefrescar()">Usar</button>`:Md.lstd?' ✔':''}<div class="mut" style="font-size:11.5px">${CT.ppn} paleta(s) + 76 mm a cada escala + 152 mm entre paletas</div></div>`:''}
+     ${Md.fondo?`<div style="margin-top:8px">Fondo de la escala: <b>${pdcF(Md.fondo)} m</b> → estándar <b>${Md.fstd?pdcF(Md.fstd)+' m':'—'}</b><div class="mut" style="font-size:11.5px">La paleta sobresale 76 mm (3") por delante y por detrás</div></div>`:''}
+     ${Md.paso?`<div style="margin-top:8px">Distancia entre niveles: <b>${pdcF(Md.paso)} m</b> · último larguero a <b>${pdcF(Md.ult)} m</b> · tope de la carga <b>${pdcF(Md.top)} m</b><br>Altura de la escala: mínimo ${pdcF(Md.escMin)} m → estándar <b>${Md.astd?pdcF(Md.astd)+' m':'más alta que la lista'}</b>
+       <div class="mut" style="font-size:11.5px">Carga + 152 mm libres + peralte del larguero</div>${Md.libre!=null?`<div style="margin-top:4px;font-weight:700;color:${Md.cabe?'#1e8e3e':'#c0392b'}">${Md.cabe?'✔ Cabe':'⚠ No cabe'}: la carga de arriba llega a ${pdcF(Md.top)} m y el máximo es ${pdcF(Md.libre)} m (${CT.roc?'457 mm bajo los rociadores':'254 mm bajo el techo'})${Md.cabe?'':' · quita un nivel o baja el 1er larguero'}</div>`:''}</div>`:''}
+     <div class="mut" style="font-size:11px;margin-top:8px">Holguras de referencia de la industria para rack selectivo. Revisa siempre el montacargas y las normas locales.</div></div>`;
+    const h3=[...res.querySelectorAll('h3')][0];if(h3)res.insertBefore(d,h3);else res.appendChild(d)}
+  /* escalas estimadas y largueros sin tabla */
+  res&&res.querySelectorAll('b').forEach(b=>{const m=/Escala (\S+) mm/.exec(b.textContent);if(m&&kmEst(m[1])&&!b.dataset.e){b.dataset.e=1;b.insertAdjacentHTML('afterend',' <span class="badge b-pend" title="Del catálogo a 1.50 m; otras alturas estimadas">estimada</span>')}});
+  if(res&&R.peso&&!$('#ctotros')){const o=document.createElement('div');o.id='ctotros';o.className='mut';o.style.cssText='font-size:11.5px;margin:0 4px 10px';
+    o.innerHTML='Kingmore también fabrica largueros de caja 90×50, 130×50, 180×50 y 140×40, largueros escalonados («step beam», americanos de 3" a 6.25" y de caja de 80 a 140 mm) y la escala 140×95, pero sus tablas no traen capacidades: para usarlos hay que pedirle los valores a Kingmore. Las capacidades de los largueros son por par (los dos largueros de un nivel), con la carga repartida.';
+    res.appendChild(o)}}catch(e){console.log('ct135',e)}};
+/* guía de sistemas */
+let CTS={refs:'',pal:'',fifo:'',rot:'',carga:'paleta'};
+function ctPintarSistemas(){const rec=CTS.refs&&CTS.pal?ctSisRecomendar(CTS):CTS.carga!=='paleta'?ctSisRecomendar(CTS):[];
+  const q=(k,l,ops)=>`<label>${l}</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${ops.map(([v,t])=>`<button class="chip ${CTS[k]===v?'on':''}" data-q="${k}" data-v="${v}">${t}</button>`).join('')}</div>`;
+  abrirSheet('calctram','Calculadora de tramería',`<div class="chips" id="cttab" style="flex-wrap:wrap;overflow:visible;margin-bottom:8px"><button class="chip" data-t="calc">🧮 Cálculo</button><button class="chip on" data-t="sis">📚 Sistemas de racks</button></div>
+   <div class="card"><b>¿Qué sistema le conviene al cliente?</b>${q('carga','Qué guarda',[['paleta','Paletas'],['larga','Cargas largas'],['cajas','Cajas / piezas']])}
+     ${CTS.carga==='paleta'?q('refs','Cuántos productos distintos',[['muchas','Muchos'],['pocas','Pocos']])+q('pal','Paletas por producto',[['pocas','Pocas'],['muchas','Muchas']])+q('fifo','¿Lo primero que entra debe salir primero (FIFO)?',[['si','Sí'],['no','No']])+q('rot','Rotación',[['alta','Alta'],['media','Media'],['baja','Baja']]):''}
+     ${rec.length?`<div style="margin-top:10px;font-size:13.5px">Sugerencia: ${rec.map(k=>'<b>'+CT_SIS.find(s=>s.k===k).n+'</b>').join(', ')}</div>`:''}</div>
+   ${CT_SIS.map(s=>`<div class="card" style="${rec.includes(s.k)?'border-left:5px solid #1e8e3e':''}"><div class="row" style="gap:8px"><b class="grow">${s.n}</b>${s.calc?'<span class="badge b-ent">Se calcula aquí</span>':''}</div>
+     <div style="font-size:12.5px;margin-top:6px;line-height:1.5"><b>Acceso:</b> ${s.acc}<br><b>Rotación:</b> ${s.rot}<br><b>Para:</b> ${s.uso}<br><b>Densidad:</b> ${s.den}<br><b>Pasillo / equipo:</b> ${s.pas}</div>
+     ${s.calc?`<button class="btn sm sec" style="margin-top:8px" onclick="CT.tab='calc';pila.pop();pintarCalcTram()">🧮 Calcular escala y larguero</button>`:''}</div>`).join('')}
+   <div class="mut" style="font-size:11.5px;margin:4px">Anchos de pasillo de referencia según el tipo de montacargas. Confirma con el equipo del cliente.</div>`,pintarCalcTram);
+  document.querySelectorAll('#cttab [data-t]').forEach(b=>b.onclick=()=>{CT.tab=b.dataset.t;pila.pop();pintarCalcTram()});
+  document.querySelectorAll('#sbody [data-q]').forEach(b=>b.onclick=()=>{CTS[b.dataset.q]=CTS[b.dataset.q]===b.dataset.v&&b.dataset.q!=='carga'?'':b.dataset.v;pila.pop();pintarCalcTram()})}
+/* el proyecto también recibe el fondo y la altura sugeridos */
+const _ctProy135=ctProyecto;ctProyecto=function(){const R=ctCalc(CT),M=ctMedidas(CT,R.peso?R:null),pn=pdcNuevo;
+  pdcNuevo=function(o){try{if(o&&o.sis){if(M.fstd)o.sis.prof=M.fstd;if(M.astd)o.sis.alto=M.astd;if(M.lstd&&!pdcN(CT.viga))o.sis.viga=M.lstd}}catch(e){}return pn.apply(this,arguments)};
+  try{return _ctProy135.apply(this,arguments)}finally{pdcNuevo=pn}};
+
+
+/* ================= v13.6: visitas → siguiente paso según el resultado, y planificar la semana por frecuencia y zona ================= */
+const VFREC={semanal:7,quincenal:15,mensual:30,bimestral:60};
+const VFREC_N={semanal:'Cada semana',quincenal:'Cada 15 días',mensual:'Cada mes',bimestral:'Cada 2 meses'};
+const vUlt=cid=>db.visitas.filter(v=>v.clienteId===cid&&v.estado==='realizada').reduce((m,v)=>v.fecha>m?v.fecha:m,'');
+const vProx=cid=>db.visitas.filter(v=>v.clienteId===cid&&v.estado==='programada'&&v.fecha>=hoy()).sort((a,b)=>a.fecha.localeCompare(b.fecha))[0]||null;
+function zonaCli(c){const z=String(c&&c.zona||'').trim();if(z)return z;const p=String(c&&c.dir||'').split(',').map(s=>s.trim()).filter(Boolean);return p.length>1?p[p.length-2]:'Sin zona'}
+function vToca(c){const d=VFREC[c&&c.frecVis];if(!d)return null;const u=vUlt(c.id),toca=u?addD(u,d):hoy();return{u,toca,prox:vProx(c.id),atr:Math.max(0,diasEntre(toca,hoy()))}}
+const vFProx=(v,c)=>{const f=addD(v.fecha,VFREC[c.frecVis]||7),m=addD(hoy(),1);return f<m?m:f};
+const vClisAtrasados=()=>db.clientes.filter(c=>{const t=vToca(c);return t&&!t.prox&&t.toca<hoy()});
+function vProgramar(cid,fecha,plan,motivo){const o={id:uid(),creado:hoy(),clienteId:cid,estado:'programada',fecha,hora:'',motivo:motivo||'Seguimiento',resultado:'',notas:'',plan:plan||''};db.visitas.push(o);return o}
+
+/* ---------- 3. siguiente paso según el resultado ---------- */
+function vPasos(v){const c=cli(v.clienteId);if(!c)return[];const cid=c.id,P=[],r=v.resultado||'',t=vToca(c),pr=vProx(cid);
+  const qa=db.cotizaciones.filter(q=>q.clienteId===cid&&q.estado==='pendiente').sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)))[0];
+  const pd=db.pedidos.filter(p=>p.clienteId===cid&&p.estado!=='cancelado'&&total(p)-pagado(p)>0.5).sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)))[0];
+  if(r==='Se tomó pedido')P.push(['📦 Crear el pedido',`vPaso('${v.id}','pedido')`,1]);
+  if(r==='Interesado / volver'){P.push(['📝 Hacer la cotización',`vPaso('${v.id}','cot')`,1]);if(qa)P.push(['🔔 Seguimiento a '+numCot(qa),`vPaso('${v.id}','seg','${qa.id}')`]);if(!pr)P.push(['📅 Programar visita en 7 días',`vPaso('${v.id}','volver',7)`])}
+  if(r==='Levantamiento realizado'){if(!v.levId)P.push(['✏️ Abrir el levantamiento',`vPaso('${v.id}','lev')`,1]);P.push(['📝 Hacer la cotización',`vPaso('${v.id}','cot')`,!!v.levId])}
+  if(r==='Se cobró')P.push([pd?'💵 Registrar el pago (pedido #'+pd.numero+')':'💵 Ver la cuenta del cliente',`vPaso('${v.id}','pago','${pd?pd.id:''}')`,1]);
+  if(r==='No estaba / cerrado'&&!pr){P.push(['📅 Programar visita para mañana',`vPaso('${v.id}','volver',1)`,1]);P.push(['📅 Programar visita en 3 días',`vPaso('${v.id}','volver',3)`])}
+  if(r==='Sin interés'&&c.frecVis&&c.frecVis!=='bimestral')P.push(['⬇ Visitarlo cada 2 meses',`vPaso('${v.id}','bajar')`]);
+  if(!pr&&t&&r!=='No estaba / cerrado'&&r!=='Interesado / volver'){const f=vFProx(v,c);P.push(['📅 Próxima visita '+diaDe(f).slice(0,3)+' '+fFecha(f)+' ('+VFREC_N[c.frecVis].toLowerCase()+')',`vPaso('${v.id}','frec')`])}
+  if(!c.frecVis)P.push(['🗓 ¿Cada cuánto lo visitas?',`vFrecCli('${cid}')`]);
+  return P}
+function vPaso(id,acc,x){const v=vis(id);if(!v)return;const c=cli(v.clienteId),cid=v.clienteId;v.pasoHecho=Date.now();save();
+  if(acc==='pedido')return formPedido(null,cid);
+  if(acc==='cot')return formCotizacion(null,cid);
+  if(acc==='seg')return formSeg(x,'visita');
+  if(acc==='lev')return formLevantamiento(cid);
+  if(acc==='pago')return x?formPago(x):verCliente(cid);
+  if(acc==='volver'||acc==='frec'){const f=acc==='frec'?vFProx(v,c):addD(hoy(),+x||7);const o=vProgramar(cid,f,acc==='volver'&&v.notas?'Pendiente de la visita del '+fFecha(v.fecha)+': '+v.notas:'',acc==='volver'&&v.motivo?v.motivo:'Seguimiento');save();
+    toast('📅 Visita programada para el '+diaDe(f)+' '+fFecha(f));if(o&&calAuto())calendarioVisita(o.id);return verVisita(id)}
+  if(acc==='bajar'){c.frecVis='bimestral';save();toast('Ahora lo visitas cada 2 meses');return verVisita(id)}}
+const _verVis136=verVisita;verVisita=function(id){const r=_verVis136.apply(this,arguments);try{const v=vis(id),sb=$('#sbody');if(!v||!sb||v.estado!=='realizada'||!v.resultado||v.pasoHecho)return r;const P=vPasos(v);if(!P.length)return r;
+  const d=document.createElement('div');d.className='card';d.id='vpaso';d.style.cssText='border-left:5px solid #1e8e3e';
+  d.innerHTML=`<div class="row"><b class="grow">➡ Siguiente paso</b><button class="btn sec sm" style="width:auto" onclick="const v=vis('${id}');v.pasoHecho=Date.now();save();this.closest('.card').remove()">Listo</button></div>
+    <div class="mut" style="font-size:12.5px;margin:2px 0 8px">Resultado: ${esc(v.resultado)}</div><div class="btns" style="flex-wrap:wrap">${P.map(([t,f,pri])=>`<button class="btn ${pri?'':'sec'}" onclick="${f}">${esc(t.replace(/^[^\wÁÉÍÓÚÑáéíóúñ¿]+\s*/,''))}</button>`).join('')}</div>`;
+  sb.prepend(d)}catch(e){console.log('vpaso',e)}return r};
+
+/* ---------- frecuencia y zona del cliente ---------- */
+function vFrecCli(cid,volver){const c=cli(cid);if(!c)return;abrirSheet('vfrec','Visitas a '+c.nombre,`<div class="card"><label style="margin-top:0">¿Cada cuánto lo visitas?</label>
+   <div class="chips" style="flex-wrap:wrap;overflow:visible">${[['','No fijo'],...Object.entries(VFREC_N)].map(([k,n])=>`<button class="chip ${(c.frecVis||'')===k?'on':''}" data-f="${k}">${n}</button>`).join('')}</div>
+   <label>Zona (para agrupar la ruta)</label><input id="vfz" value="${esc(c.zona||'')}" placeholder="${esc(zonaCli(c)==='Sin zona'?'Ej.: Naco, Haina, Santiago':zonaCli(c))}">
+   <div class="mut" style="font-size:12px;margin-top:4px">Si la dejas vacía se toma de la dirección.</div></div><button class="btn full" id="vfok">Guardar</button>`,()=>vFrecCli(cid));
+  let f=c.frecVis||'';document.querySelectorAll('#sbody [data-f]').forEach(b=>b.onclick=()=>{f=b.dataset.f;document.querySelectorAll('#sbody [data-f]').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#vfok').onclick=()=>{c.frecVis=f;c.zona=$('#vfz').value.trim();save();toast('Guardado');cerrarSheet()}}
+const _verCli136=verCliente;verCliente=function(id){const r=_verCli136.apply(this,arguments);try{const c=cli(id),sb=$('#sbody');if(!c||!sb||$('#vclif'))return r;const t=vToca(c),u=vUlt(id),pr=vProx(id);
+  const d=document.createElement('div');d.className='card tap';d.id='vclif';d.onclick=()=>vFrecCli(id);
+  d.innerHTML=`<div class="row"><b class="grow">🗓 Visitas: ${c.frecVis?VFREC_N[c.frecVis]:'sin frecuencia'}</b><span class="mut" style="font-size:12px">Cambiar ›</span></div>
+    <div class="mut" style="font-size:12.5px;margin-top:2px">Zona: ${esc(zonaCli(c))} · Última: ${u?fFecha(u)+' (hace '+diasEntre(u,hoy())+' d)':'nunca'}${pr?' · Próxima: '+fFecha(pr.fecha):t?` · <b style="color:${t.toca<hoy()?'var(--bad)':'var(--tx)'}">${t.toca<hoy()?'atrasada '+t.atr+' d':'le toca el '+fFecha(t.toca)}</b>`:''}</div>`;
+  const ref=sb.querySelector('.perfil');if(ref&&ref.nextSibling)sb.insertBefore(d,ref.nextSibling);else sb.prepend(d)}catch(e){console.log('vclif',e)}return r};
+
+/* ---------- 4. planificar la semana ---------- */
+let VPL={sem:'',quitar:{},dia:{}};
+function vPlanLista(l){const f=addD(l,5);return db.clientes.map(c=>({c,t:vToca(c)})).filter(x=>x.t&&!x.t.prox&&x.t.toca<=f).sort((a,b)=>a.t.toca.localeCompare(b.t.toca))}
+function vPlanDias(l){const D=[];for(let i=0;i<6;i++){const d=addD(l,i);if(d>=hoy())D.push(d)}return D}
+function abrirPlanSemana(){if(!VPL.sem)VPL.sem=lunes(hoy());if(!vPlanDias(VPL.sem).length)VPL.sem=addD(lunes(hoy()),7);const l=VPL.sem,L=vPlanLista(l),D=vPlanDias(l);
+  const Z={};L.forEach(x=>{const z=zonaCli(x.c);(Z[z]=Z[z]||[]).push(x)});const zs=Object.keys(Z).sort((a,b)=>Z[b].length-Z[a].length||a.localeCompare(b));
+  zs.forEach((z,i)=>{if(!VPL.dia[z]||!D.includes(VPL.dia[z]))VPL.dia[z]=D[i%D.length]});
+  const sinF=db.clientes.filter(c=>!c.frecVis).length,n=L.filter(x=>!VPL.quitar[x.c.id]).length;
+  abrirSheet('vplan','Planificar la semana',`<div class="card"><div class="row"><button class="btn sec sm" ${l<=lunes(hoy())?'disabled':''} onclick="VPL.sem=addD(VPL.sem,-7);pila.pop();abrirPlanSemana()">‹</button><div class="grow" style="text-align:center"><b>Semana ${fFecha(l)} – ${fFecha(addD(l,5))}</b><div class="mut" style="font-size:12.5px">${L.length} cliente(s) les toca visita</div></div><button class="btn sec sm" onclick="VPL.sem=addD(VPL.sem,7);pila.pop();abrirPlanSemana()">›</button></div></div>
+   ${sinF?`<div class="card tap" onclick="vSinFrec()"><b>🗓 ${sinF} cliente(s) sin frecuencia de visita</b><div class="mut" style="font-size:12.5px">Ponles cada cuánto los visitas para que salgan aquí · toca para asignar</div></div>`:''}
+   ${L.length?zs.map(z=>`<h3>${esc(z)} · ${Z[z].length}</h3><div class="card"><label style="margin-top:0">Día para esta zona</label><select data-z="${esc(z)}">${D.map(d=>`<option value="${d}" ${VPL.dia[z]===d?'selected':''}>${diaDe(d)} ${fFecha(d)}</option>`).join('')}</select>
+     ${Z[z].map(({c,t})=>`<label class="row" style="gap:10px;color:var(--tx);padding:8px 0;border-top:1px solid var(--line);margin:0"><input type="checkbox" data-c="${c.id}" ${VPL.quitar[c.id]?'':'checked'} style="width:22px;height:22px;flex:none"><div class="grow"><b>${esc(c.nombre)}</b>
+       <div class="mut" style="font-size:12px">${VFREC_N[c.frecVis]} · ${t.u?'última '+fFecha(t.u):'nunca visitado'}${t.toca<hoy()?` · <b style="color:var(--bad)">atrasada ${t.atr} d</b>`:' · le toca '+fFecha(t.toca)}</div></div></label>`).join('')}</div>`).join('')
+     :`<div class="card mut">${db.clientes.some(c=>c.frecVis)?'Esta semana no le toca visita a ningún cliente con frecuencia (o ya están programados).':'Todavía ningún cliente tiene frecuencia de visita. Empieza por «clientes sin frecuencia».'}</div>`}
+   ${n?`<button class="btn full" id="vplok">📅 Programar ${n} visita(s)</button>`:''}
+   <div class="mut" style="font-size:11.5px;margin:6px 4px">Salen los clientes con frecuencia a los que les toca o ya se les pasó la visita y no tienen una programada. Cada zona va en un mismo día para ahorrar viajes; luego en «Ruta de hoy» se ordenan por cercanía.</div>`,abrirPlanSemana);
+  document.querySelectorAll('#sbody [data-z]').forEach(s=>s.onchange=()=>{VPL.dia[s.dataset.z]=s.value});
+  document.querySelectorAll('#sbody [data-c]').forEach(b=>b.onchange=()=>{if(b.checked)delete VPL.quitar[b.dataset.c];else VPL.quitar[b.dataset.c]=1;const k=L.filter(x=>!VPL.quitar[x.c.id]).length,o=$('#vplok');if(o)o.textContent='📅 Programar '+k+' visita(s)'});
+  if($('#vplok'))$('#vplok').onclick=()=>{let k=0;L.forEach(({c})=>{if(VPL.quitar[c.id])return;vProgramar(c.id,VPL.dia[zonaCli(c)],'Visita de rutina ('+VFREC_N[c.frecVis].toLowerCase()+')','Seguimiento');k++});save();VPL.quitar={};toast('📅 '+k+' visita(s) programada(s)');pila.pop();if(typeof vista!=='undefined'&&vista==='visitas')render();abrirPlanSemana()}}
+function vSinFrec(){const L=db.clientes.filter(c=>!c.frecVis).map(c=>({c,u:vUlt(c.id),n:db.pedidos.filter(p=>p.clienteId===c.id).length})).sort((a,b)=>b.n-a.n||String(b.u).localeCompare(String(a.u))||a.c.nombre.localeCompare(b.c.nombre)).slice(0,80);
+  abrirSheet('vsinf','Frecuencia de visita',`<div class="card mut" style="font-size:12.5px">Elige cada cuánto visitas a cada cliente (primero los que más compran). Se guarda al momento.</div>
+   ${L.map(({c,u,n})=>`<div class="card"><div class="row"><b class="grow ell">${esc(c.nombre)}</b><span class="mut" style="font-size:12px">${n} pedido(s)</span></div><div class="mut" style="font-size:12px">${esc(zonaCli(c))} · ${u?'última visita '+fFecha(u):'sin visitas'}</div>
+     <div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${Object.entries(VFREC_N).map(([k,t])=>`<button class="chip" data-c="${c.id}" data-f="${k}">${t}</button>`).join('')}</div></div>`).join('')||'<div class="card mut">Todos tus clientes tienen frecuencia.</div>'}`,vSinFrec);
+  document.querySelectorAll('#sbody [data-f]').forEach(b=>b.onclick=()=>{const c=cli(b.dataset.c);c.frecVis=b.dataset.f;save();b.closest('.card').querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));toast(c.nombre+': '+VFREC_N[c.frecVis].toLowerCase())})}
+/* accesos: pantalla de visitas e inicio */
+const _vVis136=vVisitas;vVisitas=function(){let h=_vVis136.apply(this,arguments);try{const n=vClisAtrasados().length;
+  h=h.replace('<div class="btns">',`<div class="card tap" onclick="abrirPlanSemana()" style="border-left:4px solid ${n?'var(--bad)':'var(--pri2)'}"><div class="row"><b class="grow">🗓 Planificar la semana</b><span class="mut">›</span></div><div class="mut" style="font-size:12.5px">${n?n+' cliente(s) ya pasaron su frecuencia de visita':'Programa las visitas según cada cuánto ves a cada cliente, agrupadas por zona'}</div></div><div class="btns">`)}catch(e){}return h};
+const _alIni136=alertasInicio;alertasInicio=function(){let h=_alIni136.apply(this,arguments);try{const n=vClisAtrasados().length;if(!n)return h;const a=alerta('map','#d98a00',n+' cliente(s) sin su visita a tiempo','Ya pasó su frecuencia y no tienen visita programada · toca para planificar','abrirPlanSemana()');
+  h=h?h.replace('<div class="alertas">','<div class="alertas">'+a):'<div class="alertas">'+a+'</div>'}catch(e){}return h};
+
+
+/* ================= v13.7: menú principal compacto (24 → 13 accesos): lo que hace lo mismo queda junto en un solo icono ================= */
+function menuHub(key,titulo,ops){abrirSheet('hub:'+key,titulo,`<div style="display:grid;gap:10px">${ops.filter(Boolean).map(o=>`<button class="card tap row" data-hub="${o.k}" style="margin:0;border:0;gap:12px;text-align:left;padding:14px" onclick="${o.f}">
+    <span class="pi" style="background:${o.c};color:#fff;width:46px;height:46px;position:relative">${ico(o.i,24)}${o.n?`<b class="mpn">${o.n}</b>`:''}</span><div class="grow" style="min-width:0"><b style="font-size:16px">${esc(o.t)}</b>${o.s?`<div class="mut" style="font-size:12.5px">${esc(o.s)}</div>`:''}</div>${ico('chev',18)}</button>`).join('')}</div>`,()=>menuHub(key,titulo,ops))}
+const _try=(f,d)=>{try{return f()}catch(e){return d}};
+function abrirMenuClientes(){menuHub('cli','Clientes',[
+  {k:'nuevo',i:'plus',c:'#0f8b8d',t:'Nuevo cliente',s:'Agregar un cliente',f:'pila.length=0;formCliente()'},
+  {k:'rep',i:'reporte',c:'#16233f',t:'Reporte y estado del cliente',s:'Todo de un cliente: pedidos, cobros, cotizaciones, visitas',f:'pila.length=0;abrirReporteCliente()'},
+  {k:'cero',i:'cero',c:'#0f766e',t:'Cliente cero',s:'Clientes desde tu correo',f:'pila.length=0;abrirClienteCero()'},
+  {k:'lista',i:'users',c:'#24559b',t:'Mis clientes',s:db.clientes.length+' cliente(s) · importar de Excel o contactos',f:"cerrarTodo();vista='clientes';busq='';render()"}])}
+function abrirMenuVisitas(){const atr=_try(()=>vClisAtrasados().length,0),hoyN=db.visitas.filter(v=>v.estado==='programada'&&v.fecha===hoy()).length;menuHub('vis','Visitas',[
+  {k:'reg',i:'ok',c:'#1e8e3e',t:'Registrar visita',s:'La que acabas de hacer',f:'pila.length=0;formVisita(null)'},
+  {k:'prog',i:'cal',c:'#d98a00',t:'Programar visita',s:'Una visita futura',f:"pila.length=0;formVisita(null,{estado:'programada'})"},
+  {k:'ruta',i:'map',c:'#1877c9',t:'Ruta de hoy',s:hoyN?hoyN+' visita(s) hoy':'Sin visitas programadas hoy',n:hoyN,f:'pila.length=0;vRuta(hoy())'},
+  {k:'plan',i:'checklist',c:atr?'#c0392b':'#0e7490',t:'Planificar la semana',s:atr?atr+' cliente(s) sin su visita a tiempo':'Según la frecuencia de cada cliente, por zona',n:atr,f:'pila.length=0;abrirPlanSemana()'},
+  {k:'agenda',i:'grid',c:'#44546a',t:'Agenda de la semana',s:'Visitas, notas y planos',f:"cerrarTodo();vista='visitas';subAgenda='visitas';render()"}])}
+function abrirMenuPlanos(){menuHub('planos','Planos y medidas',[
+  {k:'lev',i:'pen',c:'#0f766e',t:'Levantamiento',s:_try(()=>levApp()?'Plantilla a mano · '+levApp().nom:'Plantilla de la empresa a mano','Plantilla a mano'),f:'pila.length=0;formLevantamiento()'},
+  {k:'plano',i:'layers',c:'#44546a',t:'Plano libre',s:'Croquis a mano con encabezado',f:'pila.length=0;nuevoPlano()'},
+  {k:'pdc',i:'pdc',c:'#24559b',t:'Proyecto desde cero',s:'Plano a mano → plano profesional con racks',f:'pila.length=0;abrirPdc()'},
+  {k:'medir',i:'regla',c:'#d97706',t:'Medir',s:'Con una foto o la altura con el teléfono',f:'pila.length=0;abrirMedir()'},
+  {k:'mis',i:'carpeta',c:'#7b4bb7',t:'Mis planos',s:(db.planos||[]).length+' plano(s) y levantamiento(s)',f:"cerrarTodo();vista='visitas';subAgenda='planos';render()"}])}
+function abrirMenuQR(){menuHub('qr','QR',[
+  {k:'esc',i:'escanear',c:'#16233f',t:'Escanear QR',s:'Racks, tarjetas, cotizaciones y cualquier QR',f:'pila.length=0;abrirEscanerQR()'},
+  {k:'racks',i:'qr',c:'#0e7490',t:'Etiquetas QR de racks',s:_try(()=>{const n=(db.instalaciones||[]).length;return n+' instalación(es) · repuestos, daños e inspecciones'},''),f:'pila.length=0;abrirInstalaciones()'},
+  {k:'tarj',i:'tarjeta',c:'#c2417a',t:'Mi QR (tarjeta digital)',s:'Para que el cliente guarde tus datos',f:'pila.length=0;abrirMiTarjeta()'}])}
+function abrirMenuCalc(){menuHub('calc','Calculadora',[
+  {k:'mat',i:'cash',c:'#e8892f',t:'Materiales y precio',s:'Calculadora de racks: piezas y precio para cotizar',f:'pila.length=0;vCalc(null)'},
+  {k:'tram',i:'rack',c:'#0e7490',t:'Escala y larguero',s:'Según el peso por paleta (tablas Kingmore) y las medidas',f:"pila.length=0;abrirCalcTram({tab:'calc'})"},
+  {k:'sis',i:'layers',c:'#44546a',t:'Sistemas de racks',s:'Cuál le conviene al cliente: selectivo, drive-in, dinámico…',f:"pila.length=0;abrirCalcTram({tab:'sis'})"}])}
+/* Pendientes: el seguimiento del día y las notas quedan arriba, dentro de la misma pantalla */
+const _pintarPend137=pintarPendientes;pintarPendientes=function(){const r=_pintarPend137.apply(this,arguments);try{const sb=$('#sbody');if(!sb||$('#pdhoy'))return r;
+  const sv=_try(()=>segs().filter(sdVence).length,0),nn=(db.notas||[]).filter(n=>!n.hecha).length;const d=document.createElement('div');d.id='pdhoy';d.className='card';
+  d.innerHTML=`<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn ${sv?'':'sec'}" style="flex:1;min-width:140px" onclick="pila.length=0;abrirSeguimiento()">${ico('checklist',16)} Seguimiento del día${sv?' ('+sv+')':''}</button>
+    <button class="btn sec" style="flex:1;min-width:110px" onclick="pila.length=0;formNota()">${ico('note',16)} Nota</button><button class="btn sec" style="flex:1;min-width:110px" onclick="cerrarTodo();vista='visitas';subAgenda='notas';render()">Mis notas (${nn})</button></div>`;
+  const f=sb.firstElementChild;if(f&&f.nextSibling)sb.insertBefore(d,f.nextSibling);else sb.appendChild(d)}catch(e){console.log('pdhoy',e)}return r};
+/* Embudo: botón en la pestaña Cotizaciones */
+const _vCot137=vCotizaciones;vCotizaciones=function(){let h=_vCot137.apply(this,arguments);try{const a='<button class="btn sec" onclick="pila.length=0;vCalc(null)">🧮 Calculadora de racks</button>';
+  if(h.includes(a))h=h.replace(a,a+'<button class="btn sec" id="bembcot" onclick="abrirEmbudo()">📊 Embudo de ventas</button>')}catch(e){}return h};
+/* armar el menú nuevo */
+(function(){const B=k=>MENU_ITEMS.find(x=>x.k===k),pend=B('pend'),seg=B('seg');
+  const N=[B('cot'),B('ped'),pend?Object.assign(pend,{n:()=>{const a=_try(()=>pdUrgentes(pdCategorias()),0),b=_try(()=>segs().filter(sdVence).length,0);return a+b}}):null,
+   {k:'clientes',g:'v',i:'users',l:'Clientes',c:'#0f8b8d',f:'abrirMenuClientes()',id:'bclientes',sub:()=>'Nuevo, reporte y estado, cliente cero'},
+   B('proy'),B('pres'),
+   {k:'planos',g:'k',i:'layers',l:'Planos',c:'#0f766e',f:'abrirMenuPlanos()',id:'bplanos',sub:()=>'Levantamiento, plano, proyecto desde cero, medir'},
+   {k:'qr',g:'k',i:'qr',l:'QR',c:'#16233f',f:'abrirMenuQR()',id:'bqr',sub:()=>'Escanear, racks y mi tarjeta'},
+   {k:'calc',g:'k',i:'rack',l:'Calculadora',c:'#e8892f',f:'abrirMenuCalc()',id:'bcalc',sub:()=>'Materiales, escala y larguero, sistemas'},
+   {k:'visitas',g:'c',i:'cal',l:'Visitas',c:'#1e8e3e',f:'abrirMenuVisitas()',id:'bvisitas',n:()=>_try(()=>vClisAtrasados().length,0)+db.visitas.filter(v=>v.estado==='programada'&&v.fecha===hoy()).length,sub:()=>'Registrar, programar, ruta y planificar'},
+   B('itt'),B('foto'),B('wa')].filter(Boolean);
+  MENU_ITEMS.length=0;N.forEach(x=>MENU_ITEMS.push(x));
+})();
+/* los botones que habías quitado: si quitaste todos los de un grupo, el icono nuevo también queda quitado (una sola vez) */
+const _menuCfg137=menuCfg;menuCfg=function(){try{if(!window.__mig137&&!kvGet('menu_mig137')){window.__mig137=1;const c=kvJ('menu_cfg');if(c&&Array.isArray(c.ocultos)&&c.ocultos.length){const o=c.ocultos,todos=a=>a.every(k=>o.includes(k));
+    [['clientes',['cli','repcli','cero']],['planos',['plano','lev','pdc','medir']],['qr',['escqr','qrrack','mitarj']],['calc',['tram']],['visitas',['vis','ruta']]].forEach(([n,a])=>{if(todos(a)&&!o.includes(n))o.push(n)});
+    c.ocultos=o.filter(k=>MENU_ITEMS.some(it=>it.k===k));kvSet('menu_cfg',JSON.stringify(c))}kvSet('menu_mig137','1')}}catch(e){}return _menuCfg137.apply(this,arguments)};
+
+
+/* ================= v13.8: el Excel de clientes también trae «Frecuencia de visita» y «Zona» (se llenan en la computadora) ================= */
+function frecDeTexto(t){t=norm(String(t||''));if(!t)return'';if(/2\s*mes|bimes|60/.test(t))return'bimestral';if(/15|quinc/.test(t))return'quincenal';if(/seman|7\b/.test(t))return'semanal';if(/mes|mensual|30/.test(t))return'mensual';if(/no fijo|ningun|nunca/.test(t))return'-';return''}
+const _mapCols138=mapearColsCli;mapearColsCli=function(enc){const M=_mapCols138.apply(this,arguments);try{
+  const f=enc.findIndex(h=>h&&/^(frecuencia|frec|visitar_cada|cada_cuanto|frecuencia_de_visita)/.test(h));if(f>=0)M.frec=f;
+  const z=enc.findIndex(h=>h&&/^(zona|sector|barrio)$/.test(h));if(z>=0)M.zona=z}catch(e){}return M};
+const _interpCli138=interpretarClientes;interpretarClientes=function(filas){const R=_interpCli138.apply(this,arguments);try{if(R&&R.rows&&R.M&&(R.M.frec!=null||R.M.zona!=null))R.rows.forEach(r=>{const f=filas[r.fila-1]||[],g=i=>i==null?'':String(f[i]==null?'':f[i]).trim();
+  if(R.M.frec!=null)r.frec=frecDeTexto(g(R.M.frec));if(R.M.zona!=null)r.zona=g(R.M.zona)})}catch(e){}return R};
+const _previaCli138=previaClientes;previaClientes=function(){const r=_previaCli138.apply(this,arguments);try{const I=IMPCL;document.querySelectorAll('#sbody .badge').forEach(b=>{if(/^undefined ←/.test(b.textContent)){
+  const k=Object.entries(I.M).find(([k,i])=>b.textContent.endsWith(I.enc[i]));b.textContent=b.textContent.replace('undefined',k&&k[0]==='frec'?'Frecuencia de visita':'Zona')}});
+  const nf=(I.rows||[]).filter(r=>r.frec&&r.frec!=='-').length,nz=(I.rows||[]).filter(r=>r.zona).length;if(nf||nz){const d=document.createElement('div');d.className='card';d.id='impfrec';d.style.cssText='border-left:4px solid #1e8e3e';
+  d.innerHTML=`<b>🗓 Visitas</b><div class="mut" style="font-size:12.5px">${nf} cliente(s) con frecuencia de visita${nz?' · '+nz+' con zona':''}. Saldrán en «Planificar la semana».</div>`;const sb=$('#sbody'),p=sb&&sb.querySelector('.card');if(p&&p.nextSibling)sb.insertBefore(d,p.nextSibling)}}catch(e){}return r};
+const _aplicarCli138=aplicarClientes;aplicarClientes=function(){const I=IMPCL,L=I&&I.rows?I.rows.filter(r=>r.frec||r.zona):[];const r=_aplicarCli138.apply(this,arguments);try{let k=0;
+  L.forEach(x=>{const c=emparejarCli(x);if(!c)return;let ch=0;if(x.frec){const v=x.frec==='-'?'':x.frec;if((!c.frecVis||I.reemplazar)&&c.frecVis!==v){c.frecVis=v;ch=1}}if(x.zona&&(!c.zona||I.reemplazar)&&c.zona!==x.zona){c.zona=x.zona;ch=1}k+=ch});if(k)save()}catch(e){console.log('impfrec',e)}return r};
+/* la plantilla y la exportación de clientes también llevan las dos columnas */
+plantillaClientes=function(){const L=db.clientes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const rows=[['Nombre','Contacto','Teléfono','Correo','RNC','Dirección','Zona','Frecuencia de visita','Notas']].concat(L.length?L.map(c=>[c.nombre,c.contacto||'',c.tel||'',c.correo||'',c.rnc||'',c.dir||'',c.zona||'',c.frecVis?VFREC_N[c.frecVis]:'',c.notas||'']):[['Ferretería El Martillo, SRL','Juan Pérez','809-555-1234','compras@elmartillo.com.do','101234567','Av. Duarte 45, Santiago','Santiago','Cada mes','']]);
+  guardarExcel('clientes_benderrack_'+hoy()+'.xlsx',[{name:'Clientes',rows,widths:[36,24,16,30,14,44,18,20,30]}])};
+
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){
   buscarActualizacion=async function(s){if(!s)toast('La versión web se actualiza sola cuando la abres con internet')};
@@ -8704,6 +9599,52 @@ if(AND&&AND.web){
   (function(){const q=new URLSearchParams(location.search);if(q.get('code')&&q.get('state')){try{_pkce=JSON.parse(sessionStorage.getItem('br_pkce')||'null')}catch(e){}try{sessionStorage.removeItem('br_pkce')}catch(e){}
     const u=location.href;history.replaceState(null,'',location.pathname);setTimeout(()=>{vista='ajustes';render();__loginCb(u)},600)}})();
 }
+/* ===== web: copias de seguridad fuera del navegador ===== */
+if(AND&&AND.web)(function(){
+  const idbH=(modo,v)=>new Promise(ok=>{try{const r=indexedDB.open('benderrack_dir',1);r.onupgradeneeded=()=>r.result.createObjectStore('h');
+    r.onsuccess=()=>{try{const t=r.result.transaction('h',modo==='get'?'readonly':'readwrite').objectStore('h');const q=modo==='get'?t.get('dir'):modo==='del'?t.delete('dir'):t.put(v,'dir');q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)}catch(e){ok(null)}};r.onerror=()=>ok(null)}catch(e){ok(null)}});
+  window.WRESP={dir:null,perm:'',nombre:''};
+  const puede=()=>!!window.showDirectoryPicker;
+  const nombreCopia=()=>'Benderrack_respaldo_'+hoy()+'_'+horaAhora().replace(':','')+String(new Date().getSeconds()).padStart(2,'0')+'.json';
+  const hayDatos=()=>!!(db.clientes.length||db.pedidos.length||db.cotizaciones.length);
+  const marca=d=>{kvSet('web_resp_seguro',String(Date.now()));kvSet('web_resp_donde',d)};
+  window.webUltimaCopia=()=>Math.max(+kvGet('web_resp_seguro')||0,(typeof sesion!=='undefined'&&sesion&&nubeLista()&&kvGet('autoSync')!=='0')?(+kvGet('ultimaSync')||0):0);
+  window.webDiasSinCopia=()=>{const u=webUltimaCopia();return u?Math.floor((Date.now()-u)/864e5):999};
+  async function cargarDir(){const h=await idbH('get');if(!h)return;WRESP.dir=h;WRESP.nombre=h.name;try{WRESP.perm=await h.queryPermission({mode:'readwrite'})}catch(e){WRESP.perm='prompt'}}
+  window.webCopiaCarpeta=async manual=>{if(!WRESP.dir||WRESP.perm!=='granted')return false;
+    try{const f=await WRESP.dir.getFileHandle(nombreCopia(),{create:true}),w=await f.createWritable();await w.write(jsonDb());await w.close();
+      try{const L=[];for await(const [k,v] of WRESP.dir.entries())if(v.kind==='file'&&/^Benderrack_respaldo_.*\.json$/.test(k))L.push(k);L.sort();while(L.length>30)await WRESP.dir.removeEntry(L.shift())}catch(e){}
+      marca('carpeta');if(manual)toast('✔ Copia guardada en la carpeta «'+WRESP.nombre+'»');return true}
+    catch(e){WRESP.perm='prompt';if(manual)toast('No se pudo guardar en la carpeta: toca «Dar permiso»');return false}};
+  window.webElegirCarpeta=async()=>{if(!puede())return toast('Este navegador no deja elegir carpeta: usa Chrome o Edge en la computadora, o descarga la copia');
+    try{const h=await showDirectoryPicker({id:'benderrack',mode:'readwrite',startIn:'documents'});await idbH('put',h);Object.assign(WRESP,{dir:h,nombre:h.name,perm:'granted'});await webCopiaCarpeta(true)}catch(e){if(e&&e.name!=='AbortError')toast('No se pudo usar esa carpeta')}
+    cerrarTodo();render()};
+  window.webPermiso=async()=>{if(!WRESP.dir)return webElegirCarpeta();try{WRESP.perm=await WRESP.dir.requestPermission({mode:'readwrite'})}catch(e){}
+    if(WRESP.perm==='granted')await webCopiaCarpeta(true);else toast('Sin permiso no se pueden guardar las copias en la carpeta');cerrarTodo();render()};
+  window.webQuitarCarpeta=async()=>{await idbH('del');Object.assign(WRESP,{dir:null,perm:'',nombre:''});render()};
+  window.webDescargarCopia=()=>{AND._descargar(nombreCopia(),new Blob([jsonDb()],{type:'application/json'}));marca('descarga');toast('✔ Copia descargada: guárdala en OneDrive, Drive o una memoria USB');cerrarTodo();render()};
+  window.webCopiaAhora=async()=>{if(WRESP.dir&&WRESP.perm==='granted'){if(await webCopiaCarpeta(true)){cerrarTodo();render()}return}if(WRESP.dir)return webPermiso();webAvisoCopia()};
+  window.webAvisoCopia=()=>{const d=webDiasSinCopia();abrirSheet('webcopia','Guardar una copia',`<div class="card"><b>${d>=999?'Tus datos solo están en este navegador':'Hace '+d+' día(s) que no guardas una copia fuera del navegador'}</b>
+     <div class="mut" style="font-size:13px;margin-top:4px">Si se borran los datos del navegador o cambias de computadora, se pierde lo que no tenga copia. Escoge una opción:</div></div>
+    ${puede()?`<div class="card tap" onclick="${WRESP.dir?'webPermiso()':'webElegirCarpeta()'}"><b>📁 ${WRESP.dir?'Seguir guardando en «'+esc(WRESP.nombre)+'»':'Guardar copias solas en una carpeta'}</b><div class="mut" style="font-size:12.5px">Recomendado en la computadora: elige tu carpeta de <b>OneDrive</b> y la app guarda ahí una copia ${respCfg().frec==='semanal'?'cada semana':'cada día'} (las últimas 30).</div></div>`:''}
+    <div class="card tap" onclick="cerrarTodo();abrirRespaldoNube()"><b>☁️ Usar la nube de Benderrack</b><div class="mut" style="font-size:12.5px">Se sincroniza sola, incluye fotos y archivos, y lo ves también en el teléfono.</div></div>
+    <div class="card tap" onclick="webDescargarCopia()"><b>💾 Descargar una copia ahora</b><div class="mut" style="font-size:12.5px">Un archivo .json que guardas donde quieras. Se recupera con «Restaurar desde archivo» en Ajustes.</div></div>
+    <button class="btn sec full" onclick="kvSet('web_resp_pos',String(Date.now()));cerrarTodo();render()">Recordármelo mañana</button>`)};
+  const _ra=respaldoAuto;respaldoAuto=function(){try{_ra.apply(this,arguments)}catch(e){}try{const c=respCfg();if(c.frec==='apagado'||DEMO_ON||!hayDatos())return;const dias=c.frec==='diario'?1:7;
+    if(Date.now()-(+kvGet('web_resp_seguro')||0)>=dias*864e5-36e5)webCopiaCarpeta(false).then(ok=>{if(ok)toast('💾 Copia guardada en «'+WRESP.nombre+'»')})}catch(e){}};
+  const _ai=alertasInicio;alertasInicio=function(){let h=_ai.apply(this,arguments);try{if(DEMO_ON||!hayDatos())return h;const d=webDiasSinCopia(),pos=+kvGet('web_resp_pos')||0;let a='';
+    if(WRESP.dir&&WRESP.perm!=='granted')a=alerta('carpeta','#d98a00','Copias en tu carpeta en pausa','El navegador pide permiso otra vez para «'+esc(WRESP.nombre)+'» · toca aquí','webPermiso()');
+    else if(d>=7&&Date.now()-pos>864e5)a=alerta('alert','#c62828',d>=999?'Tus datos solo están en este navegador':'Hace '+d+' días que no guardas una copia','Si se borra el navegador se pierden · toca para guardar una copia','webAvisoCopia()');
+    if(a)h=h?h.replace('<div class="alertas">','<div class="alertas">'+a):'<div class="alertas">'+a+'</div>'}catch(e){}return h};
+  const _br=bloqueRespaldo;bloqueRespaldo=function(){const u=webUltimaCopia(),dn=kvGet('web_resp_donde');
+    return `<div class="card" id="webresp" style="border-left:4px solid ${webDiasSinCopia()>=7?'#c62828':'#1e8e3e'}"><b>Copia fuera del navegador (versión web)</b>
+      <div class="mut" style="font-size:12.5px">${u?'Última: <b>'+fHora(u)+'</b> · '+(dn==='carpeta'?'en la carpeta':dn==='descarga'?'descargada':'en la nube'):'Todavía no hay ninguna: tus datos solo están en este navegador.'}</div>
+      ${WRESP.dir?`<div style="margin-top:6px;font-size:13px">📁 Carpeta: <b>${esc(WRESP.nombre)}</b> ${WRESP.perm==='granted'?'<span class="badge b-ent">activa</span>':'<span class="badge b-pend">sin permiso</span>'}</div>`:''}
+      <div class="btns" style="margin-top:8px;flex-wrap:wrap">${puede()?(WRESP.dir?(WRESP.perm==='granted'?'<button class="btn" onclick="webCopiaAhora()">💾 Copia ahora</button>':'<button class="btn" onclick="webPermiso()">🔓 Dar permiso</button>')+'<button class="btn sec" onclick="webElegirCarpeta()">Cambiar carpeta</button><button class="btn sec" onclick="webQuitarCarpeta()">Quitar</button>':'<button class="btn" onclick="webElegirCarpeta()">📁 Elegir carpeta (OneDrive)</button>'):''}<button class="btn sec" onclick="webDescargarCopia()">⬇ Descargar copia</button></div></div>`+_br.apply(this,arguments)};
+  cargarDir().then(()=>{try{if(vista==='inicio'&&!$('#sheet').classList.contains('open'))render()}catch(e){}});
+  /* lo pesado (OCR, lector de PDF, mapa…) se guarda para usar sin internet cuando ya cargó todo, si la conexión es buena */
+  setTimeout(()=>{try{const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||''))return;if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>{if(r.active)r.active.postMessage({tipo:'resto'})})}catch(e){}},15000);
+})();
 
 load();bandaDemo();try{revisarInspecciones()}catch(e){}if(lockActivo())bloquear();render();setTimeout(()=>{try{respaldoAuto()}catch(e){}},12000);try{arrancarBandeja()}catch(e){}if(!DEMO_ON)programarAvisos();setTimeout(()=>{try{const a=AND&&AND.avisoPendiente&&AND.avisoPendiente();if(a)__abrirAviso(a);const r=AND&&AND.archivosRecibidos&&AND.archivosRecibidos();if(r)__archivosRecibidos(JSON.parse(r))}catch(e){}},400);if(!DEMO_ON){revisarNube();revisarOnline();arrancarCorreo()}arrancarOta();setTimeout(()=>{revisarMensajesEmpresa().catch(()=>{});programarNotifFondo()},3500);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-(+kvGet('msg_emp_ult')||0)>3600e3){kvSet('msg_emp_ult',String(Date.now()));revisarMensajesEmpresa().catch(()=>{})}});setTimeout(limpiarFotos,8000);setTimeout(()=>descargarFotosNube().catch(()=>{}),4000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!DEMO_ON){revisarNube();revisarOnline()}});
