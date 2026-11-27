@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 126,
-    "versionName": "13.5",
+    "versionCode": 128,
+    "versionName": "13.7",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Tramería más completa: escala 120×75 del catálogo Kingmore, medidas de la paleta → largo del larguero, fondo y altura de la escala con holguras, y aviso si cabe bajo el techo o los rociadores.\n• Nueva pestaña «Sistemas de racks»: guía de 11 sistemas con sugerencia según el cliente."
+    "notas": "• Menú principal más simple: de 24 a 13 iconos. Clientes, Planos, QR, Calculadora y Visitas abren un menú con todo lo de antes.\n• Pendientes trae arriba el Seguimiento del día y las Notas; el Embudo de ventas está en la pestaña Cotizaciones."
   },
   "clientes": {
     "versionCode": 8,
