@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.0</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.1</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.0${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.1${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -9773,6 +9773,64 @@ window.__actFondo=(vc,ok,msg)=>{const j=window.__otaJ;OTA_FONDO=null;if(!j||Stri
   else{window.__otaFondoErr=msg;_mostrarAct141(j)}};
 /* el aviso permiso de «instalar apps desconocidas» vuelve al botón correcto */
 const _actPerm141=window.__actPermiso;window.__actPermiso=function(){const r=_actPerm141&&_actPerm141.apply(this,arguments);try{const j=window.__otaJ,k=document.getElementById('otaok');if(j&&k&&AND.apkListo&&AND.apkListo(String(j.versionCode))==='si')k.onclick=()=>AND.instalarOta(String(j.versionCode))}catch(e){}return r};
+
+
+/* ================= v14.1: sin Cotizaciones ni Pedidos (se usan en Benderrack Clientes). Se ocultan, los datos se conservan y se pueden reactivar en Ajustes ================= */
+const sinVentas=()=>kvGet('sin_ventas')!=='0';
+(function(){const st=document.createElement('style');st.textContent='html.sv #nav button[data-v="cotiz"],html.sv #nav button[data-v="pedidos"]{display:none!important}';document.head.appendChild(st)})();
+const SV_RE=/formPedido\(|formCotizacion\(|nuevoPedidoCliente\(|verEstadoCuenta\(|irFiltro\(|vTablero\(|abrirEmbudo\(|pegarPedido\(|verPedidosOnline\(|abrirMenuCot\(|elegirPdfCot\(|verPedido\(|verCotizacion\(|abrirEspera\(|abrirDormidos\(|formMeta\(|vista='cotiz'|vista='pedidos'|abrirCotPorCliente\(/;
+function svLimpiar(root){if(!root||!sinVentas())return;root.querySelectorAll('[onclick]').forEach(e=>{if(!SV_RE.test(e.getAttribute('onclick')||''))return;const card=e.closest('.alerta,.card.tap,.mpb');(card&&root.contains(card)?card:e).remove()});
+  root.querySelectorAll('.btns').forEach(b=>{if(!b.children.length)b.remove()})}
+function svAplicar(){document.documentElement.classList.toggle('sv',sinVentas())}
+const SV_MENU=['cot','ped'];
+const SV_ARQ={k:'arq',g:'v',i:'send',l:'Pedir cotización',c:'#0e7490',f:'SCA=null;scEnviarArq({})',id:'barq',n:()=>{try{return scEsperando().filter(scVence).length}catch(e){return 0}},sub:()=>'Al arquitecto, con el levantamiento'};
+function svSinMenu(fn){if(!sinVentas())return fn();const quit=[],gv=MENU_GR.v;for(let i=MENU_ITEMS.length-1;i>=0;i--)if(SV_MENU.includes(MENU_ITEMS[i].k))quit.unshift([i,MENU_ITEMS.splice(i,1)[0]]);
+  const ip=MENU_ITEMS.findIndex(x=>x.k==='pend');MENU_ITEMS.splice(ip<0?0:ip,0,SV_ARQ);MENU_GR.v='Clientes y cotizaciones';
+  try{return fn()}finally{MENU_GR.v=gv;MENU_ITEMS.splice(MENU_ITEMS.indexOf(SV_ARQ),1);quit.forEach(([i,x])=>MENU_ITEMS.splice(i,0,x))}}
+const _accIni142=accionesInicio;accionesInicio=function(){const a=arguments;return svSinMenu(()=>_accIni142.apply(this,a))};
+const _bloqMenu142=bloqueMenuAjustes;bloqueMenuAjustes=function(){const a=arguments;return svSinMenu(()=>_bloqMenu142.apply(this,a))};
+/* Inicio sin ventas: saludo y lo del trabajo de calle */
+function heroSV(){const h=hoy(),l=lunes(h),vs=db.visitas.filter(v=>v.estado==='realizada'&&v.fecha>=l&&v.fecha<=addD(l,6)).length,hoyN=db.visitas.filter(v=>v.estado==='programada'&&v.fecha===h).length;
+  const esp=typeof scEsperando==='function'?scEsperando().length:0,atr=typeof vClisAtrasados==='function'?vClisAtrasados().length:0;
+  return `<div class="hero"><div class="row"><div class="grow"><div class="hola">${esc(saludo())}</div><div class="hfecha">${esc(fechaLarga())}</div></div></div>
+   <div class="hmini" style="margin-top:12px"><div class="tap" onclick="pila.length=0;vRuta(hoy())"><b>${hoyN}</b><span>Visitas hoy</span></div><div class="tap" onclick="vista='visitas';subAgenda='visitas';render()"><b>${vs}</b><span>Visitas esta semana</span></div>
+    <div class="tap" onclick="pila.length=0;${esp?'abrirSolCot()':'abrirPlanSemana()'}"><b>${esp||atr}</b><span>${esp?'Esperando al arquitecto':'Clientes por visitar'}</span></div></div></div>`}
+const _vInicio142=vInicio;vInicio=function(){if(!sinVentas())return _vInicio142.apply(this,arguments);
+  return `${heroSV()}${accionesInicio()}${bloqueCorreosInicio()}${alertasCaptacion()}${alertasInicio()}${bloqueNotasInicio()}${bloqueVisitasInicio()}`};
+/* alertas, campana y recordatorios del teléfono sin lo de ventas */
+const _alIni142=alertasInicio;alertasInicio=function(){let h=_alIni142.apply(this,arguments);if(!sinVentas()||!h)return h;try{const t=document.createElement('div');t.innerHTML=h;
+  t.querySelectorAll('.alerta').forEach(a=>{const oc=a.getAttribute('onclick')||'';if(SV_RE.test(oc)||/vSeguimiento\(|abrirSeguimientoCot/.test(oc)||/Seguimiento de cotizaciones|pedido\(s\)|pedido online|cotización\(es\) por vencer/i.test(a.textContent))a.remove()});
+  return t.querySelector('.alerta')?t.innerHTML:''}catch(e){return h}};
+const _notif142=notificaciones;notificaciones=function(){const R=_notif142.apply(this,arguments);if(!sinVentas())return R;return R.filter(x=>!SV_RE.test(x.acc||'')&&!/pedido|cobro|cotización\(es\) para seguimiento|orden\(es\) de compra/i.test((x.tit||'')+' '+(x.txt||''))||/arquitecto|enviar al cliente/i.test(x.tit||''))};
+const _calcAv142=calcularAvisos;calcularAvisos=function(){const L=_calcAv142.apply(this,arguments);if(!sinVentas())return L;
+  return L.map(a=>{if(a.id>=1000&&a.id<1100){const t=String(a.texto||'').split('\n').filter(l=>!/^(📩|🔔|📦|⏳)/.test(l));if(!t.length)return null;return Object.assign({},a,{texto:t.join('\n'),abrir:a.abrir==='seg'?'inicio':a.abrir})}return a}).filter(Boolean)};
+/* Pendientes sin pedidos, cobros, cotizaciones al cliente, mercancía en espera ni clientes dormidos */
+const _pdCat142=pdCategorias;pdCategorias=function(){const C=_pdCat142.apply(this,arguments);return sinVentas()?C.filter(c=>!['ped','cob','cot','esp','dor'].includes(c.k)):C};
+/* acciones rápidas (+) sin cotización, pedido ni estado de cuenta */
+const _botAcc142=botonAcc;botonAcc=function(k){if(sinVentas()&&['cot','ped','cuenta'].includes(k))return '';return _botAcc142.apply(this,arguments)};
+const _menuCli142=menuCliente;menuCliente=function(){const r=_menuCli142.apply(this,arguments);try{if(sinVentas()){const d=$('#mcli');if(d){d.querySelectorAll('[data-g]').forEach(b=>{const s=d.querySelector(`.mcs[data-s="${b.dataset.g}"]`);if(+b.dataset.g>0&&!s)b.remove()})}}}catch(e){}return r};
+/* ficha del cliente sin compras, balance, pedidos ni cotizaciones */
+const _cotCli142=cotizacionesCliente;cotizacionesCliente=function(){return sinVentas()?'':_cotCli142.apply(this,arguments)};
+const _verCli142=verCliente;verCliente=function(id){const r=_verCli142.apply(this,arguments);try{if(sinVentas()){const sb=$('#sbody');if(sb){const ps=sb.querySelector('.pstats');if(ps)ps.remove();
+  sb.querySelectorAll('.chip').forEach(c=>{if(/sc-cot|sc-ped/.test(c.getAttribute('onclick')||''))c.remove()});
+  sb.querySelectorAll('.alerta').forEach(a=>{if(/Balance pendiente/.test(a.textContent))a.remove()});
+  const h=sb.querySelector('#sc-ped');if(h){let n=h.nextElementSibling;while(n&&!n.classList.contains('btns')){const x=n;n=n.nextElementSibling;x.remove()}h.remove()}
+  svLimpiar(sb)}}}catch(e){console.log('svcli',e)}return r};
+/* visitas: el siguiente paso pide la cotización al arquitecto en vez de hacerla */
+if(typeof vPasos==='function'){const _vPasos142=vPasos;vPasos=function(v){let P=_vPasos142.apply(this,arguments);if(!sinVentas())return P;
+  P=P.filter(p=>!/'(pedido|cot|seg|pago)'/.test(p[1]));if(v.resultado==='Interesado / volver'&&!P.some(p=>/scEnviarArq/.test(p[1])))P.unshift(['📲 Pedir cotización al arquitecto',`scEnviarArq({clienteId:'${v.clienteId}'})`,1]);return P}}
+/* búsqueda general, clientes, reportes y catálogo */
+const _render142=render;render=function(){svAplicar();if(sinVentas()&&(vista==='cotiz'||vista==='pedidos'))vista='inicio';const r=_render142.apply(this,arguments);try{if(sinVentas()){const m=$('#main');
+  if(vista==='clientes'&&m){m.querySelectorAll('[onclick]').forEach(e=>{if(/filtroCli='(deben|pend)'/.test(e.getAttribute('onclick')||'')){const t=e.closest('.chip')?e:(e.closest('.tap')||e);t.remove()}})}
+  if(vista==='reportes'&&m){['rmes','ranio'].forEach(id=>{const e=m.querySelector('#'+id);if(e)e.remove()});m.querySelectorAll('[onclick]').forEach(e=>{if(/rmes|ranio/.test(e.getAttribute('onclick')||'')){(e.closest('.tap')||e).remove()}})}
+  svLimpiar(m)}}catch(e){console.log('svrender',e)}return r};
+const _abrirSheet142=abrirSheet;abrirSheet=function(key){const r=_abrirSheet142.apply(this,arguments);try{if(sinVentas()&&!/^(fp|fq|ped|cot|q:|p:)/.test(String(key)))svLimpiar($('#sbody'))}catch(e){}return r};
+/* FAB (+) en Cotizaciones/Pedidos ya no aplica: en otras vistas sigue igual */
+/* Ajustes: interruptor para volver a activarlas */
+const _vAj142=vAjustes;vAjustes=function(){const h=_vAj142.apply(this,arguments);const on=!sinVentas();
+  return `<h3>Ventas en esta app</h3><div class="card" id="ajventas"><label class="row" style="gap:10px;color:var(--tx)"><input type="checkbox" style="width:22px;height:22px" ${on?'checked':''} onchange="kvSet('sin_ventas',this.checked?'0':'1');svAplicar();render();toast(this.checked?'Cotizaciones y pedidos activados':'Cotizaciones y pedidos ocultos')"> <b>Cotizaciones y pedidos</b></label>
+   <div class="mut" style="font-size:12.5px;margin-top:4px">${on?'Activados.':'Ocultos: ahora se hacen en Benderrack Clientes. Tus datos anteriores se conservan; actívalos aquí si los vuelves a necesitar.'}</div></div>`+h};
+svAplicar();
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){

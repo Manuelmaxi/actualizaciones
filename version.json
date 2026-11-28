@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 132,
-    "versionName": "14.0",
+    "versionCode": 133,
+    "versionName": "14.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Las actualizaciones se descargan solas en segundo plano: cuando está lista sale «Instalar ahora» y solo confirmas en Android.\n• Pedir cotización al arquitecto desde Cotización o Pendientes, con el levantamiento de la app o archivos del teléfono."
+    "notas": "• Cotizaciones y pedidos ya no están en esta app (se hacen en Benderrack Clientes). Tus datos se conservan y se pueden reactivar en Ajustes → Ventas en esta app.\n• Nuevo icono «Pedir cotización» (al arquitecto, con el levantamiento).\n• Inicio con tus visitas de hoy y de la semana."
   },
   "clientes": {
     "versionCode": 8,
