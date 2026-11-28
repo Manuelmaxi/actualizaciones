@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 133,
-    "versionName": "14.1",
+    "versionCode": 134,
+    "versionName": "14.2",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Cotizaciones y pedidos ya no están en esta app (se hacen en Benderrack Clientes). Tus datos se conservan y se pueden reactivar en Ajustes → Ventas en esta app.\n• Nuevo icono «Pedir cotización» (al arquitecto, con el levantamiento).\n• Inicio con tus visitas de hoy y de la semana."
+    "notas": "• Resultado de cada cotización con el cliente: Vendida (monto, Nº y factura), Perdida (motivo y competidor), En espera o Reemplazada, con recordatorio de seguimiento y WhatsApp al cliente en un toque.\n• «📋 Para SharePoint»: la lista de cambios (Estado, Comentarios, Competidor) lista para copiar o en Excel.\n• Los reportes cuentan las cotizaciones enviadas al cliente y las vendidas."
   },
   "clientes": {
     "versionCode": 8,

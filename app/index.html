@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.1</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.2</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.1${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.2${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -9646,7 +9646,7 @@ function scEnviarCli(id){const x=solc(id);if(!x)return;const c=cli(x.clienteId)|
    <label>Mensaje</label><textarea id="scm" style="min-height:90px">Buenas${c.contacto?' '+scPrimer(c.contacto):''}, le comparto la cotización ${x.desc?'de '+x.desc.slice(0,60)+' ':''}que nos solicitó. Quedo atento a cualquier pregunta.</textarea>
    <div class="btns"><button class="btn" id="scew">📲 WhatsApp</button><button class="btn sec" id="scec">✉️ Correo</button></div>
    <label class="row" style="gap:8px;color:var(--tx);margin-top:8px"><input type="checkbox" id="sces" checked style="width:20px;height:20px"> Recordarme darle seguimiento en 3 días</label>`);
-  const hecho=()=>{scEstado(id,'enviada');x.enviadoCli=hoy();if($('#sces').checked)db.notas.push({id:uid(),creado:hoy(),titulo:'Seguimiento: cotización de '+scCli(x),texto:'Se le envió el '+fFecha(hoy())+'. '+(x.desc||''),recordar:addD(hoy(),3),hora:'',clienteId:x.clienteId||'',hecha:false});save();programarAvisos();pila.pop();setTimeout(pintarSolCot,300)};
+  const hecho=()=>{scEstado(id,'enviada');x.enviadoCli=hoy();x.proxSeg=$('#sces').checked?addD(hoy(),3):'';save();programarAvisos();pila.pop();setTimeout(pintarSolCot,300)};
   const b64=()=>{const b=x.pdf&&(x.pdf.fid&&AND&&AND.leerArchivoPlanoB64?AND.leerArchivoPlanoB64(x.pdf.fid):(window.__scPdf||{})[id]);return b||null};
   $('#scew').onclick=()=>{const m=$('#scm').value,b=b64();if(b&&AND&&AND.sharePdfWa)spX.sharePdfWa(x.pdf.nombre,b,telWa(c.tel||''),m);else{abrirWa(c.tel||'',m);if(x.pdf)toast('Adjunta el PDF en el chat')}hecho()};
   $('#scec').onclick=()=>{const m=$('#scm').value,b=b64();if(b)mandarCorreo({para:c.correo||'',asunto:'Cotización '+(db.empresa&&db.empresa.nombre||'Benderrack'),cuerpo:m,nombre:x.pdf.nombre,b64:b});else abrirEnlace('mailto:'+(c.correo||'')+'?subject='+encodeURIComponent('Cotización')+'&body='+encodeURIComponent(m));hecho()}}
@@ -9831,6 +9831,92 @@ const _vAj142=vAjustes;vAjustes=function(){const h=_vAj142.apply(this,arguments)
   return `<h3>Ventas en esta app</h3><div class="card" id="ajventas"><label class="row" style="gap:10px;color:var(--tx)"><input type="checkbox" style="width:22px;height:22px" ${on?'checked':''} onchange="kvSet('sin_ventas',this.checked?'0':'1');svAplicar();render();toast(this.checked?'Cotizaciones y pedidos activados':'Cotizaciones y pedidos ocultos')"> <b>Cotizaciones y pedidos</b></label>
    <div class="mut" style="font-size:12.5px;margin-top:4px">${on?'Activados.':'Ocultos: ahora se hacen en Benderrack Clientes. Tus datos anteriores se conservan; actívalos aquí si los vuelves a necesitar.'}</div></div>`+h};
 svAplicar();
+
+
+/* ================= v14.2: resultado de la cotización con el cliente (Vendida, Perdida, En espera, Reemplazada) con seguimiento, lista para SharePoint y reportes ================= */
+SC_EST.push(['espera','En espera','#d98a00','⏸'],['vendida','Vendida','#1e8e3e','🏆'],['perdida','Perdida','#c0392b','✖'],['reemplazada','Reemplazada','#6b7280','🔁']);
+const SC_CLI=['enviada','espera'];
+const SC_SP={vendida:'Vendida',perdida:'Perdida',espera:'En Espera',reemplazada:'Reemplazada',cancelada:'Cancelada',enviada:'En Espera'};
+const MOTIVOS_PERD=['Precio alto','No está dentro de su presupuesto','Se fue con la competencia','No respondió','Pospuso el proyecto','Cambió lo que necesita','Otro'];
+const scConCli=()=>solcots().filter(x=>SC_CLI.includes(x.estado));
+const scSegVence=x=>SC_CLI.includes(x.estado)&&x.proxSeg&&x.proxSeg<=hoy();
+const scCod=x=>x.nro||('S-'+String(x.id).slice(-5).toUpperCase());
+const fmtRD=n=>'RD$'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function spComentario(x){const r=x.res||{},f=fFecha(r.fecha||x.resFecha||hoy());
+  if(x.estado==='vendida')return (r.factura?`Facturada ${f} (${r.factura})`:`Vendida ${f}`)+(x.monto?' por '+fmtRD(x.monto):'')+(r.coment?'. '+r.coment:'');
+  if(x.estado==='perdida')return [r.motivo,r.coment].filter(Boolean).join('. ')||'Perdida';
+  if(x.estado==='espera')return `Enviada ${fFecha(x.enviadoCli||x.fecha)}`+(r.coment?'; '+r.coment:'')+(x.proxSeg?'; seguimiento '+fFecha(x.proxSeg):'');
+  if(x.estado==='reemplazada')return 'Reemplazada'+(r.coment?': '+r.coment:'');
+  return r.coment||''}
+/* al enviarla al cliente queda el seguimiento en la misma solicitud */
+const _scEstado143=scEstado;scEstado=function(id,v){const x=solc(id),antes=x&&x.estado;const r=_scEstado143.apply(this,arguments);try{if(x&&v==='enviada'&&antes!=='enviada'){if(!x.proxSeg)x.proxSeg=addD(hoy(),3);if(!x.enviadoCli)x.enviadoCli=hoy();save();programarAvisos()}}catch(e){}return r};
+/* resultado */
+let SCR=null;
+function scResultado(id,est){const x=solc(id);if(!x)return;if(!SCR||SCR.id!==id)SCR={id,est:est||'vendida',monto:x.monto||'',nro:x.nro||'',factura:(x.res||{}).factura||'',motivo:(x.res||{}).motivo||'',competidor:(x.res||{}).competidor||'',coment:'',dias:'3',fecha:''};if(est)SCR.est=est;const S=SCR;
+  abrirSheet('scres','Resultado de la cotización',`<div class="card"><b>${esc(scCli(x))}</b><div class="mut" style="font-size:12.5px">${esc(x.desc||'')}${x.enviadoCli?' · enviada '+fFecha(x.enviadoCli):''}</div>
+     <div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:8px">${[['vendida','🏆 Vendida'],['perdida','✖ Perdida'],['espera','⏸ En espera'],['reemplazada','🔁 Reemplazada']].map(([k,t])=>`<button class="chip ${S.est===k?'on':''}" data-e="${k}">${t}</button>`).join('')}</div>
+     <label>Nº de cotización (el de la empresa)</label><input id="srn" value="${esc(S.nro)}" placeholder="Ej.: 0673">
+     ${S.est==='vendida'?`<div class="row" style="gap:8px"><div class="grow"><label>Monto vendido (RD$)</label><input id="srm" type="number" inputmode="decimal" value="${esc(S.monto)}" placeholder="0.00"></div><div class="grow"><label>Factura (opcional)</label><input id="srf" value="${esc(S.factura)}" placeholder="BTFCR…"></div></div>`:''}
+     ${S.est==='perdida'?`<label>¿Por qué se perdió?</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${MOTIVOS_PERD.map(m=>`<button class="chip ${S.motivo===m?'on':''}" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div>
+       <label>Competidor (si se fue con otro)</label><input id="src" value="${esc(S.competidor)}" placeholder="Nombre de la empresa o «No sabe»">`:''}
+     ${S.est==='espera'?`<label>Próximo seguimiento</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${[['2','2 días'],['3','3 días'],['7','1 semana'],['15','15 días'],['f','Fecha…']].map(([k,t])=>`<button class="chip ${S.dias===k?'on':''}" data-d="${k}">${t}</button>`).join('')}</div>${S.dias==='f'?`<input id="srd" type="date" value="${esc(S.fecha||addD(hoy(),7))}">`:''}`:''}
+     <label>Comentario</label><textarea id="srt" placeholder="${S.est==='espera'?'Ej.: lo está revisando con gerencia':S.est==='reemplazada'?'Ej.: por la cotización 0701 con un nivel más':'Opcional'}">${esc(S.coment)}</textarea></div>
+   <button class="btn full" id="srok">Guardar resultado</button>`,()=>scResultado(id));
+  const lee=()=>{S.nro=$('#srn').value.trim();if($('#srm'))S.monto=$('#srm').value;if($('#srf'))S.factura=$('#srf').value.trim();if($('#src'))S.competidor=$('#src').value.trim();if($('#srd'))S.fecha=$('#srd').value;S.coment=$('#srt').value.trim()};
+  document.querySelectorAll('#sbody [data-e]').forEach(b=>b.onclick=()=>{lee();S.est=b.dataset.e;scResultado(id)});
+  document.querySelectorAll('#sbody [data-m]').forEach(b=>b.onclick=()=>{lee();S.motivo=b.dataset.m;scResultado(id)});
+  document.querySelectorAll('#sbody [data-d]').forEach(b=>b.onclick=()=>{lee();S.dias=b.dataset.d;scResultado(id)});
+  $('#srok').onclick=()=>{lee();if(S.est==='perdida'&&!S.motivo)return toast('Elige por qué se perdió');
+    x.nro=S.nro;x.res={est:S.est,fecha:hoy(),coment:S.coment,factura:S.est==='vendida'?S.factura:'',motivo:S.est==='perdida'?S.motivo:'',competidor:S.est==='perdida'?S.competidor:''};
+    if(S.est==='vendida')x.monto=num(S.monto)||x.monto||0;x.proxSeg=S.est==='espera'?(S.dias==='f'?(S.fecha||addD(hoy(),7)):addD(hoy(),+S.dias)):'';x.resFecha=hoy();x.spPend=true;
+    if(!x.enviadoCli)x.enviadoCli=x.fecha;scEstado(id,S.est);x.editado=Date.now();save();programarAvisos();SCR=null;pila.pop();
+    toast(S.est==='vendida'?'🏆 ¡Vendida!'+(x.monto?' '+fmtRD(x.monto):''):S.est==='perdida'?'Guardada como perdida':S.est==='espera'?'⏸ En espera · seguimiento el '+fFecha(x.proxSeg):'Guardada');setTimeout(pintarSolCot,300)}}
+/* seguimiento con el cliente por WhatsApp */
+function scSegCliente(id){const x=solc(id);if(!x)return;const c=cli(x.clienteId)||{};
+  const msg=`Buenas${c.contacto?' '+scPrimer(c.contacto):''}, le escribo para saber si pudo revisar la cotización${x.desc?' de '+x.desc.slice(0,70):''} que le enviamos el ${fFecha(x.enviadoCli||x.fecha)}. ¿Tiene alguna pregunta o le hacemos algún ajuste? Quedo atento.`;
+  (x.segs=x.segs||[]).push(Date.now());x.proxSeg=addD(hoy(),3);x.editado=Date.now();save();programarAvisos();abrirWa(c.tel||'',msg);setTimeout(()=>{const t=pila[pila.length-1];if(t&&t.key==='solc')pintarSolCot()},500)}
+/* tarjetas y filtro «Con el cliente» */
+const _scTarj143=scTarjeta;scTarjeta=function(x){let h=_scTarj143.apply(this,arguments);try{let add='';
+  if(SC_CLI.includes(x.estado)){const v=scSegVence(x),n=(x.segs||[]).length;
+    add=`<div class="mut" style="font-size:11.5px;margin-top:4px">👤 Con el cliente desde ${fFecha(x.enviadoCli||x.fecha)}${x.proxSeg?' · seguimiento <b style="color:'+(v?'var(--bad)':'inherit')+'">'+pdCuando(x.proxSeg)+'</b>':''}${n?' · '+n+' seguimiento'+(n>1?'s':''):''}</div>
+     <div class="btns" style="margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="SCR=null;scResultado('${x.id}','vendida')">🏆 Vendida</button><button class="btn sec sm" onclick="SCR=null;scResultado('${x.id}','perdida')">Perdida</button><button class="btn sec sm" onclick="SCR=null;scResultado('${x.id}','espera')">En espera</button><button class="btn ${v?'':'sec'} sm" onclick="scSegCliente('${x.id}')">🔔 Seguimiento</button></div>`}
+  else if(['vendida','perdida','reemplazada'].includes(x.estado)){const r=x.res||{};add=`<div style="font-size:12.5px;margin-top:6px;color:${scE(x.estado)[2]}"><b>${scE(x.estado)[3]} ${esc(spComentario(x))}</b>${r.competidor?' · competidor: '+esc(r.competidor):''}</div><div class="btns" style="margin-top:6px"><button class="btn sec sm" onclick="SCR=null;scResultado('${x.id}')">Cambiar resultado</button></div>`}
+  if(add)h=h.replace(/<\/div>\s*$/,add+'</div>')}catch(e){}return h};
+const _scLista143=scLista;scLista=function(){if(SCF==='cli'){const q=SCQ.trim();return scConCli().filter(x=>!q||coincide(q,scCli(x),x.desc,x.notas)).sort((a,b)=>(a.proxSeg||'9').localeCompare(b.proxSeg||'9'))}return _scLista143.apply(this,arguments)};
+function scSpPend(){return solcots().filter(x=>x.spPend)}
+const _pintSc143=pintarSolCot;pintarSolCot=function(){const r=_pintSc143.apply(this,arguments);try{const sb=$('#sbody');if(!sb)return r;const n=scConCli().length,v=scConCli().filter(scSegVence).length;
+  const ch=sb.querySelector('[data-f="sin"]');if(ch&&!sb.querySelector('[data-f="cli"]')){const b=document.createElement('button');b.className='chip'+(SCF==='cli'?' on':'');b.dataset.f='cli';b.textContent='Con el cliente ('+n+(v?', '+v+' para hoy':'')+')';b.onclick=()=>{SCF='cli';pintarSolCot()};ch.after(b)}
+  const card=$('#scarqs'),P=scSpPend();if(card&&!$('#scsp')){const d=document.createElement('div');d.style.cssText='margin-top:8px;padding-top:8px;border-top:1px solid var(--line)';
+    d.innerHTML=`${n?`<div class="row" style="gap:8px"><div class="grow"><b>👤 ${n} con el cliente</b><div class="mut" style="font-size:12px">${v?'<b style="color:var(--bad)">'+v+' para seguimiento hoy</b>':'Sin seguimientos para hoy'}</div></div><button class="btn sec sm" style="width:auto" onclick="SCF='cli';pintarSolCot()">Ver</button></div>`:''}
+      <button class="btn ${P.length?'':'sec'} full" id="scsp" style="margin-top:8px" onclick="scSharePoint()">📋 Para SharePoint${P.length?' ('+P.length+' cambio'+(P.length>1?'s':'')+')':''}</button>`;card.appendChild(d)}}catch(e){console.log('sc143',e)}return r};
+/* ---- lista de cambios para pasar a SharePoint ---- */
+function scSharePoint(todas){const L=(todas?solcots().filter(x=>x.res||SC_CLI.includes(x.estado)):scSpPend()).sort((a,b)=>String(b.resFecha||'').localeCompare(String(a.resFecha||'')));
+  const fila=x=>[scCli(x),x.nro||'',SC_SP[x.estado]||scE(x.estado)[1],spComentario(x),(x.res||{}).competidor||''];
+  abrirSheet('scsp','Para SharePoint',`<div class="card mut" style="font-size:12.5px">En la lista «Cotizaciones» de SharePoint busca cada cotización por su número y pon el <b>Estado</b>, los <b>Comentarios</b> y el <b>Competidor</b> como salen aquí. Toca un texto para copiarlo.</div>
+   <div class="chips"><button class="chip ${todas?'':'on'}" onclick="scSharePoint(false)">Por pasar (${scSpPend().length})</button><button class="chip ${todas?'on':''}" onclick="scSharePoint(true)">Todas con resultado</button></div>
+   ${L.length?L.map(x=>{const f=fila(x);return `<div class="card" style="border-left:4px solid ${scE(x.estado)[2]}"><div class="row" style="gap:8px"><b class="grow ell">${esc(f[0])}</b><span class="badge" style="background:${scE(x.estado)[2]}1f;color:${scE(x.estado)[2]}">${esc(f[2])}</span></div>
+     <div class="mut" style="font-size:12px;margin-top:2px">Nº ${f[1]?esc(f[1]):'<b style="color:var(--bad)">sin número</b> <a href="#" onclick="SCR=null;scResultado(\''+x.id+'\');return false">poner</a>'}</div>
+     <div class="tap" onclick="copiarTexto(this.dataset.t)" data-t="${esc(f[3])}" style="margin-top:6px;padding:8px;border:1px dashed var(--line);border-radius:8px;font-size:13px">📋 ${esc(f[3])||'(sin comentario)'}</div>
+     ${f[4]?`<div class="tap mut" onclick="copiarTexto(this.dataset.t)" data-t="${esc(f[4])}" style="font-size:12.5px;margin-top:4px">Competidor: <b>${esc(f[4])}</b> (copiar)</div>`:''}
+     ${x.spPend?`<button class="btn sec sm" style="margin-top:6px" onclick="solc('${x.id}').spPend=false;save();scSharePoint(${!!todas})">✔ Ya lo pasé</button>`:''}</div>`}).join(''):'<div class="card mut" style="text-align:center">No hay cambios por pasar.</div>'}
+   ${L.length?`<div class="btns"><button class="btn" onclick="copiarTexto(scSpTexto(${!!todas}));toast('Copiado: pégalo en un correo, WhatsApp o Excel')">📋 Copiar todo</button><button class="btn sec" onclick="scSpExcel(${!!todas})">📊 Excel</button></div>
+     ${!todas&&scSpPend().length?`<button class="btn sec full" style="margin-top:8px" onclick="if(confirm('¿Marcar los '+scSpPend().length+' cambios como pasados a SharePoint?')){scSpPend().forEach(x=>x.spPend=false);save();scSharePoint(false)}">✔ Ya pasé todos</button>`:''}`:''}`,()=>scSharePoint(todas))}
+function scSpFilas(todas){return (todas?solcots().filter(x=>x.res||SC_CLI.includes(x.estado)):scSpPend()).map(x=>[scCli(x),x.nro||'',SC_SP[x.estado]||scE(x.estado)[1],spComentario(x),(x.res||{}).competidor||'',x.monto?round2(x.monto):''])}
+function scSpTexto(todas){return ['Cliente\tNroCotizacion\tEstado\tComentarios\tCompetidor (perdido por)'].concat(scSpFilas(todas).map(f=>f.slice(0,5).join('\t'))).join('\n')}
+function scSpExcel(todas){guardarExcel('Cambios SharePoint '+hoy()+'.xlsx',[{name:'Cotizaciones',rows:[['Title','NroCotizacion','Estado','Comentarios','Competidor (perdido por)','Monto']].concat(scSpFilas(todas)),widths:[34,14,14,70,24,14]}])}
+/* ---- avisos de seguimiento con el cliente ---- */
+const _alIni143=alertasInicio;alertasInicio=function(){let h=_alIni143.apply(this,arguments);try{const V=scConCli().filter(scSegVence);if(V.length){const a=alerta('bell','#d98a00',V.length+' cotización(es) para seguimiento con el cliente',V.map(scCli).slice(0,3).join(', ')+' · toca para escribirles',"SCF='cli';pintarSolCot()");
+  h=h?h.replace('<div class="alertas">','<div class="alertas">'+a):'<div class="alertas">'+a+'</div>'}}catch(e){}return h};
+const _notif143=notificaciones;notificaciones=function(){const R=_notif143.apply(this,arguments);try{const V=scConCli().filter(scSegVence);if(V.length)R.unshift({id:'ag:scs:'+hoy()+':'+V.length,tipo:'agenda',tit:V.length+' cotización(es) para seguimiento con el cliente',txt:V.map(scCli).slice(0,4).join(', '),f:hoy(),acc:"SCF='cli';pintarSolCot()",leida:false})}catch(e){}return R};
+const _calcAv143=calcularAvisos;calcularAvisos=function(){const L=_calcAv143.apply(this,arguments);try{const c=avisoCfg();if(!c.on)return L;const ahora=Date.now(),E=scConCli();
+  for(let i=0;i<7;i++){const f=addD(hoy(),i),V=E.filter(x=>x.proxSeg&&x.proxSeg<=f),t=momento(f,c.hora)+10*60000;if(V.length&&t>ahora)L.push({id:3100+i,t,titulo:'👤 '+V.length+' cotización(es) para seguimiento con el cliente',texto:V.map(scCli).slice(0,4).join(', '),abrir:'solc'})}}catch(e){}return L.slice(0,60)};
+/* ---- reportes: sin cotizaciones en la app, cuentan las solicitudes enviadas al cliente y las vendidas ---- */
+let SV_REAL=null;
+function scVirtuales(){return solcots().filter(x=>['enviada','espera','vendida','perdida','reemplazada'].includes(x.estado)).map(x=>({id:'sv_'+x.id,numero:x.nro||scCod(x),fecha:x.enviadoCli||x.fecha,clienteId:x.clienteId,estado:x.estado==='vendida'?'aceptada':['perdida','reemplazada'].includes(x.estado)?'rechazada':'pendiente',
+  items:[{desc:x.desc||'Cotización',cant:1,precio:num(x.monto)||0}],itbis:false,producto:x.desc||'',proyecto:'',virtual:true}))}
+function conSolCots(fn){if(!(typeof sinVentas==='function'&&sinVentas())||SV_REAL)return fn();SV_REAL=db.cotizaciones;db.cotizaciones=scVirtuales();try{return fn()}finally{db.cotizaciones=SV_REAL;SV_REAL=null}}
+const _save143=save;save=function(){if(SV_REAL){const v=db.cotizaciones;db.cotizaciones=SV_REAL;try{return _save143.apply(this,arguments)}finally{db.cotizaciones=v}}return _save143.apply(this,arguments)};
+['datosSemana','datosMes','datosAnio','reporteSemanal','reporteSemanalBender','reporteMensualExcel','reporteAnualExcel','filasFV','vReportes'].forEach(n=>{try{const f=window[n]||eval(n);if(typeof f!=='function')return;const w=function(){const a=arguments,t=this;return conSolCots(()=>f.apply(t,a))};eval(n+'=w')}catch(e){console.log('sv rep',n,e)}});
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){
