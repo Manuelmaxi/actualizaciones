@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v13.9</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v13.9.1</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v13.9${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v13.9.1${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -9691,6 +9691,73 @@ function scProyForm(){const P=proyectistas().map(p=>Object.assign({},p));
   $('#scpadd').onclick=()=>{lee();P.push({id:uid(),n:'',tel:''});kvSet('proyectistas',JSON.stringify(P));pila.pop();scProyForm()};
   $('#scpok').onclick=()=>{lee();const Q=P.filter(p=>p.n).map(p=>Object.assign(p,{grupo:!soloDig(p.tel)}));kvSet('proyectistas',JSON.stringify(Q));kvSet('sc_dias',$('#scpd').value);save();programarAvisos();toast('Guardado');pila.pop();if(pila.length)pila[pila.length-1].fn();else render()}}
 const _bloqAv139=bloqueAvisos;bloqueAvisos=function(){return _bloqAv139.apply(this,arguments)+`<div class="card tap" id="ajproy" onclick="scProyForm()"><div class="row"><b class="grow">👷 Arquitectos / proyectistas</b><span class="mut">›</span></div><div class="mut" style="font-size:12.5px">${proyectistas().map(p=>esc(p.n)).join(' · ')} · aviso a los ${scDiasAviso()} día(s)</div></div>`};
+
+
+/* ================= v13.9.1: «Enviar al arquitecto» con cliente, levantamiento de la app o archivos del teléfono (PDF, fotos…) ================= */
+const levsApp=()=>(db.planos||[]).filter(p=>p.lev).sort((a,b)=>(b.editado||b.creado||0)-(a.editado||a.creado||0));
+const scFileTxt=f=>(/pdf/.test(f.mime)?'📄 ':/image/.test(f.mime)?'🖼 ':'📎 ')+f.nombre+(f.b64?' · '+fTam(Math.floor(f.b64.length*3/4)):'');
+/* junta fotos y PDF en un solo PDF (así va directo al chat del arquitecto) */
+async function scUnirPdf(files,nombre){if(files.length===1&&/pdf/.test(files[0].mime))return{nombre:files[0].nombre.replace(/\.pdf$/i,'')+'.pdf',b64:files[0].b64};
+  if(!window.jspdf)await cargarScript('jspdf.umd.min.js');const doc=new jspdf.jsPDF({unit:'pt',format:'letter'}),W=612,H=792,M=24;let first=true;
+  const pagina=(url,w,h,fmt)=>{if(!first)doc.addPage();first=false;let ww=W-2*M,hh=ww*h/w;if(hh>H-2*M){hh=H-2*M;ww=hh*w/h}doc.addImage(url,fmt,(W-ww)/2,(H-hh)/2,ww,hh)};
+  for(const f of files){
+    if(/pdf/.test(f.mime)){const I=await levImagenes(f.b64,1500);I.forEach(im=>pagina(im.cv.toDataURL('image/jpeg',0.85),im.cv.width,im.cv.height,'JPEG'))}
+    else if(/image/.test(f.mime)){const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src='data:'+f.mime+';base64,'+f.b64});
+      const s=Math.min(1,2000/Math.max(img.width,img.height)),cv=document.createElement('canvas');cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(img,0,0,cv.width,cv.height);
+      pagina(cv.toDataURL('image/jpeg',0.85),cv.width,cv.height,'JPEG')}}
+  if(first)throw new Error('Ningún archivo se pudo leer (usa PDF o fotos)');return{nombre,b64:doc.output('datauristring').split(',')[1]}}
+function scElegirArchivos(){const i=document.createElement('input');i.type='file';i.multiple=true;i.accept='application/pdf,image/*,.pdf,.jpg,.jpeg,.png,.webp,.heic';
+  i.onchange=async()=>{const S=SCA;if(!S)return;for(const f of i.files){try{const d=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
+      const mime=f.type||(/\.pdf$/i.test(f.name)?'application/pdf':/\.(jpe?g|png|webp|heic)$/i.test(f.name)?'image/jpeg':'');if(!/pdf|image/.test(mime)){toast('«'+f.name+'» no es PDF ni foto: no se agrega');continue}
+      S.files.push({nombre:f.name,mime,b64:String(d).split(',')[1]})}catch(e){toast('No se pudo leer '+f.name)}}S.adj='arch';scEnviarArq(S.o)};i.click()}
+scEnviarArq=function(o){o=o||{};const x=o.id&&solc(o.id),lid=o.levId||(x&&x.levId),p0=lid&&plano(lid);
+  if(!SCA||SCA.k!==(o.id||o.levId||'n')){const cid=x?x.clienteId:p0?p0.clienteId:(o.clienteId||''),L=levsApp(),lc=p0||(cid&&L.find(p=>p.clienteId===cid));
+    SCA={k:o.id||o.levId||'n',o,proy:x&&x.proy||kvGet('sc_ult_proy')||'gel',dias:String(scDiasAviso()),fecha:'',desc:x?x.desc:p0?scDescLev(p0):(o.desc||''),clienteId:cid,cliente:x?(x.clienteId?'':x.cliente||''):p0&&!p0.clienteId?(p0.cliente||''):'',
+      adj:lc?'lev':'arch',levId:lc?lc.id:'',files:[]}}
+  const S=SCA,P=proyectistas(),L=levsApp(),p=S.levId&&plano(S.levId),clis=db.clientes.slice().sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre)));
+  const cn=S.clienteId&&cli(S.clienteId)?cli(S.clienteId).nombre:S.cliente;
+  const Lo=L.slice().sort((a,b)=>(b.clienteId===S.clienteId&&!!S.clienteId)-(a.clienteId===S.clienteId&&!!S.clienteId)).slice(0,40);
+  abrirSheet('scarq','Enviar al arquitecto',`<div class="card"><label style="margin-top:0">Cliente</label>${clis.length>6?'<input id="scaq" type="search" autocomplete="off" placeholder="🔍 Buscar cliente…" style="margin-bottom:6px">':''}
+     <select id="scac"><option value="">— Selecciona —</option>${clis.map(c=>`<option value="${c.id}" ${c.id===S.clienteId?'selected':''}>${esc(c.nombre)}</option>`).join('')}<option value="_otro" ${!S.clienteId&&S.cliente?'selected':''}>✏️ Otro (escribir el nombre)</option></select>
+     <input id="scao" placeholder="Nombre del cliente" value="${esc(S.cliente)}" style="margin-top:6px;${!S.clienteId&&S.cliente?'':'display:none'}">
+     <label>¿A quién?</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${P.map(q=>`<button class="chip ${S.proy===q.id?'on':''}" data-p="${q.id}">${q.grupo?'👥 ':''}${esc(q.n)}</button>`).join('')}</div>
+     <label>¿Para cuándo la necesitas?</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${[['1','Mañana'],['2','2 días'],['3','3 días'],['7','1 semana'],['f','Fecha…']].map(([k,t])=>`<button class="chip ${S.dias===k?'on':''}" data-d="${k}">${t}</button>`).join('')}</div>
+     ${S.dias==='f'?`<input id="scaf" type="date" value="${esc(S.fecha||addD(hoy(),2))}">`:''}
+     <label>¿Qué hay que cotizar?</label><textarea id="scad" style="min-height:80px" placeholder="Ej.: rack selectivo 3 niveles, 40 posiciones, altura 6 m">${esc(S.desc)}</textarea></div>
+   <div class="card"><b>📎 Levantamiento que se envía</b>
+     <div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:6px">${L.length?`<button class="chip ${S.adj==='lev'?'on':''}" data-a="lev">📋 De la app</button>`:''}<button class="chip ${S.adj==='arch'?'on':''}" data-a="arch">📁 Archivo del teléfono</button><button class="chip ${S.adj==='no'?'on':''}" data-a="no">Sin adjunto</button></div>
+     ${S.adj==='lev'?`<select id="scal" style="margin-top:6px">${Lo.map(q=>`<option value="${q.id}" ${q.id===S.levId?'selected':''}>${fFecha(q.fecha)} · ${esc(q.cliente||(cli(q.clienteId)||{}).nombre||'Sin cliente')}${levPaginas(q)>1?' · '+levPaginas(q)+' hojas':''}</option>`).join('')}</select><div class="mut" style="font-size:12px;margin-top:4px">Va en PDF con los datos, las hojas y el plano.</div>`:''}
+     ${S.adj==='arch'?`<div style="margin-top:6px">${S.files.map((f,i)=>`<div class="row" style="gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span class="grow ell" style="font-size:13.5px">${esc(scFileTxt(f))}</span><button class="btn sec sm" style="width:auto" data-x="${i}">✕</button></div>`).join('')}
+       <button class="btn sec full" id="scafl" style="margin-top:8px">${S.files.length?'+ Agregar otro':'Elegir PDF o fotos del teléfono'}</button><div class="mut" style="font-size:12px;margin-top:4px">${S.files.length>1||S.files.some(f=>/image/.test(f.mime))?'Se juntan en un solo PDF para mandarlo directo al chat.':'Puedes elegir varios (PDF, JPG, PNG…).'}</div></div>`:''}</div>
+   <button class="btn full" id="scaok">📲 Enviar por WhatsApp</button>
+   <div class="mut" style="font-size:11.5px;margin:6px 4px">Queda en «Cotizaciones pendientes». Si no llega para la fecha, te aviso y le puedes recordar con un toque.</div>`,()=>scEnviarArq(o));
+  const sel=$('#scac'),q=$('#scaq');
+  const lee=()=>{S.desc=$('#scad').value;if($('#scaf'))S.fecha=$('#scaf').value;if($('#scal'))S.levId=$('#scal').value;const v=sel.value;if(v==='_otro'){S.clienteId='';S.cliente=$('#scao').value.trim()}else{S.clienteId=v;S.cliente=''}};
+  sel.onchange=()=>{$('#scao').style.display=sel.value==='_otro'?'':'none';lee();if(sel.value&&sel.value!=='_otro'){const lc=levsApp().find(z=>z.clienteId===sel.value);if(lc){S.adj='lev';S.levId=lc.id;if(!S.desc.trim())S.desc=scDescLev(lc)}scEnviarArq(o)}};
+  if(q)q.oninput=()=>{const v=q.value.trim();[...sel.options].forEach(op=>{if(op.value&&op.value!=='_otro')op.hidden=!!v&&!coincide(v,op.textContent)});const m=[...sel.options].filter(op=>op.value&&op.value!=='_otro'&&!op.hidden);if(v&&m.length===1){sel.value=m[0].value;sel.onchange()}};
+  document.querySelectorAll('#sbody [data-p]').forEach(b=>b.onclick=()=>{lee();S.proy=b.dataset.p;scEnviarArq(o)});
+  document.querySelectorAll('#sbody [data-d]').forEach(b=>b.onclick=()=>{lee();S.dias=b.dataset.d;scEnviarArq(o)});
+  document.querySelectorAll('#sbody [data-a]').forEach(b=>b.onclick=()=>{lee();S.adj=b.dataset.a;if(S.adj==='lev'&&!S.levId&&levsApp()[0])S.levId=levsApp()[0].id;scEnviarArq(o);if(S.adj==='arch'&&!S.files.length)scElegirArchivos()});
+  document.querySelectorAll('#sbody [data-x]').forEach(b=>b.onclick=()=>{lee();S.files.splice(+b.dataset.x,1);scEnviarArq(o)});
+  if($('#scafl'))$('#scafl').onclick=()=>{lee();scElegirArchivos()};
+  if($('#scal'))$('#scal').onchange=()=>{lee();const z=plano(S.levId);if(z&&!S.clienteId&&z.clienteId)S.clienteId=z.clienteId;scEnviarArq(o)};
+  $('#scaok').onclick=async()=>{lee();const qp=proyG(S.proy);if(!qp)return toast('Elige a quién');if(!S.clienteId&&!S.cliente)return toast('Elige el cliente');if(!S.desc.trim())return toast('Escribe qué hay que cotizar');
+    if(S.adj==='arch'&&!S.files.length){if(!confirm('No elegiste el archivo del levantamiento. ¿Enviar la solicitud sin adjunto?'))return;S.adj='no'}
+    const comp=S.dias==='f'?(S.fecha||addD(hoy(),2)):addD(hoy(),+S.dias),cn2=S.clienteId&&cli(S.clienteId)?cli(S.clienteId).nombre:S.cliente,lp=S.adj==='lev'&&S.levId?plano(S.levId):null;let y=x;
+    if(!y){y={id:uid(),creado:Date.now(),estado:'pendiente',hist:[{f:new Date().toISOString(),e:'pendiente'}],fecha:hoy(),notas:''};solcots().push(y)}
+    Object.assign(y,{clienteId:S.clienteId,cliente:S.clienteId?'':S.cliente,desc:S.desc.trim(),compromiso:comp,proy:qp.id,enviado:Date.now(),editado:Date.now()});
+    if(lp){y.levId=lp.id;const v=db.visitas.find(v=>v.levId===lp.id);if(v)y.levVisita=v.id;lp.cotizar={fecha:hoy(),para:qp.n,via:'whatsapp'}}
+    if(S.adj==='arch')y.adjuntos=S.files.map(f=>f.nombre);kvSet('sc_ult_proy',qp.id);save();
+    const msg=`Buenas${qp.grupo?'':', '+scPrimer(qp.n)}. Le envío esta solicitud de cotización:\n\n*Cliente:* ${cn2||'—'}\n*Qué cotizar:* ${S.desc.trim()}\n*La necesito para:* ${diaDe(comp)} ${fFecha(comp)}\n\nSolicitud ${y.id.slice(-5).toUpperCase()}${S.adj!=='no'?'\nVa el levantamiento en PDF.':''}\nGracias.`;
+    let pdf=null;if(S.adj!=='no'){toast('⏳ Preparando el PDF…');try{if(lp){const r=await levPaquete(lp.id,{});pdf={nombre:r.nombre,b64:r.doc.output('datauristring').split(',')[1]}}
+      else pdf=await scUnirPdf(S.files,'Levantamiento '+(cn2||'').replace(/[\\/:*?"<>|]/g,'').trim()+' '+hoy()+'.pdf')}catch(e){toast('No se pudo preparar el adjunto ('+e.message+'): va solo el mensaje')}}
+    scWa(qp,msg,pdf);SCA=null;pila.pop();toast('📲 Enviada a '+qp.n+' · te aviso el '+fFecha(comp));programarAvisos();setTimeout(()=>{SCF='sin';pintarSolCot()},400)}};
+/* acceso directo: en el menú de Cotización y arriba en Pendientes */
+const _menuCot140=abrirMenuCot;abrirMenuCot=function(){const r=_menuCot140.apply(this,arguments);try{const g=$('#sbody>div');if(g&&!$('#bcotarq')){const n=scEsperando().length,b=document.createElement('button');b.id='bcotarq';b.className='card tap row';b.style.cssText='margin:0;border:0;gap:12px;text-align:left;padding:14px';
+  b.innerHTML=`<span class="pi" style="background:#0e7490;color:#fff;width:46px;height:46px">${ico('send',24)}</span><div class="grow"><b style="font-size:16px">Pedir cotización al arquitecto</b><div class="mut" style="font-size:12.5px">Envía el levantamiento por WhatsApp${n?' · '+n+' esperando':''}</div></div>${ico('chev',18)}`;
+  b.onclick=()=>{pila.length=0;SCA=null;scEnviarArq({})};g.insertBefore(b,g.children[1]||null)}}catch(e){}return r};
+const _pend140=pintarPendientes;pintarPendientes=function(){const r=_pend140.apply(this,arguments);try{let d=$('#pdhoy');const sb=$('#sbody');if(!d&&sb){d=document.createElement('div');d.id='pdhoy';d.className='card';const f=sb.firstElementChild;if(f&&f.nextSibling)sb.insertBefore(d,f.nextSibling);else sb.appendChild(d)}if(d&&!$('#pdarq')){const n=scEsperando().length,v=scEsperando().filter(scVence).length;const w=document.createElement('div');w.className='row';w.style.cssText='gap:8px;flex-wrap:wrap;margin-top:8px';
+  w.innerHTML=`<button id="pdarq" class="btn ${v?'':'sec'}" style="flex:1;min-width:140px" onclick="pila.length=0;SCA=null;scEnviarArq({})">${ico('send',16)} Pedir al arquitecto</button><button class="btn sec" style="flex:1;min-width:140px" onclick="pila.length=0;abrirSolCot()">Esperando${n?' ('+n+(v?', '+v+' atrasada'+(v>1?'s':''):'')+')':''}</button>`;d.appendChild(w)}}catch(e){}return r};
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){

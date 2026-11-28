@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 130,
-    "versionName": "13.9",
+    "versionCode": 131,
+    "versionName": "13.9.1",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Solicitudes al arquitecto por WhatsApp: desde el levantamiento (o la visita) se envía con el PDF y la fecha; si no llega te aviso y le recuerdas con un toque; al llegar, «Enviar al cliente» y seguimiento en 3 días.\n• Menú más simple (13 iconos), «Siguiente paso» en visitas, planificar la semana y frecuencia/zona desde el Excel."
+    "notas": "• «Pedir cotización al arquitecto» ahora está en Cotización y en Pendientes.\n• Eliges el cliente y adjuntas el levantamiento de la app o archivos del teléfono (PDF, fotos…): se juntan en un solo PDF y van directo al chat del arquitecto."
   },
   "clientes": {
     "versionCode": 8,
