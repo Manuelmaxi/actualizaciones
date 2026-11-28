@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.2</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.3</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.2${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.3${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -9917,6 +9917,127 @@ function scVirtuales(){return solcots().filter(x=>['enviada','espera','vendida',
 function conSolCots(fn){if(!(typeof sinVentas==='function'&&sinVentas())||SV_REAL)return fn();SV_REAL=db.cotizaciones;db.cotizaciones=scVirtuales();try{return fn()}finally{db.cotizaciones=SV_REAL;SV_REAL=null}}
 const _save143=save;save=function(){if(SV_REAL){const v=db.cotizaciones;db.cotizaciones=SV_REAL;try{return _save143.apply(this,arguments)}finally{db.cotizaciones=v}}return _save143.apply(this,arguments)};
 ['datosSemana','datosMes','datosAnio','reporteSemanal','reporteSemanalBender','reporteMensualExcel','reporteAnualExcel','filasFV','vReportes'].forEach(n=>{try{const f=window[n]||eval(n);if(typeof f!=='function')return;const w=function(){const a=arguments,t=this;return conSolCots(()=>f.apply(t,a))};eval(n+'=w')}catch(e){console.log('sv rep',n,e)}});
+
+
+/* ================= v14.3: «Mis ventas y cobros» (control interno): ventas, avances, pagos, lo que falta y cuándo dijo que paga, con recordatorios. La cotización marcada Vendida entra sola ================= */
+const ventas=()=>db.ventas||(db.ventas=[]);
+const venta=id=>ventas().find(v=>v.id===id);
+const vtPagado=v=>round2((v.pagos||[]).reduce((a,p)=>a+num(p.monto),0));
+const vtSaldo=v=>Math.max(0,round2(num(v.monto)-vtPagado(v)));
+const vtEst=v=>vtSaldo(v)<=0.5?['Pagada','#1e8e3e']:vtPagado(v)>0?['Abonada','#d98a00']:['Pendiente','#c0392b'];
+const vtCli=v=>{const c=v.clienteId&&cli(v.clienteId);return c?c.nombre:(v.cliente||'(sin cliente)')};
+const vtPromVence=v=>vtSaldo(v)>0.5&&v.promesa&&v.promesa<=hoy();
+const vtDeben=()=>ventas().filter(v=>vtSaldo(v)>0.5);
+const FORMAS_PAGO=['Efectivo','Transferencia','Cheque','Tarjeta','Otro'];
+let VTF='pend',VTQ='',VTC='';
+/* entra sola al marcar la cotización Vendida */
+function vtDesdeSol(x){if(!x)return null;let v=ventas().find(y=>y.solId===x.id);const r=x.res||{};
+  if(!v){v={id:uid(),creado:Date.now(),solId:x.id,clienteId:x.clienteId||'',cliente:x.clienteId?'':(x.cliente||''),desc:x.desc||'',nro:x.nro||'',factura:r.factura||'',fecha:r.fecha||hoy(),monto:num(x.monto)||0,pagos:[],promesa:'',notas:''};ventas().push(v)}
+  else Object.assign(v,{monto:num(x.monto)||v.monto,nro:x.nro||v.nro,factura:r.factura||v.factura,desc:x.desc||v.desc});return v}
+const _scEstado144=scEstado;scEstado=function(id,v){const x=solc(id),antes=x&&x.estado;const r=_scEstado144.apply(this,arguments);try{
+  if(x&&v==='vendida'){const vt=vtDesdeSol(x);save();if(antes!=='vendida')setTimeout(()=>{const t=pila[pila.length-1];if(!t||t.key==='solc')verVenta(vt.id,true)},650)}
+  else if(x&&antes==='vendida'&&v!=='vendida'){const vt=ventas().find(y=>y.solId===x.id);if(vt){if((vt.pagos||[]).length)toast('La venta tiene pagos: queda en Mis ventas y cobros');else{db.ventas=ventas().filter(y=>y!==vt);save()}}}}catch(e){console.log('vt',e)}return r};
+/* ---- pantalla principal ---- */
+function abrirVentas(o){o=o||{};if(o.cli!=null)VTC=o.cli;if(o.f)VTF=o.f;pila.length=pila.length;const A=ventas(),D=vtDeben(),porC=D.reduce((a,v)=>a+vtSaldo(v),0),ym=hoy().slice(0,7);
+  const vendMes=A.filter(v=>(v.fecha||'').startsWith(ym)).reduce((a,v)=>a+num(v.monto),0),cobMes=A.reduce((a,v)=>a+(v.pagos||[]).filter(p=>(p.fecha||'').startsWith(ym)).reduce((s,p)=>s+num(p.monto),0),0);
+  const prom=D.filter(vtPromVence).length,ncli=new Set(D.map(v=>v.clienteId||v.cliente)).size;
+  let L=A.filter(v=>!VTC||v.clienteId===VTC).filter(v=>!VTQ.trim()||coincide(VTQ.trim(),vtCli(v),v.desc,v.nro,v.factura,v.notas));
+  if(VTF==='pend')L=L.filter(v=>vtSaldo(v)>0.5).sort((a,b)=>(a.promesa||'9').localeCompare(b.promesa||'9')||String(a.fecha).localeCompare(String(b.fecha)));
+  else if(VTF==='pag')L=L.filter(v=>vtSaldo(v)<=0.5).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));else L=L.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  const porCli=Object.values(D.reduce((m,v)=>{const k=v.clienteId||('n:'+v.cliente);(m[k]=m[k]||{k,id:v.clienteId,n:vtCli(v),s:0,c:0,p:''}).s+=vtSaldo(v);m[k].c++;if(v.promesa&&(!m[k].p||v.promesa<m[k].p))m[k].p=v.promesa;return m},{})).sort((a,b)=>b.s-a.s);
+  abrirSheet('ventas','Mis ventas y cobros',`${secHero([{i:'cash',c:'#c0392b',v:fmtK(porC),l:'Me deben',on:"VTF='pend';VTC='';abrirVentas()"},{i:'users',c:'#e8892f',v:ncli,l:'Clientes que deben',on:"VTF='cli';VTC='';abrirVentas()"},{i:'chart',c:'#1e8e3e',v:fmtK(cobMes),l:'Cobrado este mes',on:"VTF='todas';abrirVentas()"}])}
+   <div class="mut" style="margin:0 4px 8px;font-size:12px">Vendido este mes: <b>${fmt(vendMes)}</b>${prom?` · <b style="color:var(--bad)">${prom} pago(s) prometido(s) para hoy o atrasado(s)</b>`:''} · Solo para tu control.</div>
+   <div class="btns" style="margin-bottom:8px"><button class="btn" onclick="formVenta()">+ Venta</button><button class="btn sec" onclick="vtExcel()">📊 Excel</button></div>
+   ${VTC?`<div class="card row" style="gap:8px"><b class="grow">👤 ${esc(cli(VTC)?cli(VTC).nombre:'Cliente')}</b><button class="btn sec sm" style="width:auto" onclick="VTC='';abrirVentas()">Ver todos</button></div>`:''}
+   <input type="search" id="vtq" placeholder="🔍 Buscar cliente, Nº o factura" value="${esc(VTQ)}" style="margin-bottom:6px">
+   <div class="chips">${[['pend','Me deben ('+D.length+')'],['cli','Por cliente'],['pag','Pagadas'],['todas','Todas']].map(([k,t])=>`<button class="chip ${VTF===k?'on':''}" onclick="VTF='${k}';abrirVentas()">${t}</button>`).join('')}</div>
+   ${VTF==='cli'?(porCli.length?porCli.map(z=>`<div class="card tap row" style="gap:10px" onclick="${z.id?`VTC='${z.id}';VTF='pend';abrirVentas()`:`VTQ='${esc(z.n).replace(/'/g,'')}';VTF='pend';abrirVentas()`}">${avatar(z.n,38)}<div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(z.n)}</b><div class="mut" style="font-size:12px">${z.c} venta(s) con saldo${z.p?' · dijo que paga '+'<b style="color:'+(z.p<=hoy()?'var(--bad)':'inherit')+'">'+pdCuando(z.p)+'</b>':''}</div></div><b style="color:var(--bad)">${fmt(z.s)}</b></div>`).join(''):'<div class="card mut" style="text-align:center">Nadie te debe. 🎉</div>')
+   :(L.length?L.map(vtTarjeta).join(''):`<div class="card mut" style="text-align:center;padding:18px">${A.length?'Nada con este filtro.':'Todavía no hay ventas.<br>Cuando marques una cotización como <b>Vendida</b> entra sola aquí; también puedes agregarlas con <b>+ Venta</b>.'}</div>`)}`,()=>abrirVentas());
+  const q=$('#vtq');if(q)q.oninput=()=>{VTQ=q.value;clearTimeout(window.__vtT);window.__vtT=setTimeout(()=>{abrirVentas();const e=$('#vtq');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},350)}}
+function vtTarjeta(v){const e=vtEst(v),s=vtSaldo(v),p=vtPagado(v),pct=num(v.monto)?Math.min(100,Math.round(p/num(v.monto)*100)):0,pv=vtPromVence(v);
+  return `<div class="card" style="border-left:4px solid ${e[1]};padding:12px"><div class="row tap" style="gap:8px;align-items:flex-start" onclick="verVenta('${v.id}')"><div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(vtCli(v))}</b>
+     <div class="mut" style="font-size:12px">${esc([v.desc,v.nro?'Nº '+v.nro:'',v.factura].filter(Boolean).join(' · ')||'Venta')} · ${fFecha(v.fecha)}</div></div><span class="badge" style="background:${e[1]}1f;color:${e[1]}">${e[0]}</span></div>
+   <div class="row" style="gap:8px;margin-top:8px;font-size:13px"><div class="grow">Total <b>${fmt(v.monto)}</b> · Pagado <b style="color:#1e8e3e">${fmt(p)}</b></div>${s>0.5?`<b style="color:var(--bad)">Debe ${fmt(s)}</b>`:''}</div>
+   <div style="height:6px;background:var(--line);border-radius:4px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${e[1]}"></div></div>
+   ${s>0.5?`<div class="mut" style="font-size:12px;margin-top:6px">${v.promesa?'📅 Dijo que paga '+'<b style="color:'+(pv?'var(--bad)':'inherit')+'">'+pdCuando(v.promesa)+'</b>':'Sin fecha de pago'}${(v.recs||[]).length?' · recordado '+v.recs.length+(v.recs.length>1?' veces':' vez'):''}</div>
+     <div class="btns" style="margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="formPagoVenta('${v.id}')">💵 Pago</button><button class="btn sec sm" onclick="formPromesa('${v.id}')">📅 Cuándo paga</button><button class="btn ${pv?'':'sec'} sm" onclick="recordarCobro('${v.id}')">🔔 Recordar</button></div>`:''}</div>`}
+/* ---- detalle ---- */
+function verVenta(id,nueva){const v=venta(id);if(!v)return abrirVentas();const e=vtEst(v),s=vtSaldo(v);
+  abrirSheet('vt:'+id,'Venta',`${nueva?`<div class="card" style="border-left:5px solid #1e8e3e"><b>🏆 Venta registrada en «Mis ventas y cobros»</b><div class="mut" style="font-size:12.5px;margin-top:2px">¿El cliente te dio un avance? ¿Cuándo dijo que paga el resto?</div>
+     <div class="btns" style="margin-top:8px"><button class="btn" onclick="formPagoVenta('${id}')">💵 Registrar avance</button><button class="btn sec" onclick="formPromesa('${id}')">📅 Cuándo paga</button></div></div>`:''}
+   <div class="card"><div class="row" style="gap:8px"><b class="grow" style="font-size:17px">${esc(vtCli(v))}</b><span class="badge" style="background:${e[1]}1f;color:${e[1]}">${e[0]}</span></div>
+    <div class="mut" style="font-size:12.5px;margin-top:2px">${esc(v.desc||'')}</div>
+    <div style="margin-top:6px;font-size:13px">${fFecha(v.fecha)}${v.nro?' · Cotización Nº '+esc(v.nro):''}${v.factura?' · Factura '+esc(v.factura):''}</div>
+    <div class="rgrid" style="margin:10px 0 0"><div class="rt" style="padding:8px 10px"><div><b>${fmt(v.monto)}</b><span>Total</span></div></div><div class="rt" style="padding:8px 10px"><div><b style="color:#1e8e3e">${fmt(vtPagado(v))}</b><span>Pagado</span></div></div><div class="rt" style="padding:8px 10px"><div><b style="color:${s>0.5?'var(--bad)':'#1e8e3e'}">${fmt(s)}</b><span>Pendiente</span></div></div></div>
+    ${s>0.5?`<div style="margin-top:8px;font-size:13px">${v.promesa?'📅 Dijo que paga el <b style="color:'+(vtPromVence(v)?'var(--bad)':'inherit')+'">'+diaDe(v.promesa)+' '+fFecha(v.promesa)+'</b>'+(v.promNota?' · '+esc(v.promNota):''):'Sin fecha de pago acordada'}</div>`:''}
+    ${v.notas?`<div class="mut" style="font-size:12.5px;margin-top:6px;white-space:pre-wrap">📝 ${esc(v.notas)}</div>`:''}</div>
+   ${s>0.5?`<div class="btns"><button class="btn" onclick="formPagoVenta('${id}')">💵 Registrar pago</button><button class="btn sec" onclick="formPromesa('${id}')">📅 Cuándo paga</button><button class="btn sec" onclick="recordarCobro('${id}')">🔔 Recordar por WhatsApp</button></div>`:'<div class="card" style="text-align:center;color:#1e8e3e;font-weight:700">✔ Pagada completa</div>'}
+   <h3>Pagos (${(v.pagos||[]).length})</h3>${(v.pagos||[]).length?(v.pagos||[]).slice().sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha))).map(p=>`<div class="card row" style="gap:8px"><div class="grow"><b>${fmt(p.monto)}</b><div class="mut" style="font-size:12px">${fFecha(p.fecha)} · ${esc(p.forma||'')}${p.nota?' · '+esc(p.nota):''}</div></div><button class="btn sec sm" style="width:auto" onclick="vtBorrarPago('${id}','${p.id}')">🗑</button></div>`).join(''):'<div class="card mut">Sin pagos todavía.</div>'}
+   <div class="btns" style="margin-top:10px"><button class="btn sec" onclick="formVenta('${id}')">✏️ Editar</button>${v.clienteId?`<button class="btn sec" onclick="VTC='${v.clienteId}';VTF='todas';abrirVentas()">Ventas de este cliente</button>`:''}<button class="btn sec red" onclick="vtBorrar('${id}')">🗑 Eliminar</button></div>`,()=>verVenta(id));}
+function vtBorrar(id){const v=venta(id);if(!v)return;if(!confirm('¿Eliminar esta venta'+((v.pagos||[]).length?' y sus '+v.pagos.length+' pago(s)':'')+'? No se puede deshacer.'))return;db.ventas=ventas().filter(y=>y.id!==id);save();toast('Venta eliminada');pila.pop();abrirVentas()}
+function vtBorrarPago(id,pid){const v=venta(id);if(!v||!confirm('¿Eliminar este pago?'))return;v.pagos=(v.pagos||[]).filter(p=>p.id!==pid);save();verVenta(id)}
+/* ---- nueva / editar ---- */
+function formVenta(id,pre){const v=id?venta(id):null,P=pre||{},clis=db.clientes.slice().sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre))),cid=v?v.clienteId:(P.clienteId||VTC||'');
+  abrirSheet('fvt:'+(id||'n'),v?'Editar venta':'Nueva venta',`<div class="card"><label style="margin-top:0">Cliente *</label>${clis.length>6?'<input id="vtcq" type="search" autocomplete="off" placeholder="🔍 Buscar cliente…" style="margin-bottom:6px">':''}
+    <select id="vtc"><option value="">— Selecciona —</option>${clis.map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.nombre)}</option>`).join('')}<option value="_otro" ${v&&!v.clienteId?'selected':''}>✏️ Otro (escribir)</option></select>
+    <input id="vto" placeholder="Nombre del cliente" value="${esc(v&&!v.clienteId?v.cliente:'')}" style="margin-top:6px;${v&&!v.clienteId?'':'display:none'}">
+    <label>¿Qué se vendió?</label><input id="vtd" value="${esc(v?v.desc:(P.desc||''))}" placeholder="Ej.: rack selectivo 3 niveles">
+    <div class="row" style="gap:8px"><div class="grow"><label>Monto total (RD$) *</label><input id="vtm" type="number" inputmode="decimal" value="${esc(v?v.monto:(P.monto||''))}"></div><div class="grow"><label>Fecha</label><input id="vtf" type="date" value="${esc(v?v.fecha:hoy())}"></div></div>
+    <div class="row" style="gap:8px"><div class="grow"><label>Nº cotización</label><input id="vtn" value="${esc(v?v.nro:'')}"></div><div class="grow"><label>Factura</label><input id="vtfa" value="${esc(v?v.factura:'')}"></div></div>
+    ${v?'':`<div class="row" style="gap:8px"><div class="grow"><label>Avance recibido (RD$)</label><input id="vta" type="number" inputmode="decimal" placeholder="0"></div><div class="grow"><label>¿Cuándo paga el resto?</label><input id="vtp" type="date"></div></div>`}
+    <label>Notas</label><textarea id="vtt" placeholder="Opcional">${esc(v?v.notas:'')}</textarea></div><button class="btn full" id="vtok">Guardar</button>`,()=>formVenta(id,pre));
+  const sel=$('#vtc'),q=$('#vtcq');sel.onchange=()=>{$('#vto').style.display=sel.value==='_otro'?'':'none'};
+  if(q)q.oninput=()=>{const t=q.value.trim();[...sel.options].forEach(op=>{if(op.value&&op.value!=='_otro')op.hidden=!!t&&!coincide(t,op.textContent)});const m=[...sel.options].filter(op=>op.value&&op.value!=='_otro'&&!op.hidden);if(t&&m.length===1){sel.value=m[0].value;sel.onchange()}};
+  $('#vtok').onclick=()=>{const sv=sel.value,otro=$('#vto').value.trim(),m=num($('#vtm').value);if(!sv||(sv==='_otro'&&!otro))return toast('Elige el cliente');if(!(m>0))return toast('Pon el monto');
+    const d={clienteId:sv==='_otro'?'':sv,cliente:sv==='_otro'?otro:'',desc:$('#vtd').value.trim(),monto:m,fecha:$('#vtf').value||hoy(),nro:$('#vtn').value.trim(),factura:$('#vtfa').value.trim(),notas:$('#vtt').value.trim()};
+    let x=v;if(x)Object.assign(x,d);else{x=Object.assign({id:uid(),creado:Date.now(),pagos:[],promesa:''},d);const a=num($('#vta').value);if(a>0)x.pagos.push({id:uid(),fecha:d.fecha,monto:Math.min(a,m),forma:'Avance',nota:''});x.promesa=$('#vtp').value||'';ventas().push(x)}
+    save();programarAvisos();toast('Venta guardada');pila.pop();verVenta(x.id)}}
+/* ---- pago ---- */
+function formPagoVenta(id){const v=venta(id);if(!v)return;const s=vtSaldo(v);
+  abrirSheet('pvt','Registrar pago',`<div class="card"><b>${esc(vtCli(v))}</b><div class="mut" style="font-size:12.5px">Pendiente: <b style="color:var(--bad)">${fmt(s)}</b> de ${fmt(v.monto)}</div>
+    <div class="row" style="gap:8px"><div class="grow"><label>Monto (RD$)</label><input id="ppm" type="number" inputmode="decimal" value="${s||''}"></div><div class="grow"><label>Fecha</label><input id="ppf" type="date" value="${hoy()}"></div></div>
+    <label>Forma de pago</label><div class="chips" style="flex-wrap:wrap;overflow:visible">${FORMAS_PAGO.map((f,i)=>`<button class="chip ${i===1?'on':''}" data-fp="${f}">${f}</button>`).join('')}</div>
+    <label>Nota</label><input id="ppn" placeholder="Ej.: avance del 50%, transferencia Banreservas">
+    <label>Si queda algo pendiente, ¿cuándo dijo que paga?</label><input id="ppp" type="date" value="${esc(v.promesa&&v.promesa>hoy()?v.promesa:'')}"></div>
+   <button class="btn full" id="ppok">Guardar pago</button>`);
+  let forma=FORMAS_PAGO[1];document.querySelectorAll('#sbody [data-fp]').forEach(b=>b.onclick=()=>{forma=b.dataset.fp;document.querySelectorAll('#sbody [data-fp]').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#ppok').onclick=()=>{const m=num($('#ppm').value);if(!(m>0))return toast('Pon el monto');if(m>s+0.5&&!confirm('El pago es mayor que lo pendiente ('+fmt(s)+'). ¿Guardarlo igual?'))return;
+    (v.pagos=v.pagos||[]).push({id:uid(),fecha:$('#ppf').value||hoy(),monto:m,forma,nota:$('#ppn').value.trim()});const ns=vtSaldo(v);v.promesa=ns>0.5?($('#ppp').value||v.promesa||''):'';save();programarAvisos();
+    toast(ns>0.5?'💵 Pago guardado · falta '+fmt(ns):'✔ ¡Pagada completa!');pila.pop();verVenta(id)}}
+/* ---- promesa de pago ---- */
+function formPromesa(id){const v=venta(id);if(!v)return;
+  abrirSheet('prvt','¿Cuándo dijo que paga?',`<div class="card"><b>${esc(vtCli(v))}</b><div class="mut" style="font-size:12.5px">Pendiente: <b style="color:var(--bad)">${fmt(vtSaldo(v))}</b></div>
+    <div class="chips" style="flex-wrap:wrap;overflow:visible;margin-top:8px">${[['1','Mañana'],['3','3 días'],['7','1 semana'],['15','15 días'],['30','30 días']].map(([k,t])=>`<button class="chip" data-dd="${k}">${t}</button>`).join('')}</div>
+    <label>Fecha</label><input id="prf" type="date" value="${esc(v.promesa||addD(hoy(),7))}"><label>Nota</label><input id="prn" value="${esc(v.promNota||'')}" placeholder="Ej.: paga cuando le paguen su cliente"></div>
+   <button class="btn full" id="prok">Guardar</button>${v.promesa?'<button class="btn sec full" id="prq" style="margin-top:8px">Quitar la fecha</button>':''}`);
+  document.querySelectorAll('#sbody [data-dd]').forEach(b=>b.onclick=()=>{$('#prf').value=addD(hoy(),+b.dataset.dd);document.querySelectorAll('#sbody [data-dd]').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#prok').onclick=()=>{v.promesa=$('#prf').value;v.promNota=$('#prn').value.trim();save();programarAvisos();toast('📅 Te aviso el '+fFecha(v.promesa));pila.pop();verVenta(id)};
+  if($('#prq'))$('#prq').onclick=()=>{v.promesa='';save();programarAvisos();pila.pop();verVenta(id)}}
+/* ---- recordatorio de cobro ---- */
+function recordarCobro(id){const v=venta(id);if(!v)return;const c=cli(v.clienteId)||{};const s=vtSaldo(v);
+  const msg=`Buenas${c.contacto?' '+scPrimer(c.contacto):''}, le escribo para recordarle el pago pendiente de *${fmt(s)}*${v.factura?' de la factura '+v.factura:v.desc?' de '+v.desc.slice(0,60):''}${v.promesa?', que quedó para el '+fFecha(v.promesa):''}. Quedo atento a cualquier cosa. Gracias.`;
+  (v.recs=v.recs||[]).push(Date.now());save();abrirWa(c.tel||'',msg)}
+function vtExcel(){const V=ventas().slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)));
+  guardarExcel('Mis ventas y cobros '+hoy()+'.xlsx',[{name:'Ventas',rows:[['Cliente','Qué se vendió','Nº cotización','Factura','Fecha','Total','Pagado','Pendiente','Estado','Dijo que paga','Notas']].concat(V.map(v=>[vtCli(v),v.desc||'',v.nro||'',v.factura||'',v.fecha||'',round2(num(v.monto)),vtPagado(v),vtSaldo(v),vtEst(v)[0],v.promesa||'',v.notas||''])),widths:[30,30,12,16,12,14,14,14,12,14,30]},
+   {name:'Pagos',rows:[['Cliente','Venta','Fecha','Monto','Forma','Nota']].concat(V.flatMap(v=>(v.pagos||[]).map(p=>[vtCli(v),v.desc||v.nro||'',p.fecha||'',round2(num(p.monto)),p.forma||'',p.nota||'']))),widths:[30,30,12,14,14,30]}])}
+/* ---- avisos ---- */
+const _alIni144=alertasInicio;alertasInicio=function(){let h=_alIni144.apply(this,arguments);try{const V=vtDeben().filter(vtPromVence);if(V.length){const t=V.reduce((a,v)=>a+vtSaldo(v),0),a=alerta('cash','#c0392b',V.length+' pago(s) que dijeron para hoy o atrasados',V.map(vtCli).slice(0,3).join(', ')+' · '+fmt(t)+' · toca para cobrar',"VTF='pend';VTC='';abrirVentas()");
+  h=h?h.replace('<div class="alertas">','<div class="alertas">'+a):'<div class="alertas">'+a+'</div>'}}catch(e){}return h};
+const _notif144=notificaciones;notificaciones=function(){const R=_notif144.apply(this,arguments);try{const V=vtDeben().filter(vtPromVence);if(V.length)R.unshift({id:'ag:vt:'+hoy()+':'+V.length,tipo:'agenda',tit:V.length+' pago(s) por cobrar hoy',txt:V.map(v=>vtCli(v)+' '+fmtK(vtSaldo(v))).slice(0,4).join(', '),f:hoy(),acc:"VTF='pend';VTC='';abrirVentas()",urg:true,leida:false})}catch(e){}return R};
+const _calcAv144=calcularAvisos;calcularAvisos=function(){const L=_calcAv144.apply(this,arguments);try{const c=avisoCfg();if(!c.on)return L;const ahora=Date.now(),D=vtDeben();
+  for(let i=0;i<7;i++){const f=addD(hoy(),i),V=D.filter(v=>v.promesa&&(i===0?v.promesa<=f:v.promesa===f)),t=momento(f,c.hora)+15*60000;if(V.length&&t>ahora)L.push({id:3200+i,t,titulo:'💵 '+V.length+' pago(s) por cobrar '+(i===0?'hoy':diaDe(f)),texto:V.map(v=>vtCli(v)+' '+fmt(vtSaldo(v))).slice(0,4).join(', '),abrir:'ventas'})}}catch(e){}return L.slice(0,60)};
+const _abrirAv144=window.__abrirAviso;window.__abrirAviso=function(a){if(String(a)==='ventas'){if(bloqueada){window.__avisoTrasDesbloquear=a;return}pila.length=0;cerrarTodo();VTF='pend';VTC='';return abrirVentas()}return _abrirAv144.apply(this,arguments)};
+/* ---- en la ficha del cliente, en el menú y en Inicio ---- */
+const _verCli144=verCliente;verCliente=function(id){const r=_verCli144.apply(this,arguments);try{const sb=$('#sbody');const V=ventas().filter(v=>v.clienteId===id);if(sb&&V.length&&!$('#vtcli')){const s=V.reduce((a,v)=>a+vtSaldo(v),0),p=V.filter(vtPromVence).length;
+  const d=document.createElement('div');d.id='vtcli';d.className='card tap';d.style.cssText='border-left:4px solid '+(s>0.5?'#c0392b':'#1e8e3e');d.onclick=()=>{VTC=id;VTF='todas';abrirVentas()};
+  d.innerHTML=`<div class="row"><b class="grow">💵 Mis ventas y cobros</b><span class="mut">›</span></div><div style="font-size:13px;margin-top:2px">${V.length} venta(s) · ${s>0.5?'<b style="color:var(--bad)">debe '+fmt(s)+'</b>':'<b style="color:#1e8e3e">al día</b>'}${p?' · <b style="color:var(--bad)">pago atrasado</b>':''}</div>`;
+  const ref=$('#vclif')||sb.querySelector('.perfil');if(ref&&ref.nextSibling)sb.insertBefore(d,ref.nextSibling);else sb.prepend(d)}}catch(e){}return r};
+const SV_COB={k:'cobros',g:'v',i:'cash',l:'Ventas y cobros',c:'#c0392b',f:"VTF='pend';VTC='';abrirVentas()",id:'bcobros',n:()=>{try{return vtDeben().filter(vtPromVence).length}catch(e){return 0}},sub:()=>{try{const s=vtDeben().reduce((a,v)=>a+vtSaldo(v),0);return s?'Me deben '+fmtK(s):'Nadie te debe'}catch(e){return ''}}};
+const _accIni144=accionesInicio;accionesInicio=function(){if(!(typeof sinVentas==='function'&&sinVentas()))return _accIni144.apply(this,arguments);const i=MENU_ITEMS.findIndex(x=>x.k==='pend');MENU_ITEMS.splice(i<0?0:i+1,0,SV_COB);try{return _accIni144.apply(this,arguments)}finally{MENU_ITEMS.splice(MENU_ITEMS.indexOf(SV_COB),1)}};
+if(typeof heroSV==='function'){heroSV=function(){const h=hoy(),hoyN=db.visitas.filter(v=>v.estado==='programada'&&v.fecha===h).length,s=vtDeben().reduce((a,v)=>a+vtSaldo(v),0),esp=typeof scEsperando==='function'?scEsperando().length:0,atr=typeof vClisAtrasados==='function'?vClisAtrasados().length:0;
+  return `<div class="hero"><div class="row"><div class="grow"><div class="hola">${esc(saludo())}</div><div class="hfecha">${esc(fechaLarga())}</div></div></div>
+   <div class="hmini" style="margin-top:12px"><div class="tap" onclick="pila.length=0;vRuta(hoy())"><b>${hoyN}</b><span>Visitas hoy</span></div><div class="tap" onclick="pila.length=0;VTF='pend';VTC='';abrirVentas()"><b>${fmtK(s)}</b><span>Me deben</span></div>
+    <div class="tap" onclick="pila.length=0;${esp?'abrirSolCot()':'abrirPlanSemana()'}"><b>${esp||atr}</b><span>${esp?'Esperando al arquitecto':'Clientes por visitar'}</span></div></div></div>`}}
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){

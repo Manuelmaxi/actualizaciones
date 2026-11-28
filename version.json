@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 134,
-    "versionName": "14.2",
+    "versionCode": 135,
+    "versionName": "14.3",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• Resultado de cada cotización con el cliente: Vendida (monto, Nº y factura), Perdida (motivo y competidor), En espera o Reemplazada, con recordatorio de seguimiento y WhatsApp al cliente en un toque.\n• «📋 Para SharePoint»: la lista de cambios (Estado, Comentarios, Competidor) lista para copiar o en Excel.\n• Los reportes cuentan las cotizaciones enviadas al cliente y las vendidas."
+    "notas": "• Nuevo «Ventas y cobros» (solo para ti): la cotización que marcas Vendida entra sola; registras avances y pagos, ves lo pendiente, quién te debe y la fecha en que dijo que paga, con aviso y recordatorio por WhatsApp.\n• Resultado de las cotizaciones con el cliente, lista para SharePoint y reportes con las solicitudes."
   },
   "clientes": {
     "versionCode": 8,
