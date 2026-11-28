@@ -738,7 +738,7 @@ function vAjustes(){
    <button class="btn full sec" onclick="exportCSV('productos')">📄 Exportar detalle de productos</button>
    <button class="btn full sec" onclick="exportCSV('pagos')">📄 Exportar pagos</button>
    <button class="btn full sec" onclick="exportCSV('clientes')">📄 Exportar clientes con balance</button></div>
-  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v13.9.1</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
+  ${AND&&AND.web?`<h3>Versión web</h3><div class="card"><b>Benderrack Vendedores web · v14.0</b><div class="mut" style="margin-top:4px">Se actualiza sola cuando la abres con internet y funciona sin internet. Tus datos se guardan en este navegador: haz copias de seguridad seguido (Ajustes → Copia de seguridad).</div>
    <div class="btns" style="margin-top:8px"><button class="btn" onclick="__instalarWeb()">📲 Instalar en este equipo</button><a class="btn sec" href="${esc(urlApkClientes().replace('Benderrack_Clientes.apk','Benderrack_Vendedores.apk')||'#')}" download>⬇ App para Android (APK)</a></div></div>
 `:`  <h3>Actualizaciones</h3><div class="card"><div class="row"><div class="grow"><b>Versión instalada:</b> ${AND&&AND.version?esc(AND.version()):'2.x'}<div class="mut">${otaKv('act_ultima')?'Última revisión: '+fHora(otaKv('act_ultima')):'Aún no se ha revisado'}</div></div></div>
    <label>Dirección del archivo de versiones (version.json)</label><input id="otau" value="${esc(otaKv('act_url')||OTA_URL_DEFECTO)}" placeholder="https://servidor.empresa.com/benderrack/version.json">
@@ -777,7 +777,7 @@ function vAjustes(){
   <h3>Copia en archivo</h3><div class="card"><div class="mut">${infoDatos()}</div><div class="mut">Guarda una copia en un archivo (Drive, Descargas, etc.).</div>
    <button class="btn full" onclick="backup()">💾 Guardar copia en archivo</button>
    <button class="btn full red" onclick="restaurar()">♻️ Restaurar desde archivo</button></div>
-  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v13.9.1${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
+  <div class="mut" style="text-align:center;margin-top:16px">${db.clientes.length} clientes · ${db.pedidos.length} pedidos · ${db.visitas.length} visitas · Benderrack Vendedores v14.0${AND&&AND.version?' · instalada '+esc(AND.version()):''}</div>`;
 }
 function csv(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
 function exportCSV(t){
@@ -9758,6 +9758,21 @@ const _menuCot140=abrirMenuCot;abrirMenuCot=function(){const r=_menuCot140.apply
   b.onclick=()=>{pila.length=0;SCA=null;scEnviarArq({})};g.insertBefore(b,g.children[1]||null)}}catch(e){}return r};
 const _pend140=pintarPendientes;pintarPendientes=function(){const r=_pend140.apply(this,arguments);try{let d=$('#pdhoy');const sb=$('#sbody');if(!d&&sb){d=document.createElement('div');d.id='pdhoy';d.className='card';const f=sb.firstElementChild;if(f&&f.nextSibling)sb.insertBefore(d,f.nextSibling);else sb.appendChild(d)}if(d&&!$('#pdarq')){const n=scEsperando().length,v=scEsperando().filter(scVence).length;const w=document.createElement('div');w.className='row';w.style.cssText='gap:8px;flex-wrap:wrap;margin-top:8px';
   w.innerHTML=`<button id="pdarq" class="btn ${v?'':'sec'}" style="flex:1;min-width:140px" onclick="pila.length=0;SCA=null;scEnviarArq({})">${ico('send',16)} Pedir al arquitecto</button><button class="btn sec" style="flex:1;min-width:140px" onclick="pila.length=0;abrirSolCot()">Esperando${n?' ('+n+(v?', '+v+' atrasada'+(v>1?'s':''):'')+')':''}</button>`;d.appendChild(w)}}catch(e){}return r};
+
+
+/* ================= v14.0: la actualización se descarga sola en segundo plano y solo queda tocar «Instalar» ================= */
+let OTA_FONDO=null;
+const _mostrarAct141=mostrarActualizacion;mostrarActualizacion=function(j){const vc=String(j&&j.versionCode||'');
+  if(!(AND&&AND.descargarApkFondo&&AND.apkListo&&AND.instalarOta)||!vc)return _mostrarAct141.apply(this,arguments);
+  if(AND.apkListo(vc)!=='si'){if(OTA_FONDO!==vc){OTA_FONDO=vc;window.__otaJ=j;try{AND.descargarApkFondo(j.apkUrl,vc)}catch(e){OTA_FONDO=null;return _mostrarAct141.apply(this,arguments)}}return}
+  const r=_mostrarAct141.apply(this,arguments);try{const k=document.getElementById('otaok'),t=document.getElementById('otatxt'),pr=document.getElementById('otaprog');
+    if(k){k.textContent='Instalar ahora';k.onclick=()=>{if(pr)pr.style.display='';if(t)t.textContent='Abriendo el instalador de Android… toca «Instalar».';AND.instalarOta(vc)}}
+    if(pr&&t){pr.style.display='';const b=document.getElementById('otabar');if(b)b.style.width='100%';t.textContent='✔ Ya está descargada: solo toca «Instalar ahora».'}}catch(e){}return r};
+window.__actFondo=(vc,ok,msg)=>{const j=window.__otaJ;OTA_FONDO=null;if(!j||String(j.versionCode)!==String(vc))return;
+  if(ok){try{if(typeof notifLocal==='function')notifLocal('Benderrack '+(j.versionName||vc)+' lista para instalar','Toca para actualizar')}catch(e){}mostrarActualizacion(j)}
+  else{window.__otaFondoErr=msg;_mostrarAct141(j)}};
+/* el aviso permiso de «instalar apps desconocidas» vuelve al botón correcto */
+const _actPerm141=window.__actPermiso;window.__actPermiso=function(){const r=_actPerm141&&_actPerm141.apply(this,arguments);try{const j=window.__otaJ,k=document.getElementById('otaok');if(j&&k&&AND.apkListo&&AND.apkListo(String(j.versionCode))==='si')k.onclick=()=>AND.instalarOta(String(j.versionCode))}catch(e){}return r};
 
 /* ===== ajustes de la versión web (PWA) ===== */
 if(AND&&AND.web){

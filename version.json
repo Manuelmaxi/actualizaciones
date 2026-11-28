@@ -1,9 +1,9 @@
 {
   "vendedores": {
-    "versionCode": 131,
-    "versionName": "13.9.1",
+    "versionCode": 132,
+    "versionName": "14.0",
     "apk": "Benderrack_Vendedores.apk",
-    "notas": "• «Pedir cotización al arquitecto» ahora está en Cotización y en Pendientes.\n• Eliges el cliente y adjuntas el levantamiento de la app o archivos del teléfono (PDF, fotos…): se juntan en un solo PDF y van directo al chat del arquitecto."
+    "notas": "• Las actualizaciones se descargan solas en segundo plano: cuando está lista sale «Instalar ahora» y solo confirmas en Android.\n• Pedir cotización al arquitecto desde Cotización o Pendientes, con el levantamiento de la app o archivos del teléfono."
   },
   "clientes": {
     "versionCode": 8,
